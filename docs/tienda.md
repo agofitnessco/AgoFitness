@@ -126,7 +126,20 @@ sin backend, sin sync entre dispositivos.
 - **`components/favorites/heart-button.tsx`** — botón corazón (outline/solid
   de Heroicons) posicionado `absolute top-3 right-3` sobre la imagen de la
   tarjeta. `stopPropagation`+`preventDefault` en el click para no disparar
-  el `Link` de navegación al producto que está debajo.
+  el `Link` de navegación al producto que está debajo. Outline con
+  `strokeWidth={2.2}` (más bold que el default de Heroicons) en estado
+  normal; **sólido en rosa Ago (`#b48b8c`)** cuando el producto está en
+  favoritos. El corazón del navbar (`nav-favorites.tsx`) se probó también en
+  rosa al "prenderse" pero el cliente pidió dejarlo neutro (outline
+  negro/blanco según `transparent`, badge negro/blanco) — el rosa se quedó
+  solo en las tarjetas.
+  - **Bug corregido:** `getFavorites()` (usado como `getSnapshot` de
+    `useSyncExternalStore` en `use-favorites.ts`) hacía `JSON.parse` en cada
+    llamada, devolviendo un array nuevo cada vez — React lo detecta como "el
+    store cambió" en cada render y entra en loop infinito ("Maximum update
+    depth exceeded" / "the result of getSnapshot should be cached"). Fix en
+    `lib/favorites.ts`: cachear el array en memoria (`cache` a nivel de
+    módulo) y solo generar uno nuevo cuando `write()` realmente cambia algo.
 - **Integrado en las 3 tarjetas de producto del sitio:**
   `components/collection/product-card.tsx` (páginas de colección/búsqueda),
   `components/product-showcase.tsx` (carrusel del home) y las tarjetas

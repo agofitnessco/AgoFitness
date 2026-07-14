@@ -58,10 +58,70 @@ a todos los inputs/botones (`focus-visible:ring-2`). Se desactivó
 puntualmente en este input con `focus-visible:ring-0
 focus-visible:ring-offset-0`.
 
-Debajo de la barra principal hay un panel (`panelRef`) con "Términos de
-búsqueda populares" (`POPULAR_SEARCH_TERMS` en `lib/constants.ts`) que
-anima con altura 0→auto + fade/stagger en los chips — este es un simple
-`gsap.timeline`, no usa Flip (no necesita medir rects, solo mostrar/ocultar).
+Debajo de la barra principal hay un panel (`panelRef`, altura 0→auto con
+`gsap.timeline`, no usa Flip — no necesita medir rects, solo mostrar/ocultar)
+con dos bloques: pills de "Búsquedas sugeridas" (`POPULAR_SEARCH_TERMS` en
+`lib/constants.ts`) y, debajo/al lado, una sección "Productos" con
+resultados reales — ver siguiente sección.
+
+## Panel de búsqueda — resultados en vivo estilo On Running (14-15 julio 2026)
+
+**Referencia de diseño:** el buscador de On Running (`on.com`) — al abrir,
+muestra pills de "Búsquedas sugeridas" + una sección "Productos" con
+tarjetas reales que se actualizan según lo que se escribe.
+
+**Ruta API** (`app/api/search-suggest/route.ts`, GET, `?q=`): llama
+`getProducts` de `lib/shopify` — sin `q` devuelve los más vendidos
+(`sortKey: "BEST_SELLING", reverse: true`, para el estado default al abrir
+sin escribir nada), con `q` filtra por `sortKey: "RELEVANCE"`. Recorta a 4
+resultados (`SUGGEST_LIMIT`). En `nav-main.tsx`, un `useEffect` hace fetch
+a esta ruta con debounce (300ms si hay texto, inmediato si está vacío) cada
+vez que cambia `query`, con `AbortController` para cancelar requests viejos
+si el usuario sigue escribiendo.
+
+**Dos layouts según si el navbar está transparente (sobre el hero) o sólido
+(scrolleado)** — el grid completo de `ProductCard` (mismo componente que las
+páginas de colección) se ve bien sobre fondo blanco, pero sobre el hero
+transparente tapaba el copy/CTA de la imagen debajo:
+
+- **Transparente:** `flex flex-col gap-6 lg:flex-row lg:justify-between` —
+  pills a la izquierda, y a la derecha (o debajo en mobile) hasta 3
+  tarjetas **chicas** (`MiniProductCard`, componente local del archivo,
+  solo imagen `aspect-[3/4]` + título + precio, sin swatches/quick-add —
+  demasiado detalle para el espacio). Pills y texto en **blanco** (outline
+  `border-white/50`, hover invierte a blanco sólido/texto negro) para
+  distinguirse sobre cualquier imagen de hero.
+- **Sólido:** layout original — pills oscuras arriba, "Productos" como
+  título + grid `grid-cols-2 sm:grid-cols-4` de `ProductCard` reales abajo
+  (mismas tarjetas grandes de las colecciones, con swatches y quick-add).
+
+Click en cualquier producto (`onClick` con `closest("a")` en el `<ul>`)
+cierra el panel antes de que la navegación del `Link` complete.
+
+**Transición de dos fases al cambiar de layout mientras el panel sigue
+abierto** (el usuario puede hacer scroll con la búsqueda abierta — el
+crossfade instantáneo anterior "se veía brincado" al cambiar de golpe entre
+dos layouts tan distintos, texto blanco↔negro y flex-row↔stacked):
+
+1. Un estado `displayTransparent` (no la prop `transparent` directa) es el
+   que decide qué layout se renderiza — va "un paso detrás" del estado real
+   del navbar mientras el panel está abierto.
+2. Al detectar que `transparent` cambió con el panel abierto: **salida**
+   (`gsap.to` del contenedor a `opacity:0, y:±10`, 0.2s `power2.in`) →
+   `onComplete` actualiza `displayTransparent` (ahí React monta el layout
+   nuevo).
+3. Un segundo `useLayoutEffect`, con dependencia solo en `displayTransparent`
+   (no en `isSearchOpen` — si no, se dispara también en el open/close normal
+   y duplica la animación de chips que ya hace el efecto de apertura del
+   panel), hace la **entrada**: selecciona `[data-chip], [data-panel-item]`
+   dentro del contenedor y las anima con `fromTo({opacity:0,y:12},
+   {opacity:1,y:0}, stagger:0.05, power2.out)` — mismo lenguaje de motion
+   que el resto del sitio (nada de scale/blur).
+
+`data-panel-item` se puso en: el título "Búsquedas sugeridas", el `<li>` de
+cada `MiniProductCard`, y el título+grid de "Productos" en modo sólido (como
+bloques, no tarjeta por tarjeta — el `ProductCard` compartido no tiene ese
+atributo, no se le agregó solo para esto).
 
 ## Mega menu (categorías)
 

@@ -1,5 +1,6 @@
 import { Carousel } from "components/carousel";
 import CategoryShowcase from "components/category-showcase";
+import GymcoBanner from "components/gymco-banner";
 import { ThreeItemGrid } from "components/grid/three-items";
 import Footer from "components/layout/footer";
 import Hero from "components/layout/hero";
@@ -35,6 +36,7 @@ export default function HomePage() {
       <Hero />
       <CategoryShowcase />
       <ProductShowcase title="Lo más nuevo" />
+      <GymcoBanner />
       <ProductShowcase title="Tendencias actuales" products={TRENDING_PRODUCTS} />
       <ThreeItemGrid />
       <Carousel />

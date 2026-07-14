@@ -157,39 +157,50 @@ export default function ProductShowcase({
   };
 
   return (
-    <section className="mx-auto w-full max-w-screen-2xl px-4 py-16 lg:px-8">
-      <div className="mb-8 flex items-end justify-between">
-        <h2 className="text-2xl font-bold tracking-tight lg:text-3xl">
-          {title}
-        </h2>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            aria-label="Anterior"
-            onClick={() => scroll("left")}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 transition-colors hover:bg-neutral-100"
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Siguiente"
-            onClick={() => scroll("right")}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 transition-colors hover:bg-neutral-100"
-          >
-            <ChevronRightIcon className="h-5 w-5" />
-          </button>
+    <section className="w-full py-16">
+      {/*
+        Breakout grid: 3 columnas [gutter | contenido (max 1536px) | gutter].
+        El título y el carrusel arrancan en la misma columna (col-start-2),
+        así que quedan alineados siempre por construcción — sin depender de
+        `100vw` (frágil: se desalinea con el ancho del scrollbar, zoom, o
+        devtools abierto, ver docs/tienda.md). El carrusel además ocupa la
+        columna derecha (col-end-4) para poder salirse hasta el borde real
+        de la pantalla al hacer scroll.
+      */}
+      <div className="grid grid-cols-[minmax(1rem,1fr)_min(1536px,calc(100%_-_2rem))_minmax(1rem,1fr)] lg:grid-cols-[minmax(2rem,1fr)_min(1536px,calc(100%_-_4rem))_minmax(2rem,1fr)]">
+        <div className="col-start-2 row-start-1 mb-8 flex items-end justify-between">
+          <h2 className="text-2xl font-bold tracking-tight lg:text-3xl">
+            {title}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              aria-label="Anterior"
+              onClick={() => scroll("left")}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 transition-colors hover:bg-neutral-100"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Siguiente"
+              onClick={() => scroll("right")}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 transition-colors hover:bg-neutral-100"
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </div>
         </div>
-      </div>
 
-      <ul
-        ref={trackRef}
-        className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {products.map((product) => (
-          <ProductCard key={product.title} product={product} />
-        ))}
-      </ul>
+        <ul
+          ref={trackRef}
+          className="col-start-2 col-end-4 row-start-2 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] lg:pr-8 [&::-webkit-scrollbar]:hidden"
+        >
+          {products.map((product) => (
+            <ProductCard key={product.title} product={product} />
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

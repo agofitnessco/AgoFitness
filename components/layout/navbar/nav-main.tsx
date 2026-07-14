@@ -2,20 +2,68 @@
 
 import CartModal from "components/cart/modal";
 import NavFavorites from "components/favorites/nav-favorites";
+import ProductCard from "components/collection/product-card";
 import { Flip } from "gsap/Flip";
 import gsap from "gsap";
 import { CATEGORY_LINKS, POPULAR_SEARCH_TERMS } from "lib/constants";
+import { colorHex, productGradient } from "lib/color-placeholder";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useLayoutEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, Suspense } from "react";
 import MobileMenu from "./mobile-menu";
 import MegaMenu from "./mega-menu";
-import { Menu } from "lib/shopify/types";
+import { Menu, Product } from "lib/shopify/types";
 
 gsap.registerPlugin(Flip);
+
+const NEUTRAL_HEX = "#c9c9c4";
+
+function firstColorHex(product: Product): string {
+  const colorValue = product.variants[0]?.selectedOptions.find(
+    (o) => o.name.toLowerCase() === "color",
+  )?.value;
+  return colorValue ? colorHex(colorValue) : NEUTRAL_HEX;
+}
+
+/**
+ * Tarjeta compacta usada SOLO en el panel de búsqueda cuando el navbar está
+ * transparente (sobre el hero) — el `ProductCard` real (aspect 3/4 grande,
+ * swatches, quick-add) tapaba el copy del hero. Texto blanco fijo porque
+ * este componente nunca se renderiza sobre fondo sólido.
+ */
+function MiniProductCard({
+  product,
+  onNavigate,
+}: {
+  product: Product;
+  onNavigate: () => void;
+}) {
+  const price = product.priceRange.minVariantPrice;
+  return (
+    <li data-panel-item className="w-24 flex-none sm:w-28">
+      <Link
+        href={`/product/${product.handle}`}
+        prefetch={true}
+        onClick={onNavigate}
+        className="group block"
+      >
+        <div
+          className="aspect-[3/4] w-full overflow-hidden rounded-md"
+          style={{ backgroundImage: productGradient(firstColorHex(product)) }}
+        />
+        <p className="mt-2 truncate text-xs font-medium text-white">
+          {product.title}
+        </p>
+        <p className="text-xs text-white/70">
+          MX${Number(price.amount).toLocaleString("es-MX")}
+        </p>
+      </Link>
+    </li>
+  );
+}
 
 export default function NavMain({
   siteName,
@@ -30,6 +78,11 @@ export default function NavMain({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [suggestProducts, setSuggestProducts] = useState<Product[]>([]);
+  const [isSuggestLoading, setIsSuggestLoading] = useState(false);
+  // Layout que se renderiza realmente en el panel de búsqueda — va un paso
+  // detrás de `transparent` durante el crossfade (ver efectos más abajo).
+  const [displayTransparent, setDisplayTransparent] = useState(transparent);
 
   const linksRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
@@ -37,9 +90,11 @@ export default function NavMain({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const panelContentRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const flipState = useRef<Flip.FlipState | null>(null);
   const megaCloseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevTransparentRef = useRef(transparent);
 
   const openMegaMenu = (title: string) => {
     if (megaCloseTimeout.current) clearTimeout(megaCloseTimeout.current);
@@ -132,6 +187,95 @@ export default function NavMain({
       });
     }
   }, [isSearchOpen]);
+
+  // Resultados en vivo bajo el panel de búsqueda (patrón On Running): al
+  // abrir sin texto muestra los más vendidos (BEST_SELLING), y conforme se
+  // escribe filtra por `query` (debounce 300ms para no golpear la Storefront
+  // API en cada tecla). Reusa el `ProductCard` real de las colecciones —
+  // mismos swatches/quick-add que el resto del sitio, sin un componente
+  // paralelo que mantener sincronizado.
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const controller = new AbortController();
+    setIsSuggestLoading(true);
+    const timeout = setTimeout(
+      () => {
+        fetch(
+          `/api/search-suggest?q=${encodeURIComponent(query.trim())}`,
+          { signal: controller.signal },
+        )
+          .then((res) => res.json())
+          .then((data) => setSuggestProducts(data.products ?? []))
+          .catch((err) => {
+            if (err?.name !== "AbortError") setSuggestProducts([]);
+          })
+          .finally(() => setIsSuggestLoading(false));
+      },
+      query.trim() ? 300 : 0,
+    );
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [isSearchOpen, query]);
+
+  // Transición de dos fases al cambiar entre el layout compacto (navbar
+  // transparente sobre el hero: pills + tarjetas chicas a la derecha) y el
+  // layout completo (navbar sólido: grid de Productos abajo) — solo si el
+  // panel de búsqueda sigue abierto mientras el usuario hace scroll.
+  // `displayTransparent` es el layout que realmente se renderiza; va un
+  // paso detrás de `transparent` para poder animar la salida del layout
+  // viejo ANTES de montar el nuevo (swap instantáneo se veía "brincado").
+  useLayoutEffect(() => {
+    if (!isSearchOpen) {
+      prevTransparentRef.current = transparent;
+      setDisplayTransparent(transparent);
+      return;
+    }
+    if (prevTransparentRef.current === transparent) return;
+    prevTransparentRef.current = transparent;
+
+    const el = panelContentRef.current;
+    if (!el) {
+      setDisplayTransparent(transparent);
+      return;
+    }
+
+    gsap.killTweensOf(el);
+    gsap.to(el, {
+      opacity: 0,
+      y: transparent ? 10 : -10,
+      duration: 0.2,
+      ease: "power2.in",
+      onComplete: () => setDisplayTransparent(transparent),
+    });
+  }, [transparent, isSearchOpen]);
+
+  // Fase 2: una vez el layout nuevo ya está montado (`displayTransparent`
+  // cambió), revela el contenedor y da un stagger sutil a sus hijos
+  // (pills, tarjetas/grid) — mismo lenguaje de motion que el resto del sitio
+  // (power2.out, y pequeño, stagger 0.05).
+  useLayoutEffect(() => {
+    if (!isSearchOpen) return;
+    const el = panelContentRef.current;
+    if (!el) return;
+
+    const items = el.querySelectorAll("[data-chip], [data-panel-item]");
+    gsap.killTweensOf(el);
+    gsap.killTweensOf(items);
+    gsap.set(el, { opacity: 1, y: 0 });
+    gsap.fromTo(
+      items,
+      { opacity: 0, y: 12 },
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.05 },
+    );
+    // Solo depende de `displayTransparent`: ese es el único evento que debe
+    // disparar esta entrada (el open/close normal del panel ya tiene su
+    // propio stagger de chips más abajo, en el efecto de `isSearchOpen`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayTransparent]);
 
   const closeSearch = () => {
     setQuery("");
@@ -234,7 +378,7 @@ export default function NavMain({
                   onChange={(e) => setQuery(e.target.value)}
                   onFocus={() => !isSearchOpen && requestToggle(true)}
                   onClick={() => !isSearchOpen && requestToggle(true)}
-                  placeholder="Buscar"
+                  placeholder="Buscar productos"
                   autoComplete="off"
                   className="w-full bg-transparent py-1.5 pl-2 pr-4 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   style={{ outline: "none", boxShadow: "none" }}
@@ -288,29 +432,115 @@ export default function NavMain({
 
       <div
         ref={panelRef}
-        className="overflow-hidden border-t border-neutral-200"
+        className={clsx(
+          "overflow-hidden border-t transition-colors duration-500",
+          transparent ? "border-white/20" : "border-neutral-200",
+        )}
         style={{ height: 0, opacity: 0 }}
       >
-        <div className="mx-auto max-w-screen-2xl px-4 py-6 lg:px-8">
-          <p className="text-sm text-neutral-500">
-            Términos de búsqueda populares
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {POPULAR_SEARCH_TERMS.map((term) => (
-              <button
-                key={term}
-                type="button"
-                data-chip
-                onClick={() => {
-                  router.push(`/search?q=${encodeURIComponent(term)}`);
-                  closeSearch();
-                }}
-                className="rounded-full bg-neutral-100 px-4 py-2 text-sm text-neutral-800 transition-colors hover:bg-neutral-200"
-              >
-                {term}
-              </button>
-            ))}
+        <div
+          ref={panelContentRef}
+          className={clsx(
+            "mx-auto max-w-screen-2xl px-4 py-6 lg:px-8",
+            displayTransparent && "flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between",
+          )}
+        >
+          {/* Búsquedas sugeridas — pills. Blancas con outline sobre el hero
+              transparente para distinguirse; sólidas oscuras en navbar blanco. */}
+          <div>
+            <p
+              data-panel-item
+              className={clsx(
+                "text-sm font-semibold",
+                displayTransparent ? "text-white" : "text-neutral-900",
+              )}
+            >
+              Búsquedas sugeridas
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {POPULAR_SEARCH_TERMS.map((term) => (
+                <button
+                  key={term}
+                  type="button"
+                  data-chip
+                  onClick={() => {
+                    setQuery(term);
+                    router.push(`/search?q=${encodeURIComponent(term)}`);
+                    closeSearch();
+                  }}
+                  className={clsx(
+                    "rounded-full border px-4 py-1.5 text-sm transition-colors",
+                    displayTransparent
+                      ? "border-white/50 text-white hover:border-white hover:bg-white hover:text-black"
+                      : "border-neutral-300 text-neutral-800 hover:border-black hover:bg-black hover:text-white",
+                  )}
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {displayTransparent ? (
+            // Navbar sobre el hero: tarjetas chicas junto a las pills, no un
+            // grid a lo ancho — así no tapan el copy/CTA del hero debajo.
+            suggestProducts.length > 0 ? (
+              <div className="lg:max-w-xs lg:flex-none">
+                <p className="mb-3 text-sm font-semibold text-white lg:text-right">
+                  Productos
+                </p>
+                <ul
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("a")) closeSearch();
+                  }}
+                  className={clsx(
+                    "flex gap-4 lg:justify-end",
+                    isSuggestLoading && "opacity-50",
+                  )}
+                >
+                  {suggestProducts.slice(0, 3).map((product) => (
+                    <MiniProductCard
+                      key={product.handle}
+                      product={product}
+                      onNavigate={closeSearch}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ) : query.trim() && !isSuggestLoading ? (
+              <p data-panel-item className="text-sm text-white/70 lg:text-right">
+                Sin resultados para{" "}
+                <span className="font-semibold text-white">
+                  &quot;{query.trim()}&quot;
+                </span>
+              </p>
+            ) : null
+          ) : suggestProducts.length > 0 || isSuggestLoading ? (
+            <div className="mt-8">
+              <p data-panel-item className="mb-4 text-sm font-semibold text-neutral-900">
+                Productos
+              </p>
+              <ul
+                data-panel-item
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest("a")) closeSearch();
+                }}
+                className={clsx(
+                  "grid grid-cols-2 gap-x-4 gap-y-8 transition-opacity duration-150 sm:grid-cols-4",
+                  isSuggestLoading && "opacity-50",
+                )}
+              >
+                {suggestProducts.map((product) => (
+                  <ProductCard key={product.handle} product={product} />
+                ))}
+              </ul>
+            </div>
+          ) : query.trim() && !isSuggestLoading ? (
+            <p data-panel-item className="mt-8 text-sm text-neutral-500">
+              No hay productos que coincidan con{" "}
+              <span className="font-semibold">&quot;{query.trim()}&quot;</span>
+            </p>
+          ) : null}
         </div>
       </div>
     </nav>

@@ -135,7 +135,62 @@ no este archivo.
 - **Favoritos agregados** (corazón en las 3 tarjetas de producto del sitio +
   ícono con badge en el navbar + página `/favoritos`, ver `docs/tienda.md`):
   100% client-side vía `localStorage` — no hay cuentas de cliente en este
-  proyecto, así que no hay backend ni sync entre dispositivos.
+  proyecto, así que no hay backend ni sync entre dispositivos. El corazón
+  se pone sólido en **rosa Ago (`#b48b8c`)** cuando el producto está en
+  favoritos (en las tarjetas — el ícono del navbar se quedó neutro a
+  propósito, el cliente prefirió no tintarlo).
+- **Banner de distribuidor Gymco agregado al home** (`components/gymco-banner.tsx`,
+  entre los dos carruseles "Lo más nuevo"/"Tendencias actuales"): el cliente
+  mandó un diseño propio (gradiente dorado/rosa, hojas de palma, QR) que no
+  combinaba con la estética del sitio — se tomó solo el contenido real
+  (marca, "Distribuidora autorizada", contacto de Adriana Godoy) y se vistió
+  como una tarjeta `rounded-lg` contenida en `max-w-screen-2xl` con gradiente
+  suave de marca, igual que el resto de cards del sitio. Sin QR — el link de
+  Instagram ya cumple esa función.
+- **Carruseles del home ahora full-bleed** (`components/product-showcase.tsx`):
+  la sección ya no vive dentro de `max-w-screen-2xl` — ocupa todo el ancho de
+  la pantalla para que las tarjetas se salgan de verdad por el borde derecho
+  al hacer scroll.
+  **Alineación del `<ul>` con el título — breakout grid (14 julio 2026,
+  corregido el mismo día):** el primer intento usó
+  `pl-[max(1rem,calc((100vw-1536px)/2+1rem))]` para calcular el inset
+  izquierdo del track a partir de `100vw` — matemáticamente correcto, pero
+  frágil en la práctica (se desalineaba con el ancho real del scrollbar,
+  zoom del navegador o devtools abierto — "se veía pegado a la izquierda").
+  Se reemplazó por un **grid de 3 columnas**
+  (`grid-cols-[minmax(1rem,1fr)_min(1536px,calc(100%_-_2rem))_minmax(1rem,1fr)]`,
+  `lg:` con `2rem`/`4rem`) donde el título (`col-start-2`) y el `<ul>`
+  (`col-start-2 col-end-4`) arrancan en la misma columna — quedan alineados
+  por construcción, sin depender de `vw`. El `<ul>` además ocupa la columna
+  derecha para poder salirse hasta el borde real de la pantalla.
+  **Ojo, van 3 approaches que NO funcionaron y se descartaron antes de este:**
+  (1) un `<li>` espaciador con ancho fijo (`w-0 lg:w-3`) — no compensaba el
+  centrado de `max-w-screen-2xl` en pantallas anchas, quedaba pegado a la
+  izquierda; (2) medir el inset con `useLayoutEffect` +
+  `getBoundingClientRect()` contra el título — funcionaba en teoría pero el
+  cliente pidió revertir; (3) el `pl` con `calc(100vw...)` de arriba. Si el
+  grid de 3 columnas alguna vez se ve desalineado, no reintroducir ninguno
+  de los dos anteriores — y seguir sin usar un `<li>` espaciador con padding
+  dentro de un contenedor `scroll-snap` (el navegador "regresa" al soltar el
+  scroll porque el padding pelea con los snap points).
+- **Tarjetas de categoría corregidas (15 julio 2026)** (`components/category-showcase.tsx`):
+  usaban `aspect-[3/4]` (retrato) en un grid de 3 columnas — en pantallas
+  anchas cada tarjeta terminaba midiendo ~900px de alto, "tapando toda la
+  pantalla" debajo del navbar. Cambiado a `aspect-[4/3]` (paisaje, más tipo
+  banner) + más espacio vertical de sección (`py-4` → `pt-10 pb-14`, `lg:`
+  `pt-14`/`pb-16`) para que no se sienta pegado al navbar arriba ni a "Lo
+  más nuevo" abajo.
+- **Panel de búsqueda rediseñado estilo On Running (14-15 julio 2026)**
+  (`nav-main.tsx` + `app/api/search-suggest/route.ts`, ver `docs/navbar.md`
+  para el detalle completo): las pills pasaron de "Términos de búsqueda
+  populares" a "Búsquedas sugeridas", y se agregó una sección "Productos"
+  con resultados reales en vivo (más vendidos por default, filtrados por
+  relevancia según se escribe, debounce 300ms). Dos layouts distintos según
+  el navbar esté transparente (sobre el hero: tarjetas chicas junto a las
+  pills, texto blanco, para no tapar el hero) o sólido (scrolleado: grid
+  completo de `ProductCard` abajo, como antes) — con una transición de dos
+  fases en GSAP (salida → swap de layout → entrada con stagger) si el
+  usuario hace scroll con el buscador abierto.
 - Pendiente: crear colección `ninos` (aún sin catálogo), precio real de
   Kisu (hoy en $0.00), sustituir los placeholders (hero, categorías,
   carrusel/tarjetas de colección, `featuredImage` del carrito) por
