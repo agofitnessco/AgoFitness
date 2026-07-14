@@ -191,7 +191,20 @@ no este archivo.
   completo de `ProductCard` abajo, como antes) — con una transición de dos
   fases en GSAP (salida → swap de layout → entrada con stagger) si el
   usuario hace scroll con el buscador abierto.
+- **6 mejoras de navbar (15 julio 2026)** (ver `docs/navbar.md`, sección
+  "Mejoras del navbar"): indicador de link activo por ruta, bump en el
+  badge del carrito al agregar, mensajes rotativos en la barra superior
+  (solo hechos ya confirmados en el sitio, sin nombrar a Shopify a pedido
+  del cliente), sección "Vistos recientemente" en el buscador
+  (`lib/recently-viewed.ts`, mismo patrón 100% client-side que favoritos),
+  skeleton mientras carga la primera respuesta de `/api/search-suggest`, y
+  Escape para cerrar buscador/mega menu. **De paso se encontró un bug
+  pre-existente (no causado por estas mejoras, confirmado con
+  `git stash`): `/product/[handle]` devuelve 500** — esa página sigue
+  siendo en buena parte el scaffold sin rediseñar de Next.js Commerce,
+  pendiente investigar por separado.
 - Pendiente: crear colección `ninos` (aún sin catálogo), precio real de
   Kisu (hoy en $0.00), sustituir los placeholders (hero, categorías,
   carrusel/tarjetas de colección, `featuredImage` del carrito) por
-  fotografía real de producto/modelo, y seguir con el resto del home.
+  fotografía real de producto/modelo, arreglar el 500 en `/product/[handle]`,
+  y seguir con el resto del home.

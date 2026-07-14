@@ -8,6 +8,20 @@ import { Menu } from "lib/shopify/types";
 import NavMain from "./nav-main";
 
 /**
+ * Mensajes de la barra superior — rotan cada 4s con fade (`.topbar-fade`,
+ * `app/globals.css`). Solo copy ya confirmado en el sitio, nada inventado:
+ * "Nueva colección" es el copy real del hero (`layout/hero.tsx`), el pago
+ * encriptado es un hecho de la arquitectura (checkout 100% tokenizado, sin
+ * mencionar el proveedor — ver `docs/arquitectura.md`), y el Instagram es
+ * el real del footer.
+ */
+const TOP_BAR_MESSAGES = [
+  "Nueva colección disponible",
+  "Pago 100% seguro y encriptado",
+  "Síguenos en Instagram @agofitnessco",
+];
+
+/**
  * Solo en el home el navbar arranca transparente sobre el hero (imagen a
  * pantalla completa) y se vuelve sólido al hacer scroll. En el resto de
  * páginas (sin hero de imagen debajo) se queda sólido siempre — ver
@@ -23,6 +37,7 @@ export default function NavbarShell({
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(!isHome);
+  const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
     if (!isHome) {
@@ -35,6 +50,15 @@ export default function NavbarShell({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const interval = setInterval(
+      () => setMessageIndex((i) => (i + 1) % TOP_BAR_MESSAGES.length),
+      4000,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   const transparent = isHome && !scrolled;
 
@@ -51,13 +75,20 @@ export default function NavbarShell({
           transparent ? "bg-transparent" : "bg-[#b48b8c]",
         )}
       >
-        <div className="mx-auto flex h-9 max-w-screen-2xl items-center justify-end gap-6 px-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white lg:px-8">
-          <Link href="/soporte" prefetch={true} className="hover:opacity-80">
-            Ayuda
-          </Link>
-          <Link href="/cuenta" prefetch={true} className="hover:opacity-80">
-            Mi cuenta
-          </Link>
+        <div className="mx-auto flex h-9 max-w-screen-2xl items-center justify-between gap-6 px-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white lg:px-8">
+          <div className="hidden overflow-hidden sm:block">
+            <span key={messageIndex} className="topbar-fade inline-block">
+              {TOP_BAR_MESSAGES[messageIndex]}
+            </span>
+          </div>
+          <div className="ml-auto flex items-center gap-6">
+            <Link href="/soporte" prefetch={true} className="hover:opacity-80">
+              Ayuda
+            </Link>
+            <Link href="/cuenta" prefetch={true} className="hover:opacity-80">
+              Mi cuenta
+            </Link>
+          </div>
         </div>
       </div>
 

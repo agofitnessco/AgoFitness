@@ -6,27 +6,20 @@ import ProductCard from "components/collection/product-card";
 import { Flip } from "gsap/Flip";
 import gsap from "gsap";
 import { CATEGORY_LINKS, POPULAR_SEARCH_TERMS } from "lib/constants";
-import { colorHex, productGradient } from "lib/color-placeholder";
+import { firstColorHex, productGradient } from "lib/color-placeholder";
+import { useRecentlyViewed } from "lib/use-recently-viewed";
+import type { RecentlyViewedItem } from "lib/recently-viewed";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, Suspense } from "react";
 import MobileMenu from "./mobile-menu";
 import MegaMenu from "./mega-menu";
 import { Menu, Product } from "lib/shopify/types";
 
 gsap.registerPlugin(Flip);
-
-const NEUTRAL_HEX = "#c9c9c4";
-
-function firstColorHex(product: Product): string {
-  const colorValue = product.variants[0]?.selectedOptions.find(
-    (o) => o.name.toLowerCase() === "color",
-  )?.value;
-  return colorValue ? colorHex(colorValue) : NEUTRAL_HEX;
-}
 
 /**
  * Tarjeta compacta usada SOLO en el panel de búsqueda cuando el navbar está
@@ -65,6 +58,76 @@ function MiniProductCard({
   );
 }
 
+/**
+ * Tarjeta para "Vistos recientemente" — a diferencia de `MiniProductCard`
+ * (solo modo transparente, texto blanco fijo) esta aparece en AMBOS layouts
+ * del panel (el buscador vacío se ve igual con navbar transparente o
+ * sólido), así que el color de texto depende de `light`. Trabaja sobre el
+ * snapshot liviano de `lib/recently-viewed.ts` (no el `Product` completo de
+ * Shopify — no hace falta refetchear nada para mostrar el historial).
+ */
+function RecentMiniCard({
+  item,
+  onNavigate,
+  light,
+}: {
+  item: RecentlyViewedItem;
+  onNavigate: () => void;
+  light: boolean;
+}) {
+  return (
+    <li data-panel-item className="w-24 flex-none sm:w-28">
+      <Link
+        href={`/product/${item.handle}`}
+        prefetch={true}
+        onClick={onNavigate}
+        className="group block"
+      >
+        <div
+          className="aspect-[3/4] w-full overflow-hidden rounded-md"
+          style={{ backgroundImage: productGradient(item.colorHex) }}
+        />
+        <p
+          className={clsx(
+            "mt-2 truncate text-xs font-medium",
+            light ? "text-white" : "text-neutral-900",
+          )}
+        >
+          {item.title}
+        </p>
+        <p className={clsx("text-xs", light ? "text-white/70" : "text-neutral-500")}>
+          MX${Number(item.price).toLocaleString("es-MX")}
+        </p>
+      </Link>
+    </li>
+  );
+}
+
+/** Placeholder mientras carga la primera respuesta de `/api/search-suggest`
+ * (antes no había nada — el bloque "Productos" aparecía de golpe y se
+ * sentía como un salto). Mismas proporciones que `MiniProductCard`. */
+function MiniSkeletonCard() {
+  return (
+    <li className="w-24 flex-none animate-pulse sm:w-28">
+      <div className="aspect-[3/4] w-full rounded-md bg-white/15" />
+      <div className="mt-2 h-2.5 w-3/4 rounded-full bg-white/15" />
+      <div className="mt-1.5 h-2.5 w-1/2 rounded-full bg-white/10" />
+    </li>
+  );
+}
+
+/** Misma idea que `MiniSkeletonCard` pero para el grid del navbar sólido —
+ * mismas proporciones que `ProductCard`. */
+function GridSkeletonCard() {
+  return (
+    <li className="animate-pulse">
+      <div className="aspect-[3/4] w-full rounded-lg bg-neutral-200" />
+      <div className="mt-3 h-2.5 w-2/3 rounded-full bg-neutral-200" />
+      <div className="mt-2 h-2.5 w-1/3 rounded-full bg-neutral-100" />
+    </li>
+  );
+}
+
 export default function NavMain({
   siteName,
   menu,
@@ -75,6 +138,7 @@ export default function NavMain({
   transparent?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -83,6 +147,11 @@ export default function NavMain({
   // Layout que se renderiza realmente en el panel de búsqueda — va un paso
   // detrás de `transparent` durante el crossfade (ver efectos más abajo).
   const [displayTransparent, setDisplayTransparent] = useState(transparent);
+  const recentlyViewed = useRecentlyViewed();
+  // Con el buscador vacío, "Vistos recientemente" reemplaza a los más
+  // vendidos si hay historial — es más útil que un default genérico. En
+  // cuanto se escribe algo, la búsqueda en vivo manda (ver bloque de abajo).
+  const showRecentlyViewed = !query.trim() && recentlyViewed.length > 0;
 
   const linksRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
@@ -289,6 +358,22 @@ export default function NavMain({
     closeSearch();
   };
 
+  // Escape cierra lo que esté abierto — buscador primero (si ambos están
+  // abiertos a la vez es porque el usuario entró al buscador desde el mega
+  // menu, así que cerrar la búsqueda es lo que se espera primero).
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (isSearchOpen) {
+        closeSearch();
+      } else if (activeCategory) {
+        setActiveCategory(null);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isSearchOpen, activeCategory]);
+
   return (
     <nav
       className={clsx(
@@ -351,7 +436,11 @@ export default function NavMain({
                           transparent ? "bg-white" : "bg-black",
                         )}
                         style={{
-                          width: activeCategory === item.title ? "100%" : 0,
+                          width:
+                            activeCategory === item.title ||
+                            (!activeCategory && pathname === item.path)
+                              ? "100%"
+                              : 0,
                         }}
                       />
                     </Link>
@@ -481,7 +570,43 @@ export default function NavMain({
             </div>
           </div>
 
-          {displayTransparent ? (
+          {showRecentlyViewed ? (
+            <div
+              className={clsx(
+                displayTransparent ? "lg:max-w-xs lg:flex-none" : "mt-8",
+              )}
+            >
+              <p
+                data-panel-item
+                className={clsx(
+                  "mb-3 text-sm font-semibold",
+                  displayTransparent
+                    ? "text-white lg:text-right"
+                    : "text-neutral-900",
+                )}
+              >
+                Vistos recientemente
+              </p>
+              <ul
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest("a")) closeSearch();
+                }}
+                className={clsx(
+                  "flex gap-4 overflow-x-auto",
+                  displayTransparent && "lg:justify-end",
+                )}
+              >
+                {recentlyViewed.map((item) => (
+                  <RecentMiniCard
+                    key={item.handle}
+                    item={item}
+                    onNavigate={closeSearch}
+                    light={displayTransparent}
+                  />
+                ))}
+              </ul>
+            </div>
+          ) : displayTransparent ? (
             // Navbar sobre el hero: tarjetas chicas junto a las pills, no un
             // grid a lo ancho — así no tapan el copy/CTA del hero debajo.
             suggestProducts.length > 0 ? (
@@ -507,7 +632,18 @@ export default function NavMain({
                   ))}
                 </ul>
               </div>
-            ) : query.trim() && !isSuggestLoading ? (
+            ) : isSuggestLoading ? (
+              <div className="lg:max-w-xs lg:flex-none">
+                <p className="mb-3 text-sm font-semibold text-white lg:text-right">
+                  Productos
+                </p>
+                <ul className="flex gap-4 lg:justify-end">
+                  {[0, 1, 2].map((i) => (
+                    <MiniSkeletonCard key={i} />
+                  ))}
+                </ul>
+              </div>
+            ) : query.trim() ? (
               <p data-panel-item className="text-sm text-white/70 lg:text-right">
                 Sin resultados para{" "}
                 <span className="font-semibold text-white">
@@ -515,7 +651,7 @@ export default function NavMain({
                 </span>
               </p>
             ) : null
-          ) : suggestProducts.length > 0 || isSuggestLoading ? (
+          ) : suggestProducts.length > 0 ? (
             <div className="mt-8">
               <p data-panel-item className="mb-4 text-sm font-semibold text-neutral-900">
                 Productos
@@ -525,17 +661,25 @@ export default function NavMain({
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest("a")) closeSearch();
                 }}
-                className={clsx(
-                  "grid grid-cols-2 gap-x-4 gap-y-8 transition-opacity duration-150 sm:grid-cols-4",
-                  isSuggestLoading && "opacity-50",
-                )}
+                className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4"
               >
                 {suggestProducts.map((product) => (
                   <ProductCard key={product.handle} product={product} />
                 ))}
               </ul>
             </div>
-          ) : query.trim() && !isSuggestLoading ? (
+          ) : isSuggestLoading ? (
+            <div className="mt-8">
+              <p className="mb-4 text-sm font-semibold text-neutral-900">
+                Productos
+              </p>
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <GridSkeletonCard key={i} />
+                ))}
+              </ul>
+            </div>
+          ) : query.trim() ? (
             <p data-panel-item className="mt-8 text-sm text-neutral-500">
               No hay productos que coincidan con{" "}
               <span className="font-semibold">&quot;{query.trim()}&quot;</span>

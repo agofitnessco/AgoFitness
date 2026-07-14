@@ -219,6 +219,73 @@ placeholder actual se lee aceptable, pero cuando se ponga la foto real del
 hero, revisar contraste y pedir al cliente una versión clara del logo si
 hace falta.
 
+## Mejoras del navbar (15 julio 2026)
+
+Seis mejoras puntuales manteniendo la estructura existente (morph de
+búsqueda, mega menu, transparente-sobre-hero):
+
+1. **Indicador de link activo:** el subrayado bajo Mujer/Hombre/Niños
+   (`nav-main.tsx`) antes solo aparecía en `mouseenter` (`activeCategory`).
+   Ahora, cuando no hay hover, también se muestra si `usePathname() ===
+   item.path` — así el usuario ve en qué sección está sin necesidad de
+   pasar el mouse. Comparación exacta de ruta (no `startsWith`): las
+   sub-colecciones (`tops`, `leggings`, etc.) son handles independientes,
+   no rutas anidadas bajo `/search/mujer`, así que no hay forma honesta de
+   marcarlas como "dentro de Mujer" sin una tabla de mapeo — no se agregó.
+2. **Bump en el badge del carrito** (`components/cart/open-cart.tsx`, ahora
+   `"use client"`): cuando `quantity` sube (se agregó algo), un
+   `gsap.fromTo` con `yoyo:true, repeat:1` hace un pequeño "pop" (scale
+   1→1.35→1, 0.18s). No anima si baja (se quitó algo) ni en el mount
+   inicial — solo confirma la acción de agregar.
+3. **Barra superior con mensajes rotativos** (`navbar-shell.tsx`): antes
+   solo tenía Ayuda/Mi cuenta a la derecha (`justify-end`). Se agregó un
+   mensaje a la izquierda (`justify-between`) que rota cada 4s con fade
+   (`.topbar-fade`, keyframe en `app/globals.css`, respeta
+   `prefers-reduced-motion`) entre 3 mensajes — **todos anclados a hechos
+   ya confirmados en el sitio, no inventados**: "Nueva colección
+   disponible" (copy real del hero), "Pago 100% seguro y encriptado"
+   (hecho de arquitectura del checkout, sin nombrar al proveedor a
+   propósito — pedido explícito del cliente), "Síguenos en Instagram
+   @agofitnessco" (handle real del footer). Oculto en mobile
+   (`hidden sm:block`) para no saturar la barra angosta. Array
+   `TOP_BAR_MESSAGES` en `navbar-shell.tsx` — actualizar copy ahí.
+4. **"Vistos recientemente" en el panel de búsqueda:** mismo patrón
+   100%-client-side de `lib/favorites.ts` (sin cuentas de cliente, sin
+   backend), nuevo módulo `lib/recently-viewed.ts` +
+   `lib/use-recently-viewed.ts` (`useSyncExternalStore`, cache en memoria
+   para evitar el loop de "getSnapshot debe estar cacheado"). Un
+   componente invisible (`components/product/record-recently-viewed.tsx`,
+   `useEffect` en mount) montado en `app/product/[handle]/page.tsx`
+   registra la vista — snapshot liviano (handle/título/precio/color, no el
+   `Product` completo). En `nav-main.tsx`, con el buscador **vacío**: si
+   hay historial, "Vistos recientemente" reemplaza a los más vendidos
+   (`showRecentlyViewed`); en cuanto se escribe algo, la búsqueda en vivo
+   manda como siempre. Tarjeta nueva `RecentMiniCard` (a diferencia de
+   `MiniProductCard`, que es blanca fija porque solo vive en modo
+   transparente, esta acepta prop `light` porque aparece en ambos
+   layouts). `firstColorHex` se movió de `nav-main.tsx` a
+   `lib/color-placeholder.ts` (ahora compartido entre el navbar y el
+   registro de vista).
+5. **Skeleton mientras carga la primera respuesta de
+   `/api/search-suggest`:** antes, con `isSuggestLoading=true` y
+   `suggestProducts` aún vacío, no se mostraba nada — el bloque
+   "Productos" aparecía de golpe. Nuevos `MiniSkeletonCard` (modo
+   transparente, 3 placeholders `animate-pulse` del tamaño de
+   `MiniProductCard`) y `GridSkeletonCard` (modo sólido, 4 placeholders
+   del tamaño de `ProductCard`).
+6. **Escape cierra lo que esté abierto** (`nav-main.tsx`): un
+   `useEffect` con listener de `keydown` en `document` — si el buscador
+   está abierto lo cierra primero (`closeSearch()`); si no, y hay un mega
+   menu abierto, lo cierra (`setActiveCategory(null)`).
+
+**Bug pre-existente encontrado (no de estas mejoras):**
+`/product/[handle]` (ej. `/product/element-top`) devuelve **500** — se
+confirmó con `git stash` que el error ya estaba ahí antes de estas 6
+mejoras, no lo causó ninguna de ellas. Esa página sigue siendo en buena
+parte el scaffold sin rediseñar de Next.js Commerce (texto en inglés,
+clases `dark:`, etc. — a diferencia de colecciones/carrusel/checkout que sí
+se rehicieron). Pendiente investigar y arreglar por separado.
+
 ## Pendientes conocidos
 
 - Los links de categoría (`/search/mujer`, `/search/hombre`, `/search/ninos`)

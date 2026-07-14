@@ -1,3 +1,5 @@
+import type { Product } from "lib/shopify/types";
+
 /**
  * Placeholder de marca por color — genera un gradiente a partir de un hex
  * mientras no hay fotografía real de producto. `COLOR_HEX` cubre los
@@ -5,6 +7,8 @@
  * un nombre nuevo que no esté en el mapa cae a un gris neutro determinado
  * por hash del string (nunca truena, nunca se ve igual a otro color real).
  */
+export const NEUTRAL_HEX = "#c9c9c4";
+
 export const COLOR_HEX: Record<string, string> = {
   Negro: "#171717",
   Cacto: "#7a8a6a",
@@ -51,4 +55,17 @@ export function productGradient(hex: string) {
 
 export function modelGradient(hex: string) {
   return `linear-gradient(135deg, ${hex} 0%, ${shade(hex, -35)} 55%, ${shade(hex, -70)} 100%)`;
+}
+
+/**
+ * Color de la primera variante de un producto — usado donde solo hace falta
+ * UN color representativo (tarjetas chicas, snapshot de recientemente
+ * visto), a diferencia de `ProductCard`/`product-showcase.tsx` que agrupan
+ * TODAS las variantes por color para los swatches.
+ */
+export function firstColorHex(product: Product): string {
+  const colorValue = product.variants[0]?.selectedOptions.find(
+    (o) => o.name.toLowerCase() === "color",
+  )?.value;
+  return colorValue ? colorHex(colorValue) : NEUTRAL_HEX;
 }
