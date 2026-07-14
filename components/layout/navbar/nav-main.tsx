@@ -5,6 +5,7 @@ import { Flip } from "gsap/Flip";
 import gsap from "gsap";
 import { CATEGORY_LINKS, POPULAR_SEARCH_TERMS } from "lib/constants";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,9 +19,11 @@ gsap.registerPlugin(Flip);
 export default function NavMain({
   siteName,
   menu,
+  transparent = false,
 }: {
   siteName: string;
   menu: Menu[];
+  transparent?: boolean;
 }) {
   const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -142,13 +145,20 @@ export default function NavMain({
   };
 
   return (
-    <nav className="relative border-b border-neutral-200 bg-white/95 backdrop-blur-md">
+    <nav
+      className={clsx(
+        "relative border-b transition-colors duration-500",
+        transparent
+          ? "border-transparent bg-transparent"
+          : "border-neutral-200 bg-white/95 backdrop-blur-md",
+      )}
+    >
       <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-4">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4 md:hidden">
               <Suspense fallback={null}>
-                <MobileMenu menu={menu} />
+                <MobileMenu menu={menu} transparent={transparent} />
               </Suspense>
             </div>
 
@@ -182,11 +192,19 @@ export default function NavMain({
                     <Link
                       href={item.path}
                       prefetch={true}
-                      className="group relative text-[15px] font-bold tracking-tight text-neutral-800 transition-colors hover:text-black"
+                      className={clsx(
+                        "group relative text-[15px] font-bold tracking-tight transition-colors",
+                        transparent
+                          ? "text-white hover:text-white/80"
+                          : "text-neutral-800 hover:text-black",
+                      )}
                     >
                       {item.title}
                       <span
-                        className="absolute -bottom-1 left-0 h-px bg-black transition-all duration-300"
+                        className={clsx(
+                          "absolute -bottom-1 left-0 h-px transition-all duration-300",
+                          transparent ? "bg-white" : "bg-black",
+                        )}
                         style={{
                           width: activeCategory === item.title ? "100%" : 0,
                         }}
@@ -228,7 +246,10 @@ export default function NavMain({
                 ref={cancelRef}
                 type="button"
                 onClick={closeSearch}
-                className="flex-none text-sm font-medium text-black hover:opacity-70"
+                className={clsx(
+                  "flex-none text-sm font-medium hover:opacity-70",
+                  transparent ? "text-white" : "text-black",
+                )}
               >
                 Cancelar
               </button>
@@ -243,7 +264,7 @@ export default function NavMain({
                 pointerEvents: isSearchOpen ? "none" : "auto",
               }}
             >
-              <CartModal />
+              <CartModal transparent={transparent} />
             </div>
           </div>
 

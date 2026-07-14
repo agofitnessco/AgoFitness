@@ -6,11 +6,18 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useEffect, useState } from "react";
 
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import { CATEGORY_LINKS } from "lib/constants";
 import { Menu } from "lib/shopify/types";
 import Search, { SearchSkeleton } from "./search";
 
-export default function MobileMenu({ menu }: { menu: Menu[] }) {
+export default function MobileMenu({
+  menu,
+  transparent = false,
+}: {
+  menu: Menu[];
+  transparent?: boolean;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +43,12 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
       <button
         onClick={openMobileMenu}
         aria-label="Open mobile menu"
-        className="flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors md:hidden"
+        className={clsx(
+          "flex h-11 w-11 items-center justify-center rounded-md border transition-colors md:hidden",
+          transparent
+            ? "border-white/40 text-white"
+            : "border-neutral-200 text-black",
+        )}
       >
         <Bars3Icon className="h-4" />
       </button>

@@ -134,18 +134,29 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="flex items-center gap-5 text-xs font-medium text-neutral-500">
-          {LEGAL_LINKS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.path}
-              prefetch={true}
-              className="group relative inline-block w-fit transition-colors hover:text-black"
-            >
-              {item.label}
-              <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-black transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:w-full" />
-            </Link>
-          ))}
+        <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
+          <div className="flex items-center gap-5 text-xs font-medium text-neutral-500">
+            {LEGAL_LINKS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.path}
+                prefetch={true}
+                className="group relative inline-block w-fit transition-colors hover:text-black"
+              >
+                {item.label}
+                <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-black transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:w-full" />
+              </Link>
+            ))}
+          </div>
+
+          <a
+            href="https://flouvia.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[11px] text-neutral-400 transition-colors hover:text-neutral-600"
+          >
+            Powered by Flouvia
+          </a>
         </div>
       </div>
     </footer>

@@ -7,6 +7,7 @@ type FillButtonProps = {
   children: ReactNode;
   size?: "md" | "sm";
   showArrow?: boolean;
+  variant?: "dark" | "light";
 } & (
   | { href: string; type?: never; onClick?: never }
   | { href?: undefined; type: "submit" | "button"; onClick?: () => void }
@@ -31,11 +32,19 @@ export default function FillButton({
   children,
   size = "md",
   showArrow = true,
+  variant = "dark",
   ...rest
 }: FillButtonProps) {
   const inner = (
     <>
-      <span className="relative z-30 font-bold text-black transition-colors duration-300 group-hover:text-white">
+      <span
+        className={clsx(
+          "relative z-30 font-bold transition-colors duration-300",
+          variant === "light"
+            ? "text-white"
+            : "text-black group-hover:text-white",
+        )}
+      >
         {children}
       </span>
       {showArrow ? (

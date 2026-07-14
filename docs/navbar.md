@@ -81,10 +81,34 @@ Running** — layout de 2 bloques, no de columnas tipo tabla:
   hairline.
 
 Datos en `MEGA_MENU` (`lib/constants.ts`: `primaryLinks`, `secondaryLinks`,
-`hero`), componente `mega-menu.tsx`. Es contenido placeholder (no hay
-colecciones reales en Shopify todavía ni fotografía de producto) — el hero
-usa un gradiente de marca en vez de foto real; sustituir por imagen real del
-catálogo cuando exista.
+`hero`), componente `mega-menu.tsx`.
+
+**Categorías reales (14 julio 2026):** los primaryLinks de Mujer/Hombre ya
+apuntan a colecciones smart reales creadas en Shopify (una por
+`product_type`, con regla `TAG = mujer|hombre` para no mezclar género):
+`tops`, `playeras-mujer`, `leggings`, `conjuntos`, `faldas`, `shorts-mujer`,
+`chamarras` (Mujer) y `playeras`, `shorts-hombre` (Hombre). Todas publicadas
+al canal **Ago Fitness Headless** (sin esto la Storefront API las devuelve
+vacías aunque existan en el Admin — las colecciones `Mujer`/`Hombre`
+tampoco estaban publicadas ahí y se corrigió al mismo tiempo). El hero
+sigue usando gradiente placeholder (no hay fotografía de producto todavía)
+pero el `path` ya apunta a una colección real, no a un `?tag=` inexistente
+— **la ruta `/search/[collection]` (`app/search/[collection]/page.tsx`)
+resuelve por handle de colección, no soporta querystring `?tag=`**, así que
+cualquier link nuevo del mega menu debe apuntar a un handle de colección
+real, no inventar un tag. `Niños` sigue sin productos/colección — placeholder
+"Próximamente" hasta que exista el catálogo real (ver CLAUDE.md, pendientes).
+
+**Correcciones de catálogo (14 julio 2026, mismo día):** el cliente
+corrigió la clasificación inicial de 2 productos — "Element Force Soft" y
+"Element Alpha Soft" no son `Top`, son `Playera` (Alpha Soft es una playera
+sin mangas, tag `sin-mangas` añadido). Y "Enterizo" no es una categoría
+aparte de "Conjunto" para esta marca — los 4 productos Kisu que tenían
+`product_type: Enterizo` se reclasificaron a `Conjunto` (la colección
+`enterizos` se eliminó, sus productos ya caen en `conjuntos`). **Lección:**
+no asumir taxonomía de producto sin confirmar con el cliente — categorías
+que parecen obvias desde afuera (enterizo ≠ conjunto) pueden no aplicar a
+cómo la marca realmente organiza su catálogo.
 
 **Tipografía — nota importante:** el usuario pidió imitar "la tipografía de
 On Running", pero es una fuente propietaria de la marca (con derechos) —
@@ -92,6 +116,48 @@ On Running", pero es una fuente propietaria de la marca (con derechos) —
 el proyecto vía el paquete `geist`) para lograr una sensación visual
 similar (sans geométrica, bold, tight tracking) sin riesgo de derechos de
 autor. Decisión confirmada con el usuario, ver `decisiones.md`.
+
+## Navbar transparente sobre el hero (13 julio 2026)
+
+**Objetivo de diseño:** en el home, el navbar flota transparente sobre el
+hero de imagen a pantalla completa (`components/layout/hero.tsx`) y se
+vuelve sólido blanco al hacer scroll — patrón estándar de marcas premium
+(Lululemon, Alo Yoga). En el resto de páginas (búsqueda, producto, etc.)
+no hay hero de imagen debajo, así que el navbar se queda sólido siempre.
+
+**Archivos:**
+- `components/layout/navbar/navbar-shell.tsx` (nuevo, client) — reemplaza
+  el wrapper que antes vivía directo en `index.tsx`. Decide `transparent`
+  con dos condiciones: `usePathname() === "/"` (solo home) y `scrollY <= 40`
+  (antes de hacer scroll). Si es home Y no ha hecho scroll → `absolute`
+  (no empuja el hero hacia abajo, flota encima) + barra superior
+  `bg-transparent`. En cualquier otro caso → `sticky` + barra superior
+  `bg-[#b48b8c]` (comportamiento de siempre).
+- `components/layout/navbar/index.tsx` — ahora solo hace el fetch del
+  menú (`getMenu`, server) y renderiza `<NavbarShell>`; toda la lógica de
+  scroll/pathname vive en el client component porque `index.tsx` es
+  `async`/server y no puede usar hooks.
+- `nav-main.tsx` recibe la prop `transparent` y la usa para togglear:
+  fondo del `<nav>` (`bg-transparent` vs `bg-white/95 backdrop-blur-md`),
+  color de los links de categoría, botón "Cancelar" del buscador, y se la
+  pasa hacia abajo a `<MobileMenu>` y `<CartModal>` (que a su vez se la
+  pasa a `<OpenCart>` para el ícono de bolsa + badge de cantidad). El
+  buscador (pill gris) y el mega menu (panel blanco) **no** cambian de
+  color — ya tienen su propio fondo claro y se leen bien sobre cualquier
+  hero.
+- `components/layout/hero.tsx` (nuevo) — sección `h-[100svh]` con overlay
+  oscuro (`from-black/50 via-black/5 to-black/70`) para que el texto
+  blanco del navbar (arriba) y de la copy del hero (abajo) tengan
+  contraste, con el placeholder de fondo (gradiente radial rosa→navy) en
+  medio. **Pendiente:** sustituir el div de fondo por una foto real
+  (producto/modelo) cuando el cliente la entregue — mismo patrón de
+  placeholder que ya se usaba en el mega menu.
+
+**Pendiente conocido:** el logo (`public/imgs/logo-ago.png`) es la versión
+rosa de siempre — no hay variante blanca/clara todavía. Sobre el gradiente
+placeholder actual se lee aceptable, pero cuando se ponga la foto real del
+hero, revisar contraste y pedir al cliente una versión clara del logo si
+hace falta.
 
 ## Pendientes conocidos
 

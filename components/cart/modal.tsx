@@ -22,7 +22,11 @@ type MerchandiseSearchParams = {
   [key: string]: string;
 };
 
-export default function CartModal() {
+export default function CartModal({
+  transparent,
+}: {
+  transparent?: boolean;
+}) {
   const { cart, updateCartItem } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
@@ -51,7 +55,7 @@ export default function CartModal() {
   return (
     <>
       <button aria-label="Open cart" onClick={openCart}>
-        <OpenCart quantity={cart?.totalQuantity} />
+        <OpenCart quantity={cart?.totalQuantity} transparent={transparent} />
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
@@ -139,11 +143,11 @@ export default function CartModal() {
                                     height={64}
                                     alt={
                                       item.merchandise.product.featuredImage
-                                        .altText ||
-                                      item.merchandise.product.title
+                                        ?.altText || item.merchandise.product.title
                                     }
                                     src={
-                                      item.merchandise.product.featuredImage.url
+                                      item.merchandise.product.featuredImage
+                                        ?.url || "/imgs/logo-ago.png"
                                     }
                                   />
                                 </div>
