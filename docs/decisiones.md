@@ -33,8 +33,14 @@ plataforma nueva a mantener.
 
 Se había inicializado un theme Liquid (Skeleton) vía `shopify theme init`
 antes de decidir ir headless. Se archivó en `_archive-liquid-theme/` (sin
-personalización, boilerplate puro) en vez de borrarlo, por si sirve de
-referencia. No se usa en el proyecto.
+personalización, boilerplate puro) en vez de borrarlo, por si servía de
+referencia. No se usaba en el proyecto.
+
+**Actualización (15 julio 2026):** eliminada por completo — semanas
+trabajando 100% headless sin haberla necesitado. Si en algún momento hace
+falta consultar el boilerplate original del theme Skeleton, está disponible
+vía `shopify theme init` de nuevo (es el scaffold estándar de Shopify, no
+algo personalizado que se perdiera).
 
 ## 2026-07-13 — Sitio 100% claro, sin dark mode
 

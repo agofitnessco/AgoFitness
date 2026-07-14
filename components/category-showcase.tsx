@@ -16,14 +16,14 @@ const CATEGORY_TINTS: Record<string, string> = {
 
 export default function CategoryShowcase() {
   return (
-    <section className="mx-auto w-full max-w-screen-2xl px-4 pt-10 pb-14 lg:px-8 lg:pt-14 lg:pb-16">
+    <section className="mx-auto w-full max-w-screen-2xl px-4 py-4 lg:px-8">
       <div className="grid gap-4 md:grid-cols-3">
         {CATEGORY_LINKS.map((category) => (
           <Link
             key={category.title}
             href={category.path}
             prefetch={true}
-            className="group relative flex aspect-[4/3] w-full flex-col justify-end overflow-hidden rounded-lg"
+            className="group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-lg"
           >
             <div
               className={`absolute inset-0 bg-gradient-to-br ${CATEGORY_TINTS[category.title]} transition-transform duration-700 ease-out group-hover:scale-105`}

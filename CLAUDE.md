@@ -173,13 +173,13 @@ no este archivo.
   de los dos anteriores — y seguir sin usar un `<li>` espaciador con padding
   dentro de un contenedor `scroll-snap` (el navegador "regresa" al soltar el
   scroll porque el padding pelea con los snap points).
-- **Tarjetas de categoría corregidas (15 julio 2026)** (`components/category-showcase.tsx`):
-  usaban `aspect-[3/4]` (retrato) en un grid de 3 columnas — en pantallas
-  anchas cada tarjeta terminaba midiendo ~900px de alto, "tapando toda la
-  pantalla" debajo del navbar. Cambiado a `aspect-[4/3]` (paisaje, más tipo
-  banner) + más espacio vertical de sección (`py-4` → `pt-10 pb-14`, `lg:`
-  `pt-14`/`pb-16`) para que no se sienta pegado al navbar arriba ni a "Lo
-  más nuevo" abajo.
+- **Tarjetas de categoría (`components/category-showcase.tsx`) — probado y
+  revertido (15 julio 2026):** se cambió brevemente `aspect-[3/4]` a
+  `aspect-[4/3]` + más padding vertical de sección para que las tarjetas no
+  midieran ~900px de alto en pantallas anchas, pero el cliente prefería el
+  look original (retrato, más alto, `py-4`) — **se revirtió a como estaba**.
+  No reintroducir el cambio a `aspect-[4/3]`/más padding sin confirmar de
+  nuevo con el cliente.
 - **Panel de búsqueda rediseñado estilo On Running (14-15 julio 2026)**
   (`nav-main.tsx` + `app/api/search-suggest/route.ts`, ver `docs/navbar.md`
   para el detalle completo): las pills pasaron de "Términos de búsqueda
