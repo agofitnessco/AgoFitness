@@ -278,13 +278,21 @@ búsqueda, mega menu, transparente-sobre-hero):
    está abierto lo cierra primero (`closeSearch()`); si no, y hay un mega
    menu abierto, lo cierra (`setActiveCategory(null)`).
 
-**Bug pre-existente encontrado (no de estas mejoras):**
-`/product/[handle]` (ej. `/product/element-top`) devuelve **500** — se
-confirmó con `git stash` que el error ya estaba ahí antes de estas 6
-mejoras, no lo causó ninguna de ellas. Esa página sigue siendo en buena
-parte el scaffold sin rediseñar de Next.js Commerce (texto en inglés,
-clases `dark:`, etc. — a diferencia de colecciones/carrusel/checkout que sí
-se rehicieron). Pendiente investigar y arreglar por separado.
+**Bug pre-existente encontrado y corregido (mismo día, no relacionado a
+las 6 mejoras):** `/product/[handle]` (ej. `/product/element-top`)
+devolvía 500 — se confirmó con `git stash` que el error ya estaba ahí
+antes. Causa: `app/product/[handle]/page.tsx` leía `product.featuredImage.url`
+sin optional chaining para el JSON-LD del producto — como ningún producto
+real tiene foto subida todavía (todo el sitio usa placeholders de
+gradiente), `featuredImage` es `null` y tronaba. Mismo tipo de bug que ya
+se había corregido antes en `cart/modal.tsx` (ver tabla de "Bugs conocidos"
+en `CLAUDE.md`) — el resto del sitio ya usaba `?.url` ahí, esta página se
+había quedado sin ese fix. Fix: `product.featuredImage?.url ||
+"/imgs/logo-ago.png"`, mismo fallback que el carrito. Esa página sigue
+siendo en buena parte el scaffold sin rediseñar de Next.js Commerce (texto
+en inglés, clases `dark:`, etc. — a diferencia de colecciones/carrusel/
+checkout que sí se rehicieron) — sigue pendiente el rediseño visual, solo
+se arregló el crash.
 
 ## Pendientes conocidos
 
