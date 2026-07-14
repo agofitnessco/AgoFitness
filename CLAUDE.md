@@ -31,6 +31,7 @@ La documentación está dividida por tema en `docs/`:
 | [`docs/decisiones.md`](docs/decisiones.md) | Bitácora de decisiones (por qué se eligió X sobre Y) |
 | [`docs/navbar.md`](docs/navbar.md) | Cómo está armado el navbar: estructura, morph de búsqueda, mega menu |
 | [`docs/footer.md`](docs/footer.md) | Estructura del footer y links pendientes de página real |
+| [`docs/tienda.md`](docs/tienda.md) | Guía de tallas, páginas de colección (`/search/[collection]`), FilterBar, ProductCard, estado del catálogo en Shopify |
 
 **Regla:** este archivo (`CLAUDE.md`) se mantiene corto — es un índice. El detalle
 y contexto va en `docs/`. Cuando se tome una decisión nueva de arquitectura o se
@@ -114,7 +115,28 @@ no este archivo.
   "Enterizo" no es categoría aparte de "Conjunto" para esta marca — los 4
   Kisu que eran `Enterizo` se reclasificaron a `Conjunto` y esa colección
   se eliminó. No asumir taxonomía de producto sin confirmar con el cliente.
-- Pendiente: crear colección `ninos` (aún sin catálogo), precios reales
-  para la línea Kisu, sustituir los placeholders (hero, categorías,
-  carrusel, `featuredImage` del carrito) por fotografía real de
-  producto/modelo, y seguir con el resto del home.
+- **Guía de tallas real construida** (`/guia-de-tallas`, ver `docs/tienda.md`):
+  medidas tomadas del fit guide oficial de Element (PDF de la marca),
+  remapeadas a las tallas CH/M/G/XG que usan las variantes en Shopify.
+  Línea Kisu queda con nota honesta de "pendiente" (su catálogo no trae
+  guía de tallas) en vez de medidas inventadas.
+- **Páginas de colección reconstruidas** (`/search/[collection]`, `/search`,
+  ver `docs/tienda.md`): se eliminó el scaffold sin diseñar de Next.js
+  Commerce (sidebar de colecciones + "Sort by" en inglés) y se reemplazó
+  por `CollectionHeader` (eyebrow + título + pills de subcategoría) +
+  `FilterBar` (ordenar por / tipo de producto / chips, todo en la URL,
+  sticky al hacer scroll) + `ProductCard` que consume productos reales de
+  Shopify (no hardcodeados como el carrusel).
+- **Los 15 productos que quedaban en `DRAFT` (3 Hombre + 12 Kisu) se
+  publicaron como `ACTIVE`** al canal Headless (14 julio 2026, decisión
+  explícita del cliente) — Mujer pasó a 20 productos, Hombre a 3. **Los 12
+  Kisu quedan a precio `$0.00` y son comprables así** — actualizar el precio
+  real antes de que el sitio reciba tráfico de verdad.
+- **Favoritos agregados** (corazón en las 3 tarjetas de producto del sitio +
+  ícono con badge en el navbar + página `/favoritos`, ver `docs/tienda.md`):
+  100% client-side vía `localStorage` — no hay cuentas de cliente en este
+  proyecto, así que no hay backend ni sync entre dispositivos.
+- Pendiente: crear colección `ninos` (aún sin catálogo), precio real de
+  Kisu (hoy en $0.00), sustituir los placeholders (hero, categorías,
+  carrusel/tarjetas de colección, `featuredImage` del carrito) por
+  fotografía real de producto/modelo, y seguir con el resto del home.

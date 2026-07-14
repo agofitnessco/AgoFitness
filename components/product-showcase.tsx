@@ -3,7 +3,9 @@
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { addItem } from "components/cart/actions";
 import { useCart } from "components/cart/cart-context";
+import HeartButton from "components/favorites/heart-button";
 import clsx from "clsx";
+import { modelGradient, productGradient } from "lib/color-placeholder";
 import {
   ELEMENT_PRODUCTS,
   type ShowcaseProduct,
@@ -13,29 +15,11 @@ import { useRef, useState, useTransition } from "react";
 /**
  * Placeholder de marca por producto — el color activo determina el gradiente
  * de las dos capas (producto solo / con modelo), calculado a partir del hex
- * real de cada variante. Sustituir por fotografía real (una foto por color)
- * cuando esté disponible. Datos (nombre, precio, colores, tallas) vienen de
- * los productos reales ya cargados en Shopify (línea Element) — ver
- * `lib/product-showcase-data.ts`.
+ * real de cada variante (ver `lib/color-placeholder.ts`). Sustituir por
+ * fotografía real (una foto por color) cuando esté disponible. Datos
+ * (nombre, precio, colores, tallas) vienen de los productos reales ya
+ * cargados en Shopify (línea Element) — ver `lib/product-showcase-data.ts`.
  */
-
-function shade(hex: string, percent: number) {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const amt = Math.round(2.55 * percent);
-  const clamp = (v: number) => Math.max(0, Math.min(255, v));
-  const r = clamp((num >> 16) + amt);
-  const g = clamp(((num >> 8) & 0x00ff) + amt);
-  const b = clamp((num & 0x0000ff) + amt);
-  return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
-}
-
-function productGradient(hex: string) {
-  return `linear-gradient(135deg, ${shade(hex, 45)} 0%, ${hex} 45%, ${shade(hex, -55)} 100%)`;
-}
-
-function modelGradient(hex: string) {
-  return `linear-gradient(135deg, ${hex} 0%, ${shade(hex, -35)} 55%, ${shade(hex, -70)} 100%)`;
-}
 
 function ProductCard({ product }: { product: ShowcaseProduct }) {
   const [activeColorIndex, setActiveColorIndex] = useState(0);
@@ -91,6 +75,16 @@ function ProductCard({ product }: { product: ShowcaseProduct }) {
         <div
           className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
           style={{ backgroundImage: modelGradient(activeColor.hex) }}
+        />
+
+        <HeartButton
+          item={{
+            handle: product.handle,
+            title: product.title,
+            price: product.price.toFixed(2),
+            currencyCode: "MXN",
+            colorHex: activeColor.hex,
+          }}
         />
 
         {/* añadir rápido */}

@@ -6,34 +6,28 @@ export type SortFilterItem = {
 };
 
 export const defaultSort: SortFilterItem = {
-  title: "Relevance",
+  title: "Destacados",
   slug: null,
-  sortKey: "RELEVANCE",
+  sortKey: "BEST_SELLING",
   reverse: false,
 };
 
 export const sorting: SortFilterItem[] = [
   defaultSort,
   {
-    title: "Trending",
-    slug: "trending-desc",
-    sortKey: "BEST_SELLING",
-    reverse: false,
-  }, // asc
-  {
-    title: "Latest arrivals",
+    title: "Novedades",
     slug: "latest-desc",
     sortKey: "CREATED_AT",
     reverse: true,
   },
   {
-    title: "Price: Low to high",
+    title: "Precio: de menor a mayor",
     slug: "price-asc",
     sortKey: "PRICE",
     reverse: false,
-  }, // asc
+  },
   {
-    title: "Price: High to low",
+    title: "Precio: de mayor a menor",
     slug: "price-desc",
     sortKey: "PRICE",
     reverse: true,
@@ -92,7 +86,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
       { label: "Ver todo", path: "/search/mujer" },
     ],
     secondaryLinks: [
-      { label: "Guía de tallas", path: "/soporte" },
+      { label: "Guía de tallas", path: "/guia-de-tallas" },
       { label: "Centro de ayuda", path: "/soporte" },
     ],
     heroes: [
@@ -117,7 +111,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
       { label: "Ver todo", path: "/search/hombre" },
     ],
     secondaryLinks: [
-      { label: "Guía de tallas", path: "/soporte" },
+      { label: "Guía de tallas", path: "/guia-de-tallas" },
       { label: "Centro de ayuda", path: "/soporte" },
     ],
     heroes: [
@@ -139,7 +133,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
     // Sin productos/colección real todavía — pendiente (ver docs/navbar.md).
     primaryLinks: [{ label: "Ver todo", path: "/search/ninos" }],
     secondaryLinks: [
-      { label: "Guía de tallas", path: "/soporte" },
+      { label: "Guía de tallas", path: "/guia-de-tallas" },
       { label: "Centro de ayuda", path: "/soporte" },
     ],
     heroes: [

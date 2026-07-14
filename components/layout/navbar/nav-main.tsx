@@ -1,6 +1,7 @@
 "use client";
 
 import CartModal from "components/cart/modal";
+import NavFavorites from "components/favorites/nav-favorites";
 import { Flip } from "gsap/Flip";
 import gsap from "gsap";
 import { CATEGORY_LINKS, POPULAR_SEARCH_TERMS } from "lib/constants";
@@ -257,18 +258,20 @@ export default function NavMain({
 
             <div
               ref={cartRef}
-              className="overflow-hidden"
+              className="flex items-center overflow-hidden"
               style={{
                 width: isSearchOpen ? 0 : "auto",
                 opacity: isSearchOpen ? 0 : 1,
                 pointerEvents: isSearchOpen ? "none" : "auto",
               }}
             >
+              <NavFavorites transparent={transparent} />
               <CartModal transparent={transparent} />
             </div>
           </div>
 
           <div className="flex items-center gap-3 md:hidden">
+            <NavFavorites />
             <CartModal />
           </div>
         </div>

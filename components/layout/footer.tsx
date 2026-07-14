@@ -14,7 +14,7 @@ const HELP_LINKS = [
   { label: "Centro de ayuda", path: "/soporte" },
   { label: "Envíos y entregas", path: "/soporte" },
   { label: "Devoluciones", path: "/soporte" },
-  { label: "Guía de tallas", path: "/soporte" },
+  { label: "Guía de tallas", path: "/guia-de-tallas" },
 ];
 
 const COMPANY_LINKS = [

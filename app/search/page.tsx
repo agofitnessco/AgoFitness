@@ -1,11 +1,10 @@
-import Grid from "components/grid";
-import ProductGridItems from "components/layout/product-grid-items";
+import ProductCard from "components/collection/product-card";
 import { defaultSort, sorting } from "lib/constants";
 import { getProducts } from "lib/shopify";
 
 export const metadata = {
-  title: "Search",
-  description: "Search for products in the store.",
+  title: "Buscar",
+  description: "Busca productos en la tienda.",
 };
 
 export default async function SearchPage(props: {
@@ -17,23 +16,24 @@ export default async function SearchPage(props: {
     sorting.find((item) => item.slug === sort) || defaultSort;
 
   const products = await getProducts({ sortKey, reverse, query: searchValue });
-  const resultsText = products.length > 1 ? "results" : "result";
 
   return (
-    <>
+    <div className="mx-auto w-full max-w-screen-2xl px-4 py-12 lg:px-8">
       {searchValue ? (
-        <p className="mb-4">
+        <p className="mb-8 text-lg">
           {products.length === 0
-            ? "There are no products that match "
-            : `Showing ${products.length} ${resultsText} for `}
+            ? "No hay productos que coincidan con "
+            : `Mostrando ${products.length} ${products.length > 1 ? "resultados" : "resultado"} para `}
           <span className="font-bold">&quot;{searchValue}&quot;</span>
         </p>
       ) : null}
       {products.length > 0 ? (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <ProductGridItems products={products} />
-        </Grid>
+        <ul className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product.handle} product={product} />
+          ))}
+        </ul>
       ) : null}
-    </>
+    </div>
   );
 }
