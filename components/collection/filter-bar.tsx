@@ -77,7 +77,7 @@ export default function FilterBar({
         className={isOpen ? "grid grid-cols-1 gap-10 sm:grid-cols-[220px_1fr]" : ""}
       >
         {isOpen && (
-          <div className="sticky top-[60px] flex max-h-[calc(100svh-184px)] flex-col gap-8 self-start overflow-y-auto border-t border-neutral-200 pt-6 sm:border-t-0 sm:pt-0 md:top-[168px]">
+          <div className="sticky top-[68px] flex max-h-[calc(100svh-192px)] flex-col gap-8 self-start overflow-y-auto border-t border-neutral-200 pt-6 sm:border-t-0 sm:pt-0 md:top-[184px]">
             {activeFilterCount > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-bold text-black">
