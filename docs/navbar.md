@@ -1,8 +1,10 @@
 # Navbar
 
 Archivos: `components/layout/navbar/index.tsx` (server, shell) → renderiza
-`nav-main.tsx` (client, toda la interactividad) + `mobile-menu.tsx` (drawer
-móvil, sin cambios grandes).
+`nav-main.tsx` (client, toda la interactividad — desktop + montaje de la
+barra móvil) + `mobile-nav-bar.tsx`/`mobile-search-panel.tsx`/
+`mobile-menu-panel.tsx` (navbar móvil estilo On Running, ver sección
+"Navbar móvil" más abajo).
 
 ## Estructura de dos niveles
 
@@ -293,6 +295,68 @@ siendo en buena parte el scaffold sin rediseñar de Next.js Commerce (texto
 en inglés, clases `dark:`, etc. — a diferencia de colecciones/carrusel/
 checkout que sí se rehicieron) — sigue pendiente el rediseño visual, solo
 se arregló el crash.
+
+## Navbar móvil (15 julio 2026)
+
+**Referencia de diseño:** el patrón mobile de On Running (`on.com`) — una
+barra de 5 íconos fija al pie de pantalla (buscar, bolsa, IA, cuenta,
+menú), transparente sobre el hero y sólida al hacer scroll, donde el
+buscador y el menú abren paneles a pantalla completa que suben desde
+abajo; el último ícono se convierte en una "X" que cierra lo que esté
+abierto, sin importar cuál se abrió.
+
+**Reemplazo del drawer viejo:** `mobile-menu.tsx` (drawer lateral con
+`Dialog`/`translate-x`) y `search.tsx` (input suelto que usaba) se
+eliminaron — sustituidos por 3 archivos nuevos, todos dentro de
+`components/layout/navbar/`:
+
+- **`mobile-nav-bar.tsx`** — la barra fija (`fixed inset-x-0 bottom-0`,
+  `md:hidden`). 5 botones: Buscar (`MagnifyingGlassIcon`), `<NavFavorites>`,
+  `<CartModal>` (los mismos componentes que ya usaba el desktop — no se
+  duplicó lógica de carrito/favoritos), Cuenta (`UserIcon` → `/cuenta`) y
+  Menú/Cerrar. Recibe la misma prop `transparent` que gobierna el navbar
+  desktop en `nav-main.tsx` (se le pasa desde ahí, no desde
+  `navbar-shell.tsx` directo). Estado `activePanel: "search" | "menu" |
+  null` controla cuál de los dos paneles está abierto — el quinto botón
+  alterna `Bars3Icon`↔`XMarkIcon` según `activePanel !== null` y, si hay
+  cualquier panel abierto, cerrarlo con un solo tap (igual que On: el
+  ícono de menú es el "cerrar universal", no solo el que abre el menú).
+  Cierra el panel activo también en cambio de ruta y con Escape.
+- **`mobile-search-panel.tsx`** — panel a pantalla completa (`Dialog` +
+  `Transition` de Headless UI, `translate-y-full → translate-y-0`, mismo
+  patrón que ya usaba `CartModal` para su drawer). Input arriba,
+  "Búsquedas sugeridas" (pills de `POPULAR_SEARCH_TERMS`) y "Productos"
+  (grid `grid-cols-2` con el `ProductCard` real de las colecciones — mismas
+  tarjetas que el resto del sitio, con swatches/quick-add). El fetch de
+  sugerencias (best-sellers por default, debounce 300ms al escribir) se
+  extrajo a **`lib/use-search-suggest.ts`**, compartido con el panel
+  desktop de `nav-main.tsx` (antes duplicaba el mismo `useEffect` con
+  `AbortController`).
+- **`mobile-menu-panel.tsx`** — panel a pantalla completa con la lista de
+  categorías en tipografía grande/bold (`text-4xl font-bold`, como
+  Tienda/Actividades/Explorar de On). A diferencia del drawer viejo (que
+  solo listaba `CATEGORY_LINKS` planos), cada categoría con entrada real en
+  `MEGA_MENU` (Mujer/Hombre/Niños — las 3 tienen entrada, Niños con hero
+  "Próximamente") se expande in-place con un acordeón CSS
+  (`grid-template-rows: 0fr → 1fr`, transición nativa sin JS de medición)
+  para revelar sus `primaryLinks` reales — mismos datos que ya alimentan el
+  mega menu desktop, sin taxonomía duplicada. Debajo, una lista secundaria
+  más chica/gris (Favoritos, Guía de tallas, Centro de ayuda, Mi cuenta) +
+  el menú real de Shopify (`getMenu`, prop `menu`, vacío por ahora).
+
+**Ambos paneles** usan `bottom: calc(4.5rem + env(safe-area-inset-bottom))`
+en el `Dialog.Panel` para terminar justo arriba de la barra de íconos (que
+se queda visible y usable mientras el panel está abierto — el botón de
+cerrar vive ahí, no dentro del panel).
+
+**Logo más chico en mobile:** el logo (`nav-main.tsx`) pasó de `h-18` fijo
+a `h-12 md:h-18` — a tamaño completo se veía desproporcionado ahora que ya
+no comparte la fila con el botón de hamburguesa (que se movió a la barra
+inferior).
+
+**Espaciado del layout:** `app/layout.tsx` le agregó `pb-24 md:pb-0` al
+`<main>` para que el contenido (y el footer) no quede tapado por la barra
+fija en mobile.
 
 ## Pendientes conocidos
 

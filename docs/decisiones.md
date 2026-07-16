@@ -92,3 +92,27 @@ actuales") a pedido del cliente. **El componente no se borró** —
 `app/page.tsx` (el import y `<GymcoBanner />`). No requiere reconstruir
 nada — el componente sigue funcionando tal cual quedó documentado en
 `CLAUDE.md` (sección "Estado actual", banner de distribuidor Gymco).
+
+## 2026-07-15 — Navbar móvil: barra fija de íconos (On Running) en vez de drawer lateral
+
+**Decisión:** se retiró por completo el drawer lateral (`mobile-menu.tsx`,
+`Dialog` deslizando desde la izquierda) y se reemplazó por una barra fija
+al pie de pantalla con 5 íconos (buscar/favoritos/bolsa/cuenta/menú) que
+abren paneles a pantalla completa desde abajo — mismo patrón que el
+mobile de On Running (`on.com`), pedido explícito del usuario con
+capturas de referencia. Ver `docs/navbar.md`, sección "Navbar móvil", para
+el detalle de archivos.
+
+**Razón:** el drawer lateral no aprovechaba que el navbar ya tenía el
+estado `transparent` (transparente sobre el hero, sólido al hacer scroll)
+— era un botón sólido de siempre en la esquina, out of place sobre un hero
+a pantalla completa. La barra fija hereda `transparent` directamente del
+navbar desktop y da una sensación más "app nativa" acorde a la referencia.
+De paso se aprovechó `MEGA_MENU` (ya existente para el mega menu desktop)
+para que el menú móvil tenga acordeón con subcategorías reales en vez de
+la lista plana que tenía el drawer viejo.
+
+**Alternativa descartada:** mantener el drawer y solo re-skinnearlo no
+lograba el efecto "flotando sobre el hero + icon bar tipo app" que pedía
+la referencia — la estructura (posición fija vs. panel lateral) es
+distinta de raíz, no solo estética.

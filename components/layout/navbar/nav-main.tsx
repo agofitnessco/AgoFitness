@@ -8,14 +8,15 @@ import gsap from "gsap";
 import { CATEGORY_LINKS, POPULAR_SEARCH_TERMS } from "lib/constants";
 import { firstColorHex, productGradient } from "lib/color-placeholder";
 import { useRecentlyViewed } from "lib/use-recently-viewed";
+import { useSearchSuggest } from "lib/use-search-suggest";
 import type { RecentlyViewedItem } from "lib/recently-viewed";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState, Suspense } from "react";
-import MobileMenu from "./mobile-menu";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import MobileNavBar from "./mobile-nav-bar";
 import MegaMenu from "./mega-menu";
 import { Menu, Product } from "lib/shopify/types";
 
@@ -142,8 +143,8 @@ export default function NavMain({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [suggestProducts, setSuggestProducts] = useState<Product[]>([]);
-  const [isSuggestLoading, setIsSuggestLoading] = useState(false);
+  const { products: suggestProducts, isLoading: isSuggestLoading } =
+    useSearchSuggest(query, isSearchOpen);
   // Layout que se renderiza realmente en el panel de búsqueda — va un paso
   // detrás de `transparent` durante el crossfade (ver efectos más abajo).
   const [displayTransparent, setDisplayTransparent] = useState(transparent);
@@ -261,34 +262,8 @@ export default function NavMain({
   // abrir sin texto muestra los más vendidos (BEST_SELLING), y conforme se
   // escribe filtra por `query` (debounce 300ms para no golpear la Storefront
   // API en cada tecla). Reusa el `ProductCard` real de las colecciones —
-  // mismos swatches/quick-add que el resto del sitio, sin un componente
-  // paralelo que mantener sincronizado.
-  useEffect(() => {
-    if (!isSearchOpen) return;
-
-    const controller = new AbortController();
-    setIsSuggestLoading(true);
-    const timeout = setTimeout(
-      () => {
-        fetch(
-          `/api/search-suggest?q=${encodeURIComponent(query.trim())}`,
-          { signal: controller.signal },
-        )
-          .then((res) => res.json())
-          .then((data) => setSuggestProducts(data.products ?? []))
-          .catch((err) => {
-            if (err?.name !== "AbortError") setSuggestProducts([]);
-          })
-          .finally(() => setIsSuggestLoading(false));
-      },
-      query.trim() ? 300 : 0,
-    );
-
-    return () => {
-      clearTimeout(timeout);
-      controller.abort();
-    };
-  }, [isSearchOpen, query]);
+  // mismos swatches/quick-add que el resto del sitio. Fetch/debounce vive en
+  // `lib/use-search-suggest.ts`, compartido con el panel de búsqueda móvil.
 
   // Transición de dos fases al cambiar entre el layout compacto (navbar
   // transparente sobre el hero: pills + tarjetas chicas a la derecha) y el
@@ -375,6 +350,7 @@ export default function NavMain({
   }, [isSearchOpen, activeCategory]);
 
   return (
+    <>
     <nav
       className={clsx(
         "relative border-b transition-colors duration-500",
@@ -386,12 +362,6 @@ export default function NavMain({
       <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-4">
           <div className="flex items-center gap-8">
-            <div className="flex items-center gap-4 md:hidden">
-              <Suspense fallback={null}>
-                <MobileMenu menu={menu} transparent={transparent} />
-              </Suspense>
-            </div>
-
             <Link href="/" prefetch={true} className="flex items-center">
               <Image
                 src="/imgs/logo-ago.png"
@@ -399,7 +369,7 @@ export default function NavMain({
                 width={280}
                 height={72}
                 priority
-                className="h-18 w-auto object-contain"
+                className="h-12 w-auto object-contain md:h-18"
               />
             </Link>
 
@@ -501,11 +471,6 @@ export default function NavMain({
               <NavFavorites transparent={transparent} />
               <CartModal transparent={transparent} />
             </div>
-          </div>
-
-          <div className="flex items-center gap-3 md:hidden">
-            <NavFavorites />
-            <CartModal />
           </div>
         </div>
       </div>
@@ -688,5 +653,7 @@ export default function NavMain({
         </div>
       </div>
     </nav>
+    <MobileNavBar menu={menu} transparent={transparent} />
+    </>
   );
 }

@@ -242,3 +242,13 @@ no este archivo.
   carrusel/tarjetas de colección, galería de producto, `featuredImage`
   del carrito) por fotografía real de producto/modelo, y seguir con el
   resto del home.
+- **Navbar móvil reconstruida estilo On Running (15 julio 2026)** — ver
+  `docs/navbar.md`, sección "Navbar móvil". Reemplaza el drawer lateral
+  viejo (`mobile-menu.tsx`, retirado) por una barra fija al pie de
+  pantalla (`mobile-nav-bar.tsx`, 5 íconos: buscar/favoritos/bolsa/
+  cuenta/menú) que hereda el mismo estado `transparent` del navbar
+  desktop (transparente sobre el hero, sólida al hacer scroll), más dos
+  paneles a pantalla completa (`mobile-search-panel.tsx`,
+  `mobile-menu-panel.tsx`) que suben desde abajo con Headless UI
+  Transition/Dialog. El fetch de sugerencias de búsqueda se compartió
+  entre desktop y mobile en `lib/use-search-suggest.ts`.
