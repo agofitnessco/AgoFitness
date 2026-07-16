@@ -20,7 +20,7 @@ function SubmitButton({
     "flex w-full items-center justify-center gap-2 rounded-full p-4 text-sm font-bold tracking-wide transition-transform active:scale-[0.98]";
   const disabledClasses =
     "cursor-not-allowed bg-neutral-100 text-neutral-400";
-  const readyClasses = "bg-[#b48b8c] text-white hover:bg-[#a17879]";
+  const readyClasses = "bg-black text-white hover:bg-neutral-800";
 
   if (!availableForSale) {
     return (
@@ -60,13 +60,24 @@ export function AddToCart({ product }: { product: Product }) {
   const searchParams = useSearchParams();
   const [message, formAction] = useActionState(addItem, null);
 
+  // Cada opción cae al primer valor (la talla más chica, el primer color)
+  // cuando la URL no trae una selección explícita — así nunca queda sin
+  // variante seleccionada al entrar desde un carrusel/recomendación.
+  const optionDefaults = Object.fromEntries(
+    product.options.map((option) => {
+      const key = option.name.toLowerCase();
+      return [key, searchParams.get(key) ?? option.values[0]];
+    }),
+  );
+
   const variant = variants.find((variant: ProductVariant) =>
     variant.selectedOptions.every(
-      (option) => option.value === searchParams.get(option.name.toLowerCase()),
+      (option) => option.value === optionDefaults[option.name.toLowerCase()],
     ),
   );
-  const defaultVariantId = variants.length === 1 ? variants[0]?.id : undefined;
-  const selectedVariantId = variant?.id || defaultVariantId;
+  const defaultVariantId =
+    variants.find((v) => v.availableForSale)?.id ?? variants[0]?.id;
+  const selectedVariantId = variant?.id ?? defaultVariantId;
   const addItemAction = formAction.bind(null, selectedVariantId);
   const finalVariant = variants.find(
     (variant) => variant.id === selectedVariantId,

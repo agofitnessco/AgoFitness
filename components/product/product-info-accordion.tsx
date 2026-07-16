@@ -50,7 +50,7 @@ export function ProductInfoAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="mt-8 border-t border-neutral-200">
+    <div className="border-t border-neutral-200">
       {SECTIONS.map((section, index) => {
         const isOpen = openIndex === index;
 

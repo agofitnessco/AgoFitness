@@ -60,6 +60,37 @@ button {
   animation: topbar-fade-in 0.4s ease-out;
 }
 
+@keyframes variant-pop {
+  0% {
+    transform: scale(0.85);
+  }
+  55% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.variant-pop {
+  animation: variant-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.check-in {
+  animation: check-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s backwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .topbar-fade {
     animation: none;
@@ -69,5 +100,10 @@ button {
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  .variant-pop,
+  .check-in {
+    animation: none;
   }
 }

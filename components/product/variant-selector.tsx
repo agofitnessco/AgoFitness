@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { colorHex, productGradient } from "lib/color-placeholder";
 import { ProductOption, ProductVariant } from "lib/shopify/types";
@@ -103,8 +104,9 @@ export function VariantSelector({
                 ),
               );
 
-              // The option is active if it's in the selected options.
-              const isActive = searchParams.get(optionNameLowerCase) === value;
+              // Activo si está en la URL, o si es el default (primer valor)
+              // cuando la URL todavía no trae selección explícita.
+              const isActive = selectedValue === value;
 
               if (isColor) {
                 const hex = colorHex(value);
@@ -117,13 +119,20 @@ export function VariantSelector({
                     aria-label={`Color ${value}${!isAvailableForSale ? " (agotado)" : ""}`}
                     title={value}
                     className={clsx(
-                      "h-14 w-14 overflow-hidden rounded-md border transition-shadow disabled:cursor-not-allowed disabled:opacity-30",
+                      "relative h-14 w-14 overflow-hidden rounded-md border transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100",
+                      "hover:scale-110 active:scale-90",
                       isActive
-                        ? "border-black ring-1 ring-black"
+                        ? "variant-pop border-black ring-2 ring-black ring-offset-2"
                         : "border-black/10",
                     )}
                     style={{ backgroundImage: productGradient(hex) }}
-                  />
+                  >
+                    {isActive ? (
+                      <span className="check-in absolute right-1 bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-black shadow-sm">
+                        <CheckIcon className="h-3.5 w-3.5 text-white" />
+                      </span>
+                    ) : null}
+                  </button>
                 );
               }
 
@@ -135,11 +144,12 @@ export function VariantSelector({
                   disabled={!isAvailableForSale}
                   title={`${option.name} ${value}${!isAvailableForSale ? " (agotado)" : ""}`}
                   className={clsx(
-                    "flex items-center justify-center border text-sm font-medium transition-colors",
+                    "flex items-center justify-center border text-sm font-medium transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:hover:-translate-y-0 disabled:active:scale-100",
                     isSize ? "rounded-md px-2 py-3" : "min-w-11 rounded-full px-3 py-1.5",
                     {
-                      "border-black bg-black text-white": isActive,
-                      "border-neutral-300 text-black hover:border-black":
+                      "variant-pop border-black bg-black text-white shadow-md":
+                        isActive,
+                      "border-neutral-300 text-black hover:-translate-y-0.5 hover:border-black active:scale-90":
                         !isActive && isAvailableForSale,
                       "cursor-not-allowed border-neutral-200 text-neutral-300":
                         !isAvailableForSale,

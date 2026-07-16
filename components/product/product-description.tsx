@@ -8,8 +8,6 @@ import { Product } from "lib/shopify/types";
 import Link from "next/link";
 import { VariantSelector } from "./variant-selector";
 
-const INSTALLMENTS = 3;
-
 function CompleteTheLook({ product }: { product: Product }) {
   const price = product.priceRange.minVariantPrice;
 
@@ -71,7 +69,6 @@ export function ProductDescription({
 }) {
   const price = product.priceRange.minVariantPrice;
   const { gender, typeEntry } = breadcrumbFor(product);
-  const perPayment = Number(price.amount) / INSTALLMENTS;
 
   return (
     <>
@@ -128,13 +125,6 @@ export function ProductDescription({
       <VariantSelector options={product.options} variants={product.variants} />
       {completeWith ? <CompleteTheLook product={completeWith} /> : null}
       <AddToCart product={product} />
-      <p className="mt-3 text-center text-xs text-neutral-500">
-        {INSTALLMENTS} pagos de{" "}
-        <span className="font-semibold text-black">
-          MX${perPayment.toLocaleString("es-MX", { maximumFractionDigits: 0 })}
-        </span>{" "}
-        · cálculo de referencia, no un plan de financiamiento
-      </p>
     </>
   );
 }

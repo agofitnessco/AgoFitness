@@ -365,6 +365,31 @@ fija en mobile.
 - **Paneles "seamless" y fix de z-index (fondo grisáceo):** Se eliminó el `border-t` de la barra inferior cuando el buscador o menú están abiertos y se ajustó el tope inferior de los paneles de `4.5rem` a `4.1rem` para que conecten perfectamente sin huecos. Adicionalmente, el `MobileNavBar` se extrajo de `nav-main.tsx` hacia `navbar-shell.tsx` (fuera del contenedor `z-40`) y se le asignó `z-[60]`. Esto asegura que se posicione por encima del `backdrop` oscuro del `Dialog` de Headless UI, evitando que la barra inferior blanca se vea gris o "sucia" cuando se abre el menú, y devolviendo la interactividad al botón "Cerrar".
 - **Hero CTA y responsive:** Se simplificó la sección Hero eliminando el link "Conócenos" y se actualizó el botón principal a "Conoce la nueva colección" (apuntando al primer carrusel de productos mediante ancla `#nueva-coleccion` para scroll suave). Se agregó soporte a `FillButton` para `arrowDirection="down"` usando el ícono oficial, y se le hizo responsivo (`size="sm"` en móvil, `size="md"` en desktop con compensaciones `-ml-5` y `-ml-9` respectivamente). Esto arregló un bug donde el texto largo del botón desbordaba las pantallas móviles (`overflow-hidden` cortaba la flecha) y aseguró que su texto quede siempre perfectamente alineado a la izquierda con los encabezados superiores.
 
+### Barra móvil en `/product/*` — botón de carrito vs. menú (julio 2026)
+
+En la página de producto, `MobileNavBar` reemplaza la fila normal de 5
+íconos por el botón "Añadir al carrito" (portal hacia
+`#mobile-add-to-cart-portal`, ver `docs/tienda.md` → `add-to-cart.tsx`),
+manteniendo solo el botón ☰ a la derecha.
+
+- **Crossfade al abrir el menú:** al tocar ☰ en `/product/*`, el botón de
+  carrito se desvanece y aparece la fila de íconos normal (buscar/
+  favoritos/carrito/cuenta) — antes convivían encimados mientras el panel
+  estaba abierto. Se resuelve con dos capas `absolute inset-0` dentro de
+  un wrapper `relative` (`transition-opacity duration-300`), controladas
+  por `showAddToCart = isProductPage && !isPanelOpen`, en vez de
+  desmontar/montar el botón: el `div#mobile-add-to-cart-portal` **nunca
+  se desmonta** — el portal de `AddToCart` lo agarra una sola vez con
+  `document.getElementById` en un `useEffect`, así que si el nodo se
+  desmontara al cerrar el menú, el botón se rompería silenciosamente
+  después.
+- **Bug corregido:** el wrapper `relative` no tenía altura propia — como
+  sus dos hijos son `absolute` (fuera del flujo normal), el contenedor
+  colapsaba a `0px` de alto y arrastraba consigo a los hijos posicionados
+  con `inset-0` (que heredan la altura del padre). Resultado: el botón de
+  "Añadir al carrito" quedaba invisible/sin poder tocarse. Fix: `h-12`
+  explícito en el wrapper.
+
 ## Pendientes conocidos
 
 - Los links de categoría (`/search/mujer`, `/search/hombre`, `/search/ninos`)

@@ -225,15 +225,22 @@ lib/product-types.ts                 → +`fitFor`/`climateFor` (heurística)
 
 ### Layout de arriba a abajo
 
+> Actualizado julio 2026: layout responsive real (antes el orden mobile
+> quedaba roto — ver "Bugs corregidos" abajo). El contenedor pasó de
+> `grid` con `order-N` a `flex flex-col` en mobile (orden = orden natural
+> del DOM, sin ambigüedad) y solo se vuelve `grid` explícito desde `lg:`.
+
 ```
-Hero (w-full, SIN max-w-screen-2xl) — galería 1fr + info 400px fijo
-  ├─ Gallery                  (columna ancha)
-  ├─ ProductInfoAccordion     (columna ancha, debajo de la galería)
-  └─ ProductDescription       (columna angosta, fija)
-        breadcrumb → título+corazón → precio → descripción real (Prose)
-        → VariantSelector → CompleteTheLook ("Queda bien con...")
-        → AddToCart → nota de cuotas
-FitClimateRow (full-width, debajo del grid 2-col)
+Mobile (flex-col, orden = orden del DOM):
+  Gallery → ProductDescription → ProductInfoAccordion → FitClimateRow
+  (ProductDescription YA NO tiene la nota de cuotas/MSI — se quitó)
+
+Desktop (lg:grid grid-cols-[minmax(0,1fr)_400px], col/row explícitos):
+  col 1 / row 1: Gallery                (columna ancha, díptico 2 imgs)
+  col 2 / row 1: ProductDescription     (columna angosta, fija, 400px)
+  col 1 / row 2: ProductInfoAccordion   (debajo de la galería)
+  col 2 / row 2: FitClimateRow          (tarjetas junto al acordeón — ya
+                                          no full-width abajo de todo)
 ── mx-auto max-w-screen-2xl ──
   OutfitGrid        "Ideas para combinar"        (shop-the-look, 1 foto + grid hotspot)
   FeatureStory      3 paneles editoriales
@@ -276,8 +283,12 @@ falsas, toda la página usa un mismo lenguaje de placeholder consistente:
   `OutfitGrid`, `FeatureStory`) para que quede explícito.
 - **`Gallery` ya soporta el caso con fotos reales** sin tocar nada más:
   en cuanto `product.images` deje de venir vacío desde Shopify, cae
-  automáticamente al carrusel real (ventana deslizante de 2 imágenes,
-  flechas, contador `n/N`, thumbnails con más de 2 fotos).
+  automáticamente al carrusel real. **El tratamiento ahora difiere por
+  breakpoint** (julio 2026, ver "Piezas construidas" abajo): en mobile es
+  un carrusel deslizable de verdad (scroll-snap + swipe táctil, una imagen
+  a pantalla completa por slide); en desktop sigue siendo el díptico
+  original (2 imágenes lado a lado, flechas/contador debajo, sin
+  superponerse).
 - **`ArrowsRightLeftIcon`/`SunIcon`** (Ajuste/Clima) y los 3 paneles de
   `FeatureStory` seguirán funcionando igual cuando haya fotos — solo
   cambia qué se pinta detrás, no la estructura.
@@ -316,29 +327,71 @@ no es lo mismo que el sort `BEST_SELLING` real de las colecciones).
 
 ### Piezas construidas, por sección
 
-- **`Gallery`** — díptico (`grid grid-cols-2`), no un solo cuadro: panel
-  izquierdo = vista "producto solo", derecho = "con modelo" (estáticos,
-  simultáneos — un hover no aplica en un díptico de 2 fotos fijas). El hex
-  activo viene del color seleccionado en `VariantSelector` vía
-  `colorSwatches` que le pasa la página. Con fotos reales: ventana
-  deslizante de 2 imágenes, flechas, contador. El link "Ideas para
-  combinar ↓" vive en la misma fila que las flechas/contador y hace scroll
-  suave a `#ideas-para-combinar` (el ancla de `OutfitGrid`).
+- **`Gallery`** — **responsive por breakpoint** (julio 2026, antes era el
+  mismo díptico en todo tamaño de pantalla):
+  - **Mobile** (`lg:hidden`): carrusel deslizable de verdad —
+    `overflow-x-auto snap-x snap-mandatory` con una imagen a pantalla
+    completa (`aspect-[4/5]`) por slide, swipe táctil nativo. El estado
+    (`imageIndex`, en la URL vía `?image=`) se mantiene sincronizado con
+    el scroll en ambos sentidos: un `useEffect` hace `scrollTo` suave
+    cuando `imageIndex` cambia por botón/thumbnail, y un handler de
+    `onScroll` (debounced 100ms) detecta el swipe manual y actualiza la
+    URL — así flechas, contador y thumbnails seguían funcionando igual
+    que antes, ahora sobre un carrusel real. Flechas superpuestas a la
+    imagen (`absolute`, círculos blancos translúcidos) + contador `n/N`.
+  - **Desktop** (`hidden lg:grid`): se mantiene el díptico original sin
+    cambios — panel izquierdo "producto solo" / derecho "con modelo"
+    (estáticos, simultáneos), flechas/contador **debajo** de las imágenes
+    (no superpuestos). El usuario pidió explícitamente no tocar el
+    desktop al agrandar las fotos en mobile — de ahí la bifurcación por
+    breakpoint en vez de un único layout compartido.
+  - El hex activo viene del color seleccionado en `VariantSelector` vía
+  `colorSwatches` que le pasa la página. El link "Ideas para combinar ↓"
+  hace scroll suave a `#ideas-para-combinar` (el ancla de `OutfitGrid`).
 - **`VariantSelector`** — "Color" renderiza swatches cuadrados
   `h-14 w-14 rounded-md` pintados con `productGradient(hex)` (se ven como
   mini-foto de la prenda, no un círculo de Pantone plano); "Talla" son
   píldoras negro/blanco con link real a "Guía de tallas" en la misma fila.
+  **Microinteracciones (julio 2026):** swatches con `hover:scale-110` /
+  `active:scale-90` y una animación `variant-pop` (bounce con overshoot,
+  keyframe en `app/globals.css`) al seleccionarse, más un check ✓ que
+  aparece con `check-in` (fade+scale) sobre el swatch activo; tallas con
+  `active:scale-90` al tocar y `hover:-translate-y-0.5` en disponibles.
+  Ambas animaciones respetan `prefers-reduced-motion`. **Bug corregido:**
+  `isActive` comparaba el valor crudo de `searchParams` — sin
+  `?color=`/`?talla=` en la URL (típico al entrar desde un carrusel/
+  recomendación) **ningún swatch se marcaba visualmente como
+  seleccionado**, aunque `AddToCart` ya defaulteaba la variante por
+  debajo. Fix: `isActive` ahora usa el mismo fallback al primer valor
+  (`selectedValue`) que ya se usaba para el label "Color: X".
 - **`ProductDescription`** — breadcrumb real "Comprar › Género › Tipo"
   derivado de `product.tags` (las colecciones smart de Shopify se arman
   con reglas de tag por género) + `MEGA_MENU`; corazón de favoritos
   inline junto al título (`HeartButton` con `variant="inline"`, sin romper
   su uso `variant="overlay"` en las tarjetas); precio como texto plano
-  `MX$1,234`; `CompleteTheLook` (cross-sell real, no inventado); nota de
-  cuotas.
+  `MX$1,234`; `CompleteTheLook` (cross-sell real, no inventado). **La nota
+  de cuotas/MSI se eliminó** (julio 2026) — no hay proveedor real de
+  MSI/BNPL integrado, se prefirió quitarla en vez de mantener un cálculo
+  de referencia sin proveedor.
 - **`ProductInfoAccordion`** — 4 secciones expandibles con el patrón
   `grid-rows-[0fr]`→`[1fr]` (altura animable sin medir con JS ni usar
-  `<details>` nativo).
-- **`FitClimateRow`** (en `page.tsx`, full-width) — ver heurística arriba.
+  `<details>` nativo). Vive en `col-start-1 row-start-2` en desktop
+  (debajo de la galería) y en su posición natural del `flex-col` en
+  mobile (después de `ProductDescription`, antes de `FitClimateRow`).
+- **`FitClimateRow`** (en `page.tsx`) — ver heurística arriba. **Ya no es
+  full-width debajo de todo el grid** (julio 2026): en desktop vive junto
+  al acordeón (`col-start-2 row-start-2`) como dos tarjetas con borde
+  (`lg:rounded-lg lg:border`, apiladas verticalmente en la columna de
+  400px); en mobile sigue siendo la fila de 2 columnas original, ahora
+  como su propio ítem del `flex-col` (ya no anidado dentro del mismo div
+  que el acordeón — así el espaciado lo da el `gap` del contenedor, sin
+  doble padding).
+- **`InfoBadge`** — acepta `align?: "left" | "right"` (default `"left"`)
+  para elegir hacia qué lado se ancla el popover (`left-0`/`right-0`).
+  Se agregó porque en `FitClimateRow` el badge de "Clima" (tarjeta de la
+  derecha, pegada al borde de pantalla en mobile) se salía de la pantalla
+  con el ancla fija a la izquierda — `FitClimateRow` pasa `align="left"`
+  al de Ajuste y `align="right"` al de Clima.
 - **`OutfitGrid`** — foto grande del outfit (color del producto que se
   está viendo) + grid de hasta 6 piezas recomendadas, cada una con un
   hotspot (punto blanco) que al hover revela tarjeta flotante: título,
@@ -354,8 +407,25 @@ no es lo mismo que el sort `BEST_SELLING` real de las colecciones).
   en vez de crear una tercera versión de tarjeta. Vive **fuera** del
   `max-w-screen-2xl` de la página — ese wrapper duplicaría el límite de
   ancho que el propio breakout grid ya resuelve.
-- **`components/cart/add-to-cart.tsx`** — botón rosa Ago (`#b48b8c`), copy
-  en español ("Añadir al carrito"/"Selecciona una opción"/"Agotado").
+- **`components/cart/add-to-cart.tsx`** — botón negro (`bg-black`, antes
+  rosa `#b48b8c`, julio 2026), copy en español ("Añadir al carrito"/
+  "Selecciona una opción"/"Agotado"). **Bug corregido (julio 2026):** la
+  variante seleccionada solo se resolvía si la URL traía
+  `?color=X&talla=Y` explícitos — entrando desde un carrusel/
+  recomendación (sin tocar los selectores) esos params no existían,
+  ninguna variante calzaba, y el botón quedaba deshabilitado en
+  "Selecciona una opción" aunque `VariantSelector` mostrara visualmente
+  una talla/color activo. Fix: `AddToCart` arma el mismo default por
+  opción que ya usa `VariantSelector` (`searchParams.get(opción) ??
+  option.values[0]` — la talla más chica y el primer color, según el
+  orden real de Shopify) y busca la variante que calce con esos defaults;
+  si esa combinación no fuera una variante válida, cae a la primera
+  variante disponible para venta.
+- El botón de "Añadir al carrito" en mobile vive en `MobileNavBar`
+  (`components/layout/navbar/mobile-nav-bar.tsx`) vía
+  `createPortal` hacia `#mobile-add-to-cart-portal` — ver
+  `docs/navbar.md` para el detalle del crossfade con el menú (☰) en la
+  página de producto.
 - **`components/prose.tsx`** — sin clases `dark:` (también usado en
   `app/[page]/page.tsx`, páginas legales/CMS).
 

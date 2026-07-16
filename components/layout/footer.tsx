@@ -57,11 +57,18 @@ export default async function Footer() {
 
   return (
     <footer className="mt-auto border-t border-neutral-200 bg-white text-black">
-      <div className="mx-auto flex max-w-screen-2xl flex-col gap-6 px-4 py-16 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <p className="text-2xl font-bold leading-tight tracking-tight text-black md:text-4xl">
+      <div className="mx-auto flex max-w-screen-2xl flex-row items-center justify-between gap-4 px-4 py-8 lg:gap-6 lg:px-8 lg:py-16">
+        <p className="min-w-0 flex-1 text-lg font-bold leading-tight tracking-tight text-black md:text-4xl">
           Feel strong. Live confident.
         </p>
-        <FillButton href="/nosotros">Conócenos</FillButton>
+        <div className="flex-none md:hidden">
+          <FillButton href="/nosotros" size="sm">
+            Conócenos
+          </FillButton>
+        </div>
+        <div className="hidden flex-none md:block">
+          <FillButton href="/nosotros">Conócenos</FillButton>
+        </div>
       </div>
 
       <div className="border-t border-neutral-200">

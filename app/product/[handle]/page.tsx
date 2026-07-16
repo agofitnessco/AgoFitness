@@ -100,30 +100,36 @@ export default async function ProductPage(props: {
         }}
       />
       <RecordRecentlyViewed product={product} />
-      <div className="w-full px-4 py-8 lg:px-8 lg:py-12">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-16">
-          <div className="w-full">
+      <div className="w-full px-4 pt-8 lg:px-8 lg:pt-12">
+        <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-16">
+          <div className="w-full lg:col-start-1 lg:row-start-1">
             <Suspense
               fallback={
-                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-neutral-100" />
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-neutral-100 lg:aspect-[16/10]" />
               }
             >
               <Gallery
-                images={product.images.slice(0, 5).map((image: Image) => ({
+                images={product.images.slice(0, 7).map((image: Image) => ({
                   src: image.url,
                   altText: image.altText,
                 }))}
                 colorSwatches={colorSwatches}
               />
             </Suspense>
-            <ProductInfoAccordion />
-            <FitClimateRow productType={product.productType} />
           </div>
 
-          <div className="w-full lg:pt-4">
+          <div className="w-full lg:col-start-2 lg:row-start-1 lg:pt-4">
             <Suspense fallback={null}>
               <ProductDescription product={product} completeWith={completeWith} />
             </Suspense>
+          </div>
+
+          <div className="w-full lg:col-start-1 lg:row-start-2">
+            <ProductInfoAccordion />
+          </div>
+
+          <div className="w-full lg:col-start-2 lg:row-start-2">
+            <FitClimateRow productType={product.productType} />
           </div>
         </div>
       </div>
@@ -142,13 +148,13 @@ function FitClimateRow({ productType }: { productType: string }) {
     "Esta clasificación es una estimación por tipo de prenda, no una medición individual de esta pieza.";
 
   return (
-    <div className="grid grid-cols-2 gap-6 pt-8">
-      <div className="flex items-center gap-3">
+    <div className="grid grid-cols-2 gap-6 lg:grid-cols-1 lg:gap-3">
+      <div className="flex items-center gap-3 lg:rounded-lg lg:border lg:border-neutral-200 lg:p-4">
         <ArrowsRightLeftIcon className="h-6 w-6 flex-none text-neutral-400" />
         <div>
           <p className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-neutral-500 uppercase">
             Ajuste{" "}
-            <InfoBadge>
+            <InfoBadge align="left">
               <p>Ajustado: se ciñe al cuerpo.</p>
               <p className="mt-2">Holgado: corte amplio y cómodo.</p>
               <p className="mt-2">Estándar: ni ceñido ni amplio.</p>
@@ -160,12 +166,12 @@ function FitClimateRow({ productType }: { productType: string }) {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 lg:rounded-lg lg:border lg:border-neutral-200 lg:p-4">
         <SunIcon className="h-6 w-6 flex-none text-neutral-400" />
         <div>
           <p className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-neutral-500 uppercase">
             Clima{" "}
-            <InfoBadge>
+            <InfoBadge align="right">
               <p>Cálido: pensada para clima templado-caluroso.</p>
               <p className="mt-2">Frío: pensada para clima frío.</p>
               <p className="mt-2">Templado: temperaturas intermedias.</p>

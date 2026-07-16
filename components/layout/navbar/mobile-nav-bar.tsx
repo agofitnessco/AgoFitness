@@ -54,6 +54,48 @@ export default function MobileNavBar({
   }, []);
 
   const isPanelOpen = activePanel !== null;
+  const isProductPage = pathname.startsWith("/product/");
+  // En la página de producto, el botón de Añadir al carrito ocupa el
+  // lugar de la fila de íconos — al abrir el menú (☰), se hace crossfade
+  // hacia la fila normal (buscar/favoritos/carrito/cuenta) en vez de que
+  // ambos convivan encimados. Se usa opacidad apilada (no unmount) para
+  // que el nodo #mobile-add-to-cart-portal nunca se desmonte: el portal
+  // de AddToCart lo agarra una sola vez al montar.
+  const showAddToCart = isProductPage && !isPanelOpen;
+
+  const icons = (
+    <>
+      <button
+        type="button"
+        aria-label="Buscar"
+        onClick={() =>
+          setActivePanel((p) => (p === "search" ? null : "search"))
+        }
+        className={clsx(
+          "flex h-11 w-11 items-center justify-center transition-colors",
+          transparent && !isPanelOpen ? "text-white" : "text-black",
+          activePanel === "search" && "opacity-60",
+        )}
+      >
+        <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2} />
+      </button>
+
+      <NavFavorites transparent={transparent && !isPanelOpen} />
+      <CartModal transparent={transparent && !isPanelOpen} />
+
+      <Link
+        href="/cuenta"
+        prefetch={true}
+        aria-label="Mi cuenta"
+        className={clsx(
+          "flex h-11 w-11 items-center justify-center transition-colors",
+          transparent && !isPanelOpen ? "text-white" : "text-black",
+        )}
+      >
+        <UserIcon className="h-6 w-6" strokeWidth={2} />
+      </Link>
+    </>
+  );
 
   return (
     <div className="md:hidden">
@@ -69,40 +111,32 @@ export default function MobileNavBar({
           className="mx-auto flex max-w-screen-2xl items-center px-2 pt-3"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.6rem)" }}
         >
-          <div className={clsx("flex flex-1 items-center justify-around", pathname.startsWith("/product/") && "hidden")}>
-          <button
-            type="button"
-            aria-label="Buscar"
-            onClick={() =>
-              setActivePanel((p) => (p === "search" ? null : "search"))
-            }
-            className={clsx(
-              "flex h-11 w-11 items-center justify-center transition-colors",
-              transparent && !isPanelOpen ? "text-white" : "text-black",
-              activePanel === "search" && "opacity-60",
-            )}
-          >
-            <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2} />
-          </button>
-
-          <NavFavorites transparent={transparent && !isPanelOpen} />
-          <CartModal transparent={transparent && !isPanelOpen} />
-
-          <Link
-            href="/cuenta"
-            prefetch={true}
-            aria-label="Mi cuenta"
-            className={clsx(
-              "flex h-11 w-11 items-center justify-center transition-colors",
-              transparent && !isPanelOpen ? "text-white" : "text-black",
-            )}
-          >
-            <UserIcon className="h-6 w-6" strokeWidth={2} />
-          </Link>
-          </div>
-
-          {pathname.startsWith("/product/") && (
-            <div id="mobile-add-to-cart-portal" className="flex flex-1 items-center pr-2" />
+          {isProductPage ? (
+            <div className="relative h-12 flex-1">
+              <div
+                className={clsx(
+                  "absolute inset-0 flex items-center justify-around transition-opacity duration-300",
+                  showAddToCart
+                    ? "pointer-events-none opacity-0"
+                    : "opacity-100",
+                )}
+              >
+                {icons}
+              </div>
+              <div
+                id="mobile-add-to-cart-portal"
+                className={clsx(
+                  "absolute inset-0 flex items-center pr-2 transition-opacity duration-300",
+                  showAddToCart
+                    ? "opacity-100"
+                    : "pointer-events-none opacity-0",
+                )}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-1 items-center justify-around">
+              {icons}
+            </div>
           )}
 
           <button

@@ -15,6 +15,13 @@ el patrón de layout.
 1. **CTA de marca** — fila con el slogan "Feel strong. Live confident." a
    la izquierda y el botón `FillButton` "Conócenos" a la derecha (no es un
    link inline con texto — es un botón real, ver sección FillButton abajo).
+   **Slim en mobile (julio 2026):** antes se apilaba en columna
+   (texto arriba, botón abajo, `py-16`) — ahora siempre es una fila
+   (`flex-row items-center justify-between`), con `py-8` en mobile
+   (`lg:py-16` en desktop), texto `text-lg` en mobile (`md:text-4xl` en
+   desktop) y el botón en `size="sm"` en mobile vs. tamaño normal en
+   desktop — mucho más delgado sin perder el CTA. Ver el bug de
+   visibilidad del botón responsivo abajo.
 2. **Newsletter + columnas** (`grid-cols-[1.5fr_1.6fr]`, con las 3 columnas
    agrupadas en un sub-grid `grid-cols-3 gap-6` dentro de la segunda mitad
    — así el newsletter respira con más espacio y las columnas de links
@@ -52,6 +59,30 @@ después en el DOM (el wrapper de la flecha, que contiene el círculo), sin
 importar que ambos digan "20". **Fix:** el texto quedó en `z-30`
 (estrictamente mayor que el `z-20` del wrapper de la flecha) — así gana
 siempre el orden de pintado, sin depender del orden en el DOM.
+
+## `FillButton` — bug de visibilidad responsiva (julio 2026)
+
+Al hacer el CTA de marca "slim" en mobile (ver arriba), el primer intento
+fue renderizar dos `<FillButton>` y pasarles `className="md:hidden"` /
+`className="hidden md:inline-flex"` directamente. **Resultado: los dos
+botones se veían a la vez en mobile**, uno encima del otro.
+
+**Causa:** `fill-button.tsx` ya trae `inline-flex` hardcoded en su propio
+`baseClass` (sin prefijo de breakpoint). Un `className` externo con
+`hidden`/`md:hidden` cae en la **misma especificidad** CSS (ambas son
+clases de una sola declaración) — quién gana no depende del orden en el
+atributo `class` del HTML, sino del orden en que Tailwind emitió esas
+reglas en la hoja de estilos compilada, que es esencialmente impredecible
+al mezclar clases de un componente compartido con overrides externos.
+
+**Fix:** en vez de pelear con las clases internas de `FillButton`, cada
+instancia se envuelve en su propio `<div>` que controla la visibilidad
+(`<div className="md:hidden"><FillButton .../></div>` /
+`<div className="hidden md:block">...`) — el mismo patrón que ya usaba el
+CTA del Hero para su versión responsiva de `FillButton` (`size="sm"` en
+mobile, `-ml-5`; `size="md"` en desktop, `-ml-9`). **Regla general:**
+nunca pasar `hidden`/`block`/`flex` por `className` a un componente que ya
+trae su propio `display` hardcoded — envolver en un `<div>` en su lugar.
 
 ## Footer pegado al fondo (`mt-auto`)
 

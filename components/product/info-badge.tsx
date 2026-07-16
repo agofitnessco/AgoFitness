@@ -1,10 +1,17 @@
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import { useState } from "react";
 import type { ReactNode } from "react";
 
-export function InfoBadge({ children }: { children: ReactNode }) {
+export function InfoBadge({
+  children,
+  align = "left",
+}: {
+  children: ReactNode;
+  align?: "left" | "right";
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -19,7 +26,12 @@ export function InfoBadge({ children }: { children: ReactNode }) {
         i
       </button>
       {open ? (
-        <div className="absolute top-6 left-0 z-20 w-72 max-w-[80vw] rounded-lg bg-black p-5 text-left text-sm leading-relaxed normal-case text-white shadow-xl">
+        <div
+          className={clsx(
+            "absolute top-6 z-20 w-72 max-w-[85vw] rounded-lg bg-black p-5 text-left text-sm leading-relaxed normal-case text-white shadow-xl",
+            align === "right" ? "right-0" : "left-0",
+          )}
+        >
           <button
             type="button"
             onClick={() => setOpen(false)}
