@@ -96,11 +96,12 @@ ya llena o excede el viewport.
 
 ## Pendiente
 
-- `/nosotros`, `/contacto`, `/privacidad`, `/terminos` **no existen como
-  páginas todavía** — dan 404. Next.js Commerce trae soporte para páginas
-  de Shopify vía `app/[page]/page.tsx`, así que se pueden crear como
-  páginas normales en el Admin de Shopify (Online Store → Pages) y
-  aparecerán automáticamente en esa ruta.
+- `/contacto`, `/privacidad`, `/terminos` y `/soporte` **ya existen**
+  (16 julio 2026) como páginas propias con el diseño real del sitio — no
+  se usó el catch-all `app/[page]/page.tsx` de Shopify Admin. Ver
+  `CLAUDE.md` para el detalle de cada una.
+- `/nosotros` **sigue sin existir** — el botón "Conócenos" del CTA de
+  marca y el link de la columna Empresa todavía dan 404.
 - Links de redes sociales: **Instagram ya es real**
   (`instagram.com/agofitnessco`). TikTok y Facebook siguen en placeholder
   (`#`) — reemplazar cuando el cliente pase esas URLs.

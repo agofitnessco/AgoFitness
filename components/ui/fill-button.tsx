@@ -11,8 +11,13 @@ type FillButtonProps = {
   variant?: "dark" | "light";
   className?: string;
 } & (
-  | { href: string; type?: never; onClick?: never }
-  | { href?: undefined; type: "submit" | "button"; onClick?: () => void }
+  | { href: string; type?: never; onClick?: never; disabled?: never }
+  | {
+      href?: undefined;
+      type: "submit" | "button";
+      onClick?: () => void;
+      disabled?: boolean;
+    }
 );
 
 const SIZE_CLASSES = {
@@ -80,6 +85,7 @@ export default function FillButton({
 
   const baseClass = clsx(
     "group relative inline-flex flex-none items-center overflow-hidden rounded-lg transition-transform duration-150 active:scale-95",
+    "disabled:pointer-events-none disabled:opacity-60",
     SIZE_CLASSES[size],
     className
   );
@@ -93,7 +99,12 @@ export default function FillButton({
   }
 
   return (
-    <button type={rest.type} onClick={rest.onClick} className={baseClass}>
+    <button
+      type={rest.type}
+      onClick={rest.onClick}
+      disabled={rest.disabled}
+      className={baseClass}
+    >
       {inner}
     </button>
   );

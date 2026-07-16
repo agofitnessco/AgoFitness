@@ -92,6 +92,13 @@ export default function NavbarShell({
               >
                 Ayuda
               </Link>
+              <Link
+                href="/contacto"
+                prefetch={true}
+                className="hover:opacity-80"
+              >
+                Contacto
+              </Link>
               <Link href="/cuenta" prefetch={true} className="hover:opacity-80">
                 Mi cuenta
               </Link>

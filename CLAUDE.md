@@ -333,3 +333,75 @@ no este archivo.
   de solo lectura en el perfil, por qué recuperar contraseña siempre
   devuelve el mismo mensaje sin importar si el correo existe, y el fix al
   foco gris feo que traían los tabs por el `ring` global del sitio).
+- **`/terminos` y `/privacidad` construidas (16 julio 2026)** — antes
+  daban 404 (el catch-all `app/[page]/page.tsx` solo sirve páginas creadas
+  en el Admin de Shopify, y no existían). Se optó por páginas propias con
+  el diseño real del sitio en vez de contenido vía Shopify Admin.
+  Contenido honesto: donde falta un dato real del cliente (razón social,
+  domicilio fiscal, paquetería específica, plazos exactos de devolución)
+  se marca explícito con una caja punteada "Pendiente: …" en vez de
+  inventarlo — mismo criterio que ya se sigue en el resto del sitio.
+  **Formato (iterado a pedido del cliente, referencia on.com):** primer
+  intento fue con índice/tabla de contenido + secciones en prosa; se
+  descartó por un acordeón — `components/legal-accordion.tsx`
+  (`LegalAccordion`, reutilizable, mismo patrón grid-rows +/× que
+  `product-info-accordion.tsx`), un panel abierto a la vez, sin índice.
+- **`/contacto` construida (16 julio 2026, referencia on.com)** — hero +
+  grid 2 col: `components/contact-form.tsx` (formulario con selects en
+  cascada motivo → submotivo, mostrando nombre/correo/mensaje solo una vez
+  elegido el motivo) y `components/contact-faq.tsx` (buscador +
+  `LegalAccordion` con `numbered={false}`). Envío real vía **Resend**
+  (`app/contacto/actions.ts`, server action con `useActionState`, mismo
+  patrón que `app/cuenta/actions.ts`) — variables `RESEND_API_KEY`,
+  `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL` en `.env.local`/`.env.example`.
+  Si `RESEND_API_KEY` no está configurada, el formulario no falla en
+  silencio: muestra un error real pidiendo escribir a hola@agofitness.com
+  mientras tanto. `CONTACT_FROM_EMAIL` quedó con un remitente placeholder
+  (`contacto@agofitness.com`) — **confirmar que sea el remitente
+  verificado real en Resend antes de producción**.
+- **`FillButton` ganó soporte de `disabled`** (para el submit de
+  `/contacto` mientras Resend procesa el envío, evitar doble envío) —
+  agrega `disabled:pointer-events-none disabled:opacity-60` a
+  `components/ui/fill-button.tsx`; no aplica a la variante `href` (los
+  links no se deshabilitan).
+- **Links de Contacto agregados al navbar (16 julio 2026):** junto a
+  "Ayuda" en la barra superior desktop (`navbar-shell.tsx`) y debajo de
+  "Centro de ayuda" en el menú móvil (`mobile-menu-panel.tsx`).
+- **Bug corregido — selects del formulario de contacto en mobile (16 julio
+  2026):** el label flotante (`Cuéntanos el motivo de tu consulta`, etc.)
+  no tenía límite de ancho ni `truncate`, así que en pantallas angostas
+  podía envolver a 2 líneas y encimarse con el valor seleccionado o con el
+  ícono de chevron. Fix en `components/contact-form.tsx`: label con
+  `left-4 right-9 truncate` (ancho acotado, una sola línea con ellipsis) y
+  el `<select>` con `pr-9` (antes `px-4` simétrico) para no correr texto
+  bajo el chevron. De paso, tanto los `<select>` como los `<input>`/
+  `<textarea>` del formulario pasaron de `text-sm` a `text-base` — con
+  menos de 16px Safari iOS hace zoom automático al enfocar un campo, un
+  bug real de mobile, no solo estético.
+- **Bug corregido — pill Entrar/Crear cuenta de `/cuenta` en mobile (16
+  julio 2026):** con `px-6 text-sm uppercase tracking-wide` fijo en ambas
+  mitades del pill (`grid-cols-2`), "CREAR CUENTA" no cabía en una línea
+  en pantallas angostas y rompía el pill. Fix en
+  `components/account/auth-panel.tsx`: `text-[11px] px-2` en mobile,
+  `sm:text-sm sm:px-6` en desktop, más `whitespace-nowrap` y
+  `flex items-center justify-center` para centrar de verdad en vez de
+  depender solo del padding.
+- **`/soporte` construida (16 julio 2026, referencia on.com/ALO)** — antes
+  el link "Centro de ayuda"/"Ayuda" del footer y navbar apuntaba a un
+  404. Estructura: hero → grid "Temas" (`components/help-center.tsx`,
+  tarjetas que al hacer clic saltan y abren la sección correspondiente del
+  acordeón de abajo vía `scrollIntoView` + estado `openId` compartido, más
+  una tarjeta "Contacto directo" que enlaza de verdad a `/contacto`) →
+  buscador con pills sugeridas que filtran el FAQ por texto/keywords → el
+  mismo acordeón `grid-rows` +/× que `product-info-accordion.tsx` /
+  `legal-accordion.tsx`, pero con control de apertura externo (no se
+  reutilizó `LegalAccordion` porque este necesita `openId` accesible desde
+  las tarjetas de arriba) → `components/help-contact-cards.tsx` con los
+  **3 canales reales** (correo, formulario de `/contacto`, Instagram). A
+  diferencia de la referencia de on.com/ALO (que tiene chat en vivo,
+  llamada telefónica y SMS), **no se inventaron esos canales** — Ago
+  Fitness no los tiene, así que no aparecen.
+- **Eyebrow "Ago Fitness" quitado del hero de `/soporte`, `/contacto`,
+  `/terminos` y `/privacidad`** (16 julio 2026, a pedido del cliente) — el
+  `<h1>` de las 4 páginas ahora es el primer elemento de la sección, sin
+  el `<p className="... uppercase">Ago Fitness</p>` que iba arriba.

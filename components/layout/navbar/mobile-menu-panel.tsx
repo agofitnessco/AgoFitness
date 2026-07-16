@@ -12,6 +12,7 @@ const UTILITY_LINKS = [
   { title: "Favoritos", path: "/favoritos" },
   { title: "Guía de tallas", path: "/guia-de-tallas" },
   { title: "Centro de ayuda", path: "/soporte" },
+  { title: "Contacto", path: "/contacto" },
   { title: "Mi cuenta", path: "/cuenta" },
 ];
 

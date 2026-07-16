@@ -156,7 +156,7 @@ export default function AuthPanel() {
             type="button"
             onClick={() => setTab(key)}
             className={clsx(
-              "relative z-10 rounded-full px-6 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:ring-black/25 focus-visible:ring-offset-0",
+              "relative z-10 flex items-center justify-center whitespace-nowrap rounded-full px-2 py-2.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:ring-black/25 focus-visible:ring-offset-0 sm:px-6 sm:text-sm",
               tab === key ? "text-white" : "text-neutral-500 hover:text-black",
             )}
           >
