@@ -117,6 +117,7 @@ export default async function ProductPage(props: {
               />
             </Suspense>
             <ProductInfoAccordion />
+            <FitClimateRow productType={product.productType} />
           </div>
 
           <div className="w-full lg:pt-4">
@@ -125,7 +126,6 @@ export default async function ProductPage(props: {
             </Suspense>
           </div>
         </div>
-        <FitClimateRow productType={product.productType} />
       </div>
       <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
         <OutfitGrid heroProduct={product} pieces={otherRecommendations} />
@@ -142,7 +142,7 @@ function FitClimateRow({ productType }: { productType: string }) {
     "Esta clasificación es una estimación por tipo de prenda, no una medición individual de esta pieza.";
 
   return (
-    <div className="mt-10 grid grid-cols-1 gap-6 border-t border-neutral-200 pt-8 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-6 pt-8">
       <div className="flex items-center gap-3">
         <ArrowsRightLeftIcon className="h-6 w-6 flex-none text-neutral-400" />
         <div>
