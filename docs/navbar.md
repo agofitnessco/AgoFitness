@@ -28,7 +28,7 @@ en vez de pedir uno nuevo.
 ## Buscador — morph in-place con GSAP Flip
 
 **Objetivo de diseño:** al abrir la búsqueda, la píldora pequeña ("Buscar")
-debía crecer *en su propio lugar* hasta ocupar el espacio de
+debía crecer _en su propio lugar_ hasta ocupar el espacio de
 Mujer/Hombre/Niños (que se ocultan) — no un dropdown que empuja contenido
 hacia abajo. Esto es exactamente lo que resuelve el plugin **Flip** de GSAP
 (mide el rect antes/después de un cambio de layout y anima la transición).
@@ -117,7 +117,7 @@ dos layouts tan distintos, texto blanco↔negro y flex-row↔stacked):
    y duplica la animación de chips que ya hace el efecto de apertura del
    panel), hace la **entrada**: selecciona `[data-chip], [data-panel-item]`
    dentro del contenedor y las anima con `fromTo({opacity:0,y:12},
-   {opacity:1,y:0}, stagger:0.05, power2.out)` — mismo lenguaje de motion
+{opacity:1,y:0}, stagger:0.05, power2.out)` — mismo lenguaje de motion
    que el resto del sitio (nada de scale/blur).
 
 `data-panel-item` se puso en: el título "Búsquedas sugeridas", el `<li>` de
@@ -188,6 +188,7 @@ vuelve sólido blanco al hacer scroll — patrón estándar de marcas premium
 no hay hero de imagen debajo, así que el navbar se queda sólido siempre.
 
 **Archivos:**
+
 - `components/layout/navbar/navbar-shell.tsx` (nuevo, client) — reemplaza
   el wrapper que antes vivía directo en `index.tsx`. Decide `transparent`
   con dos condiciones: `usePathname() === "/"` (solo home) y `scrollY <= 40`
@@ -229,7 +230,7 @@ búsqueda, mega menu, transparente-sobre-hero):
 1. **Indicador de link activo:** el subrayado bajo Mujer/Hombre/Niños
    (`nav-main.tsx`) antes solo aparecía en `mouseenter` (`activeCategory`).
    Ahora, cuando no hay hover, también se muestra si `usePathname() ===
-   item.path` — así el usuario ve en qué sección está sin necesidad de
+item.path` — así el usuario ve en qué sección está sin necesidad de
    pasar el mouse. Comparación exacta de ruta (no `startsWith`): las
    sub-colecciones (`tops`, `leggings`, etc.) son handles independientes,
    no rutas anidadas bajo `/search/mujer`, así que no hay forma honesta de
@@ -317,7 +318,7 @@ eliminaron — sustituidos por 3 archivos nuevos, todos dentro de
   Menú/Cerrar. Recibe la misma prop `transparent` que gobierna el navbar
   desktop en `nav-main.tsx` (se le pasa desde ahí, no desde
   `navbar-shell.tsx` directo). Estado `activePanel: "search" | "menu" |
-  null` controla cuál de los dos paneles está abierto — el quinto botón
+null` controla cuál de los dos paneles está abierto — el quinto botón
   alterna `Bars3Icon`↔`XMarkIcon` según `activePanel !== null` y, si hay
   cualquier panel abierto, cerrarlo con un solo tap (igual que On: el
   ícono de menú es el "cerrar universal", no solo el que abre el menú).
@@ -389,6 +390,38 @@ manteniendo solo el botón ☰ a la derecha.
   con `inset-0` (que heredan la altura del padre). Resultado: el botón de
   "Añadir al carrito" quedaba invisible/sin poder tocarse. Fix: `h-12`
   explícito en el wrapper.
+
+### `CartModal` montado dos veces — bug del "doble carrito" (julio 2026)
+
+**Síntoma reportado:** al agregar un producto al carrito, el panel se abría
+dos veces encimado — había que darle cerrar dos veces para que
+desapareciera de verdad.
+
+**Causa:** `CartModal` (`components/cart/modal.tsx`) se monta dos veces —
+una en `nav-main.tsx:478` (desktop) y otra en `mobile-nav-bar.tsx:84`
+(mobile) — pero **ambas siempre están en el DOM**, las clases `hidden`/
+`md:hidden` solo ocultan visualmente el trigger, no desmontan el
+componente. Cada instancia tenía su propio `useState(false)` para
+`isOpen`, y cada una tenía su propio `useEffect` que auto-abre el carrito
+cuando `cart.totalQuantity` sube (ambas leen el mismo `cart` del
+`CartContext`, así que ambas veían el mismo incremento). Resultado: al
+agregar un producto, **las dos** instancias ponían su `isOpen` en `true`
+por separado, y cada una renderizaba su propio `<Dialog>` de Headless UI
+(que hace portal a `document.body`, así que ninguna quedaba oculta por el
+wrapper `hidden`) — dos overlays apilados, cerrar uno dejaba el otro
+abierto.
+
+**Fix:**
+
+1. `isCartOpen`/`openCart`/`closeCart` se subieron a `CartContext`
+   (`components/cart/cart-context.tsx`) — un solo estado compartido en vez
+   de un `useState` por instancia.
+2. `modal.tsx` se partió en dos: `CartModal` (default export, solo el
+   botón trigger — se sigue montando dos veces, una por navbar, sin
+   cambios en sus usos) y `CartPanel` (named export, el `<Dialog>` real).
+   `CartPanel` se monta **una sola vez**, en `navbar-shell.tsx` (el padre
+   común de `NavMain` y `MobileNavBar`) — así solo existe un panel en el
+   DOM sin importar cuántos botones lo abran.
 
 ## Pendientes conocidos
 

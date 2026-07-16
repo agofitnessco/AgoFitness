@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { Menu } from "lib/shopify/types";
+import { CartPanel } from "components/cart/modal";
 import NavMain from "./nav-main";
 import MobileNavBar from "./mobile-nav-bar";
 
@@ -65,38 +66,43 @@ export default function NavbarShell({
 
   return (
     <>
-    <div
-      className={clsx(
-        "left-0 right-0 top-0 z-40",
-        transparent ? "absolute" : "absolute md:sticky",
-      )}
-    >
       <div
         className={clsx(
-          "transition-colors duration-500 hidden md:block",
-          transparent ? "bg-transparent" : "bg-[#b48b8c]",
+          "left-0 right-0 top-0 z-40",
+          transparent ? "absolute" : "absolute md:sticky",
         )}
       >
-        <div className="mx-auto flex h-9 max-w-screen-2xl items-center justify-between gap-6 px-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white lg:px-8">
-          <div className="hidden overflow-hidden sm:block">
-            <span key={messageIndex} className="topbar-fade inline-block">
-              {TOP_BAR_MESSAGES[messageIndex]}
-            </span>
-          </div>
-          <div className="ml-auto flex items-center gap-6">
-            <Link href="/soporte" prefetch={true} className="hover:opacity-80">
-              Ayuda
-            </Link>
-            <Link href="/cuenta" prefetch={true} className="hover:opacity-80">
-              Mi cuenta
-            </Link>
+        <div
+          className={clsx(
+            "transition-colors duration-500 hidden md:block",
+            transparent ? "bg-transparent" : "bg-[#b48b8c]",
+          )}
+        >
+          <div className="mx-auto flex h-9 max-w-screen-2xl items-center justify-between gap-6 px-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white lg:px-8">
+            <div className="hidden overflow-hidden sm:block">
+              <span key={messageIndex} className="topbar-fade inline-block">
+                {TOP_BAR_MESSAGES[messageIndex]}
+              </span>
+            </div>
+            <div className="ml-auto flex items-center gap-6">
+              <Link
+                href="/soporte"
+                prefetch={true}
+                className="hover:opacity-80"
+              >
+                Ayuda
+              </Link>
+              <Link href="/cuenta" prefetch={true} className="hover:opacity-80">
+                Mi cuenta
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      <NavMain siteName={siteName} menu={menu} transparent={transparent} />
-    </div>
-    <MobileNavBar menu={menu} transparent={transparent} />
+        <NavMain siteName={siteName} menu={menu} transparent={transparent} />
+      </div>
+      <MobileNavBar menu={menu} transparent={transparent} />
+      <CartPanel />
     </>
   );
 }
