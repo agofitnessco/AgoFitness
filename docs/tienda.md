@@ -45,7 +45,7 @@ Ahora: `app/search/[collection]/page.tsx` (server) compone:
    traducido a español y reducido a 4 opciones, antes tenía "Trending" en
    inglés sin usarse en ningún lado más) y "Tipo de producto" (checkboxes con
    conteo, generados dinámicamente desde `productType` de los productos de
-   *esa* colección — no una lista hardcodeada).
+   _esa_ colección — no una lista hardcodeada).
    - Todo el estado de filtro vive en la URL (`?tipo=Top,Legging&sort=price-asc`)
      vía `useSearchParams`/`router.push` — enlazable, funciona con back/forward.
    - **Sticky (14 julio 2026):** la fila de toggle+conteo es
@@ -107,9 +107,12 @@ facets de tipo tendrían que reconsiderarse).
 
 ## Favoritos (corazón en las tarjetas + `/favoritos`)
 
-No hay cuentas de cliente en este proyecto (no hay Clerk ni ningún login),
-así que favoritos es **100% client-side, persistido en `localStorage`** —
-sin backend, sin sync entre dispositivos.
+Se construyó **antes de que existiera `/cuenta`** (ver `docs/cuenta.md`),
+por eso es **100% client-side, persistido en `localStorage`** — sin
+backend, sin sync entre dispositivos. **No se migró después de agregar
+cuentas de cliente reales** — sincronizar favoritos por cliente (vía
+metafields de Shopify, por ejemplo) queda como mejora futura, no como
+algo hecho.
 
 - **`lib/favorites.ts`** — funciones planas (`getFavorites`, `toggleFavorite`,
   `isFavorite`, `subscribeFavorites`) que leen/escriben la key
@@ -253,6 +256,7 @@ Footer
 
 `getProductRecommendations(product.id)` se pide **una sola vez** en
 `page.tsx` y se reparte:
+
 - `recommendations[0]` → "Queda bien con..." (`CompleteTheLook`, junto al
   selector de variantes).
 - `recommendations.slice(1)` (hasta 6) → `OutfitGrid` ("Ideas para
@@ -346,8 +350,8 @@ no es lo mismo que el sort `BEST_SELLING` real de las colecciones).
     desktop al agrandar las fotos en mobile — de ahí la bifurcación por
     breakpoint en vez de un único layout compartido.
   - El hex activo viene del color seleccionado en `VariantSelector` vía
-  `colorSwatches` que le pasa la página. El link "Ideas para combinar ↓"
-  hace scroll suave a `#ideas-para-combinar` (el ancla de `OutfitGrid`).
+    `colorSwatches` que le pasa la página. El link "Ideas para combinar ↓"
+    hace scroll suave a `#ideas-para-combinar` (el ancla de `OutfitGrid`).
 - **`VariantSelector`** — "Color" renderiza swatches cuadrados
   `h-14 w-14 rounded-md` pintados con `productGradient(hex)` (se ven como
   mini-foto de la prenda, no un círculo de Pantone plano); "Talla" son
@@ -417,7 +421,7 @@ no es lo mismo que el sort `BEST_SELLING` real de las colecciones).
   "Selecciona una opción" aunque `VariantSelector` mostrara visualmente
   una talla/color activo. Fix: `AddToCart` arma el mismo default por
   opción que ya usa `VariantSelector` (`searchParams.get(opción) ??
-  option.values[0]` — la talla más chica y el primer color, según el
+option.values[0]` — la talla más chica y el primer color, según el
   orden real de Shopify) y busca la variante que calce con esos defaults;
   si esa combinación no fuera una variante válida, cae a la primera
   variante disponible para venta.

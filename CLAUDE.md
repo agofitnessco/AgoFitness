@@ -23,15 +23,16 @@ cliente Ago Fitness.
 
 La documentación está dividida por tema en `docs/`:
 
-| Doc | Contenido |
-|-----|-----------|
-| [`docs/arquitectura.md`](docs/arquitectura.md) | Por qué headless, por qué Next.js Commerce, qué es Shopify vs qué es custom |
-| [`docs/shopify.md`](docs/shopify.md) | Cuenta, tienda, Storefront API, variables de entorno |
-| [`docs/stack.md`](docs/stack.md) | Stack técnico completo, estructura de carpetas |
-| [`docs/decisiones.md`](docs/decisiones.md) | Bitácora de decisiones (por qué se eligió X sobre Y) |
-| [`docs/navbar.md`](docs/navbar.md) | Cómo está armado el navbar: estructura, morph de búsqueda, mega menu |
-| [`docs/footer.md`](docs/footer.md) | Estructura del footer y links pendientes de página real |
-| [`docs/tienda.md`](docs/tienda.md) | Guía de tallas, páginas de colección (`/search/[collection]`), FilterBar, ProductCard, estado del catálogo en Shopify |
+| Doc                                            | Contenido                                                                                                                                                               |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`docs/arquitectura.md`](docs/arquitectura.md) | Por qué headless, por qué Next.js Commerce, qué es Shopify vs qué es custom                                                                                             |
+| [`docs/shopify.md`](docs/shopify.md)           | Cuenta, tienda, Storefront API, variables de entorno                                                                                                                    |
+| [`docs/stack.md`](docs/stack.md)               | Stack técnico completo, estructura de carpetas                                                                                                                          |
+| [`docs/decisiones.md`](docs/decisiones.md)     | Bitácora de decisiones (por qué se eligió X sobre Y)                                                                                                                    |
+| [`docs/navbar.md`](docs/navbar.md)             | Cómo está armado el navbar: estructura, morph de búsqueda, mega menu                                                                                                    |
+| [`docs/footer.md`](docs/footer.md)             | Estructura del footer y links pendientes de página real                                                                                                                 |
+| [`docs/tienda.md`](docs/tienda.md)             | Guía de tallas, páginas de colección (`/search/[collection]`), FilterBar, ProductCard, estado del catálogo en Shopify, galería/variantes/carrito de `/product/[handle]` |
+| [`docs/cuenta.md`](docs/cuenta.md)             | `/cuenta`: login, registro, recuperar contraseña, perfil, pedidos y direcciones — 100% custom con las mutations clásicas del Storefront API                             |
 
 **Regla:** este archivo (`CLAUDE.md`) se mantiene corto — es un índice. El detalle
 y contexto va en `docs/`. Cuando se tome una decisión nueva de arquitectura o se
@@ -134,8 +135,11 @@ no este archivo.
   real antes de que el sitio reciba tráfico de verdad.
 - **Favoritos agregados** (corazón en las 3 tarjetas de producto del sitio +
   ícono con badge en el navbar + página `/favoritos`, ver `docs/tienda.md`):
-  100% client-side vía `localStorage` — no hay cuentas de cliente en este
-  proyecto, así que no hay backend ni sync entre dispositivos. El corazón
+  100% client-side vía `localStorage` — en ese momento no había cuentas de
+  cliente en el proyecto, así que no hay backend ni sync entre
+  dispositivos. **Nota (16 julio 2026): ya existe `/cuenta` con clientes
+  reales (ver más abajo), pero favoritos no se migró** — sigue siendo
+  client-side puro. El corazón
   se pone sólido en **rosa Ago (`#b48b8c`)** cuando el producto está en
   favoritos (en las tarjetas — el ícono del navbar se quedó neutro a
   propósito, el cliente prefirió no tintarlo).
@@ -271,3 +275,61 @@ no este archivo.
   `app/icon.png`/`app/apple-icon.png` de Next, que solo soportan un
   tamaño cada uno sin `generateImageMetadata`). **Si el logo cambia,
   regenerar todo el set** — no editar cada PNG a mano.
+- **`/product/[handle]` — galería, variantes y layout responsive (16 julio 2026)** — ver `docs/tienda.md` para el detalle completo. Resumen: la
+  galería ahora es responsive por breakpoint (carrusel deslizable real en
+  mobile con scroll-snap/swipe, el díptico original intacto en desktop);
+  el layout mobile pasó de `grid` con `order-N` a `flex-col` (orden = DOM,
+  sin ambigüedad — hubo un bug real donde Ajuste/Clima aparecía antes que
+  la galería); `FitClimateRow` se movió de full-width a vivir junto al
+  acordeón en desktop; se quitó la nota de cuotas/MSI (sin proveedor
+  real); `VariantSelector` ganó microinteracciones (hover/tap scale,
+  animación al seleccionar, check en swatches) y se corrigió que
+  `isActive` no defaulteaba al primer valor sin `?color=`/`?talla=` en la
+  URL; `InfoBadge` ganó `align` para que el popover no se salga de
+  pantalla.
+- **Bug corregido — carrito sin variante default (16 julio 2026):**
+  `AddToCart` solo resolvía la variante si la URL traía
+  `?color=X&talla=Y` explícitos — entrando desde un carrusel/
+  recomendación (sin tocar los selectores) el botón quedaba deshabilitado
+  en "Selecciona una opción". Fix: mismo fallback al primer valor
+  (talla más chica, primer color) que ya usaba `VariantSelector`. Botón
+  cambiado de rosa (`#b48b8c`) a negro. Ver `docs/tienda.md`.
+- **Bug corregido — el carrito se abría doble (16 julio 2026):**
+  `CartModal` está montado dos veces (navbar desktop + barra móvil),
+  siempre en el DOM — cada instancia tenía su propio `useState` y su
+  propio efecto de auto-apertura al subir `cart.totalQuantity`, así que
+  al agregar un producto **ambas** se abrían a la vez (dos `<Dialog>`
+  apilados, había que cerrar dos veces). Fix: `isCartOpen`/`openCart`/
+  `closeCart` subieron a `CartContext` (estado compartido) y el panel se
+  separó del botón trigger (`CartPanel`, montado una sola vez en
+  `navbar-shell.tsx`). Ver `docs/navbar.md`.
+- **Barra móvil en `/product/*` — crossfade carrito↔menú (16 julio
+  2026):** al abrir el menú (☰) en la página de producto, el botón
+  "Añadir al carrito" ahora se desvanece y aparece la fila de íconos
+  normal, en vez de convivir encimados. Ver `docs/navbar.md`.
+- **`/search/mujer` y `/search/hombre` ya existen en Shopify** (verificado
+  16 julio 2026 contra el Storefront API real — 20 y 3 productos
+  respectivamente). La nota vieja de "dan 404" en `docs/navbar.md` estaba
+  desactualizada, se corrigió. **`/search/ninos` sigue sin colección**
+  (confirmado con el cliente: sin catálogo de niños por ahora).
+- **Footer — CTA superior más delgado en mobile (16 julio 2026):** pasó de
+  apilado en columna (`py-16`) a una sola fila compacta (`py-8`, texto y
+  botón más chicos en mobile). Se encontró y corrigió un bug de
+  visibilidad: `FillButton` ya trae `inline-flex` hardcoded en su propio
+  `baseClass`, así que pasarle `className="hidden"`/`"md:hidden"` desde
+  afuera colisiona en especificidad y puede mostrar ambas versiones a la
+  vez — la regla ahora es envolver cada instancia en su propio `<div>` de
+  visibilidad en vez de pasarle `hidden`/`block`/`flex` por `className`.
+  Ver `docs/footer.md`.
+- **`/cuenta` construida desde cero (16 julio 2026)** — login, registro,
+  recuperar contraseña, editar perfil, historial de pedidos y direcciones
+  guardadas (con selector de país), 100% custom con la estética del
+  sitio. Antes de construir se confirmó por introspección + prueba de
+  login contra el Storefront API real que Ago Fitness todavía usa el
+  sistema **clásico** de cuentas de cliente de Shopify (no las "New
+  Customer Accounts" OAuth-only) — si eso cambia algún día, este flujo
+  completo dejaría de funcionar y habría que rehacerlo. Ver
+  `docs/cuenta.md` para el detalle completo (incluye por qué el correo es
+  de solo lectura en el perfil, por qué recuperar contraseña siempre
+  devuelve el mismo mensaje sin importar si el correo existe, y el fix al
+  foco gris feo que traían los tabs por el `ring` global del sitio).

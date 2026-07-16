@@ -253,8 +253,9 @@ item.path` — así el usuario ve en qué sección está sin necesidad de
    (`hidden sm:block`) para no saturar la barra angosta. Array
    `TOP_BAR_MESSAGES` en `navbar-shell.tsx` — actualizar copy ahí.
 4. **"Vistos recientemente" en el panel de búsqueda:** mismo patrón
-   100%-client-side de `lib/favorites.ts` (sin cuentas de cliente, sin
-   backend), nuevo módulo `lib/recently-viewed.ts` +
+   100%-client-side de `lib/favorites.ts` (construido antes de que
+   existiera `/cuenta`, ver `docs/cuenta.md` — no se migró a backend
+   después), nuevo módulo `lib/recently-viewed.ts` +
    `lib/use-recently-viewed.ts` (`useSyncExternalStore`, cache en memoria
    para evitar el loop de "getSnapshot debe estar cacheado"). Un
    componente invisible (`components/product/record-recently-viewed.tsx`,
