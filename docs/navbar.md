@@ -425,8 +425,11 @@ abierto.
 
 ## Pendientes conocidos
 
-- Los links de categoría (`/search/mujer`, `/search/hombre`, `/search/ninos`)
-  dan 404 hasta que existan esas colecciones en Shopify.
+- **`/search/mujer` y `/search/hombre` ya existen en Shopify** (confirmado
+  julio 2026 — 20 y 3 productos reales respectivamente). **`/search/ninos`
+  sigue sin colección creada** (404, confirmado por el cliente: "de momento
+  no tenemos" catálogo de niños) — la ruta ya soporta el handle sin tocar
+  código, solo falta crear la colección en el Admin cuando exista catálogo.
 - El menú móvil combina `CATEGORY_LINKS` (hardcoded) + el menú real de
   Shopify (`getMenu`, vacío por ahora) — cuando se cree el menú en el Admin,
   van a aparecer ambos; decidir si eliminar el hardcoded en ese momento.
