@@ -8,6 +8,16 @@ export const metadata: Metadata = {
   title: "Contáctanos",
   description:
     "Envíanos tus preguntas sobre pedidos, tallas, devoluciones o cualquier otra cosa — Ago Fitness te responde en menos de 24 horas.",
+  alternates: {
+    canonical: "/contacto",
+  },
+  openGraph: {
+    title: "Contáctanos",
+    description:
+      "Envíanos tus preguntas sobre pedidos, tallas, devoluciones o cualquier otra cosa — Ago Fitness te responde en menos de 24 horas.",
+    url: "/contacto",
+    type: "website",
+  },
 };
 
 export default function ContactoPage() {

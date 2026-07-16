@@ -116,3 +116,132 @@ la lista plana que tenía el drawer viejo.
 lograba el efecto "flotando sobre el hero + icon bar tipo app" que pedía
 la referencia — la estructura (posición fija vs. panel lateral) es
 distinta de raíz, no solo estética.
+
+## 2026-07-16 — SEO/AI-SEO del home (metadata real + JSON-LD + limpieza de scaffold)
+
+**Decisión:** el home seguía con metadata de scaffold de Next.js Commerce
+(`description: "High-performance ecommerce store built with Next.js,
+Vercel, and Shopify."`, sin `openGraph`/`twitter` reales) y `<html lang="en">`
+en un sitio 100% en español — se corrigió todo el paquete SEO del home:
+
+- `app/layout.tsx`: `lang="en"` → `lang="es"`, `viewport` export propio,
+  `openGraph`/`twitter` de fallback a nivel raíz (`siteName`, `locale:
+  "es_MX"`, `card: "summary_large_image"`) para que cualquier página sin
+  metadata propia ya herede algo razonable en vez del vacío de antes.
+- `app/page.tsx`: `title`/`description` reales orientados a keywords reales
+  del catálogo (activewear, leggings, ropa deportiva, mujer/hombre,
+  México), `alternates.canonical`, y **3 bloques JSON-LD** (`Organization`
+  con el Instagram real como `sameAs`, `WebSite` con `SearchAction` hacia
+  `/search?q=`, `ItemList` de los productos de "Lo más nuevo" enlazando a
+  cada `/product/[handle]` — sin duplicar precio/disponibilidad ahí, eso
+  ya vive en el `Product` schema de la página de producto). Se agregó
+  también un párrafo visible (no solo meta/schema) que define la marca en
+  una frase — Google AI Overviews prioriza texto extraíble en el DOM, no
+  solo metadata.
+  **No se inventó ningún dato** (envíos, ubicación física, composición de
+  tela) — el párrafo solo usa hechos ya confirmados en el repo (mercado
+  México, categorías reales de Shopify, el tagline ya aprobado del hero).
+- `app/robots.ts`: se agregó `disallow` para `/api/`, `/cuenta` y
+  `/favoritos` (auth-gated / sin contenido indexable para un crawler).
+- `app/sitemap.ts`: se agregaron las páginas propias construidas a mano
+  (`/contacto`, `/soporte`, `/guia-de-tallas`, `/terminos`, `/privacidad`)
+  — antes solo listaba `""` + lo que viene dinámico de Shopify
+  (colecciones/productos/`getPages()`).
+- **`<ThreeItemGrid />` y `<Carousel />` se quitaron de `app/page.tsx`**
+  (no eliminados del repo, solo del home): dependían de las colecciones
+  demo `hidden-homepage-featured-items` y `hidden-homepage-carousel` del
+  template de Next.js Commerce, que **no existen** en el Shopify real de
+  Ago Fitness (verificado contra la Storefront API) — ambos componentes
+  renderizaban `null` en producción. Puro peso muerto: dos fetches a la
+  Storefront API por carga de página sin ningún contenido a cambio.
+- El `<Analytics />` de Vercel (ver `CLAUDE.md`, 16 julio) ya deja medir
+  el efecto de estos cambios en tráfico real una vez deployado.
+
+**Pendiente detectado, no corregido (no es código):** el sitemap sigue
+trayendo `/contact` y `/search` como páginas de contenido de Shopify
+(`getPages()`) — parecen páginas demo en inglés que trae el template por
+default en el Admin de Shopify, separadas de las rutas reales `/contacto`
+y `/search` de la app. Revisar/borrar en el Admin de Shopify (Online
+Store → Pages) si son basura del scaffold — no se tocó porque es contenido
+del Admin, no código.
+
+## 2026-07-16 — SEO ronda 2: fallback en inglés en categorías, FAQPage schema, canonical faltante
+
+**Contexto:** se auditó el resto de las páginas indexables del sitio
+(colecciones, `/soporte`, páginas legales) buscando el mismo tipo de bug
+que el home (metadata rota/heredada del template). Se encontraron 3 cosas
+reales, no cosméticas:
+
+1. **`/search/[collection]` caía a `` `${collection.title} products` `` en
+   inglés.** Se verificó contra la Storefront API real: de las 11
+   colecciones del catálogo, solo `Mujer` y `Hombre` tienen `description`
+   capturada en el Admin de Shopify — las otras 9 (Leggings, Tops,
+   Chamarras, Faldas, Conjuntos, Shorts Mujer, Playeras, Shorts Hombre,
+   Playeras Mujer) están vacías. Esas son justo las páginas de categoría
+   que alguien busca como "leggings mujer" o "shorts hombre" — estaban
+   sirviendo `<meta name="description">` en inglés tipo "Leggings
+   products". Fix en `app/search/[collection]/page.tsx`: fallback en
+   español (`Compra {título} en Ago Fitness — activewear diseñado para
+   moverse contigo...`) + `alternates.canonical` + `openGraph` (ninguna de
+   las dos existía antes). **Pendiente real, no de código:** cargar
+   `description`/`seo.title`/`seo.description` reales por colección en el
+   Admin de Shopify — el fallback ya no rompe, pero sigue siendo genérico.
+2. **`POPULAR_SEARCH_TERMS`** (`lib/constants.ts`) sugería búsquedas en
+   inglés y de categorías que Ago Fitness no vende (`sports bra`,
+   `running`, `yoga`, `hoodie`, `sneakers`) en un catálogo 100% en español
+   sin calzado. Se reemplazó por los 7 tipos de producto reales
+   (leggings/playeras/shorts/chamarras/conjuntos/faldas/tops) — cada
+   sugerencia ahora devuelve resultados de verdad.
+3. **`/soporte` tiene 5 preguntas/respuestas reales** en el acordeón de
+   `components/help-center.tsx` (pedidos, cambios/devoluciones, tallas,
+   pagos, cuenta) sin ningún `FAQPage` schema — cero oportunidad de rich
+   result pese a tener contenido de sobra. Se agregó el JSON-LD en
+   `app/soporte/page.tsx`, con el texto de las respuestas espejado 1:1 al
+   copy visible del acordeón (Google exige que el schema no invente
+   contenido que no esté en la página) — si el copy del acordeón cambia,
+   hay que actualizar también `FAQ_JSON_LD_ITEMS` en el page.
+
+De paso se agregó `alternates.canonical` + `openGraph` a `/contacto`,
+`/terminos`, `/privacidad` y `/guia-de-tallas` (ninguna de las 5 páginas
+estáticas los tenía).
+
+**No se tocó:** las descripciones/SEO de colecciones en el Admin de
+Shopify — eso es contenido del cliente, no código; ver punto 1 arriba
+para lo que falta ahí si se quiere cerrar del todo.
+
+## 2026-07-16 — SEO ronda 3: BreadcrumbList schema, descripciones de colección en Shopify, limpieza de página fantasma
+
+**Contexto:** cierre de la ronda de SEO — dos partes de código y dos
+acciones directas en el Admin de Shopify, estas últimas con autorización
+explícita del cliente (el sistema bloquea por default cualquier escritura
+directa a Shopify Admin sin confirmación puntual).
+
+1. **`BreadcrumbList` JSON-LD en `/product/[handle]` y
+   `/search/[collection]`.** En producto, `breadcrumbFor()` (antes privada
+   en `components/product/product-description.tsx`) se exportó para que
+   `app/product/[handle]/page.tsx` arme el schema con la misma lógica que
+   ya calcula el breadcrumb visible — una sola fuente de verdad, no puede
+   desincronizarse. En colección, se agregó `parentGenderFor()` en
+   `app/search/[collection]/page.tsx`, que resuelve el género padre de
+   cualquier subcategoría recorriendo los `primaryLinks` reales de
+   `MEGA_MENU` (misma fuente que arma el mega menu) — verificado en vivo:
+   `/search/leggings` → Inicio › Mujer › Leggings.
+2. **Corregido un hallazgo erróneo de la ronda 2:** se había señalado
+   `/search` como página fantasma de Shopify junto con `/contact` — falso.
+   `/search` es una colección sintética "All" que ya arma
+   `getCollections()` en `lib/shopify/index.ts` (boilerplate de Next.js
+   Commerce, representa "todos los productos"), no contenido de Shopify.
+   Se confirmó por GraphQL contra el Admin real que la única página en
+   Shopify era **"Contact"** (handle `contact`, en inglés, `body` vacío,
+   publicada) — el verdadero leftover del scaffold.
+3. **Con autorización explícita del cliente:**
+   - Se completaron las 9 descripciones de colección que faltaban (Tops,
+     Chamarras, Faldas, Leggings, Conjuntos, Shorts Mujer, Playeras,
+     Shorts Hombre, Playeras Mujer) vía `update-collection` — mismo tono
+     que ya tenían Mujer/Hombre, sin inventar composición de tela ni
+     ninguna claim no confirmada. El fallback en español del código
+     (ronda 2) ya no debería activarse en ninguna colección real.
+   - Se borró por completo la página "Contact" del Admin de Shopify
+     (`pageDelete`, `gid://shopify/Page/165087314212`) — confirmado
+     `deletedPageId` sin `userErrors`, y una segunda consulta a `pages`
+     devolvió lista vacía.

@@ -45,9 +45,12 @@ function CompleteTheLook({ product }: { product: Product }) {
 /**
  * Deriva "Comprar > Género > Tipo" a partir de los tags reales del producto
  * (las colecciones smart de Shopify ya se arman con reglas de tag por
- * género, ver docs/navbar.md) — no hardcodea taxonomía nueva.
+ * género, ver docs/navbar.md) — no hardcodea taxonomía nueva. Exportada:
+ * también la usa `app/product/[handle]/page.tsx` para el JSON-LD
+ * `BreadcrumbList`, así el schema no puede desincronizarse del breadcrumb
+ * visible — una sola fuente de verdad.
  */
-function breadcrumbFor(product: Product) {
+export function breadcrumbFor(product: Product) {
   const gender = CATEGORY_LINKS.find((c) =>
     product.tags.some((tag) => tag.toLowerCase() === c.title.toLowerCase()),
   );

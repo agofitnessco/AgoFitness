@@ -11,6 +11,7 @@
 | Animación | `gsap` (incluye el plugin `Flip`, gratis desde que Webflow liberó todos los plugins de club en 2025) — ver [`navbar.md`](navbar.md) |
 | Backend de comercio | Shopify (Storefront API, GraphQL) — ver [`shopify.md`](shopify.md) |
 | Hosting | Vercel |
+| Analytics | `@vercel/analytics` (`<Analytics />` montado en `app/layout.tsx`) — page views vía Vercel Analytics |
 | Package manager | npm (el template viene armado para pnpm — se migró a npm por consistencia con el resto de los proyectos) |
 
 ## Estructura de carpetas (heredada de Next.js Commerce)

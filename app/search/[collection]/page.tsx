@@ -1,4 +1,5 @@
 import { getCollection, getCollectionProducts } from "lib/shopify";
+import { baseUrl } from "lib/utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -32,6 +33,30 @@ function tabsFor(handle: string): CollectionTab[] | undefined {
   ];
 }
 
+const HANDLE_BY_GENDER: Record<keyof typeof MEGA_MENU, string> = {
+  Mujer: "mujer",
+  Hombre: "hombre",
+  Niños: "ninos",
+};
+
+/**
+ * Para el JSON-LD `BreadcrumbList`: si `handle` es una raíz de género
+ * (mujer/hombre/ninos) no tiene padre. Si es una subcategoría (leggings,
+ * chamarras...), se busca a qué género pertenece recorriendo los
+ * `primaryLinks` reales de `MEGA_MENU` — misma fuente de verdad que ya
+ * arma el mega menu, no se inventa una jerarquía nueva.
+ */
+function parentGenderFor(handle: string) {
+  if (GENDER_BY_HANDLE[handle]) return undefined;
+
+  const genderKey = (Object.keys(MEGA_MENU) as (keyof typeof MEGA_MENU)[]).find(
+    (key) => MEGA_MENU[key]!.primaryLinks.some((link) => link.path === `/search/${handle}`),
+  );
+  if (!genderKey) return undefined;
+
+  return { title: genderKey, path: `/search/${HANDLE_BY_GENDER[genderKey]}` };
+}
+
 export async function generateMetadata(props: {
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
@@ -40,12 +65,28 @@ export async function generateMetadata(props: {
 
   if (!collection) return notFound();
 
+  const title = collection.seo?.title || collection.title;
+  // Fallback en español: la mayoría de las colecciones (todas menos Mujer/
+  // Hombre) no tienen `description` capturada en el Admin de Shopify — sin
+  // este fallback, esas páginas caían a un genérico en inglés
+  // ("Leggings products") en un sitio 100% en español. Ver docs/decisiones.md.
+  const description =
+    collection.seo?.description ||
+    collection.description ||
+    `Compra ${collection.title} en Ago Fitness — activewear diseñado para moverse contigo, rendimiento real sin sacrificar estilo.`;
+
   return {
-    title: collection.seo?.title || collection.title,
-    description:
-      collection.seo?.description ||
-      collection.description ||
-      `${collection.title} products`,
+    title,
+    description,
+    alternates: {
+      canonical: collection.path,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}${collection.path}`,
+      type: "website",
+    },
   };
 }
 
@@ -82,8 +123,31 @@ export default async function CategoryPage(props: {
     ? allProducts.filter((p) => activeTypes.includes(p.productType))
     : allProducts;
 
+  const parentGender = parentGenderFor(params.collection);
+  const breadcrumbItems = [
+    { name: "Inicio", url: baseUrl },
+    ...(parentGender
+      ? [{ name: parentGender.title, url: `${baseUrl}${parentGender.path}` }]
+      : []),
+    { name: collection.title, url: `${baseUrl}/search/${params.collection}` },
+  ];
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+
   return (
     <section className="mx-auto w-full max-w-screen-2xl px-4 py-12 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <CollectionHeader
         title={collection.title}
         tabs={tabsFor(params.collection)}

@@ -7,6 +7,16 @@ export const metadata: Metadata = {
   title: "Términos y Condiciones",
   description:
     "Términos y condiciones de uso y compra de Ago Fitness — catálogo, precios, envíos, cambios y devoluciones.",
+  alternates: {
+    canonical: "/terminos",
+  },
+  openGraph: {
+    title: "Términos y Condiciones",
+    description:
+      "Términos y condiciones de uso y compra de Ago Fitness — catálogo, precios, envíos, cambios y devoluciones.",
+    url: "/terminos",
+    type: "website",
+  },
 };
 
 function Pending({ children }: { children: React.ReactNode }) {

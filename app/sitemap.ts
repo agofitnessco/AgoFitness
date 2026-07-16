@@ -12,7 +12,17 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   validateEnvironmentVariables();
 
-  const routesMap = [""].map((route) => ({
+  // Páginas propias (no vienen de Shopify Admin vía `getPages()`): home +
+  // páginas construidas a mano en app/. /cuenta y /favoritos quedan fuera
+  // a propósito — auth-gated / sin contenido indexable, ver app/robots.ts.
+  const routesMap = [
+    "",
+    "/contacto",
+    "/soporte",
+    "/guia-de-tallas",
+    "/terminos",
+    "/privacidad",
+  ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString(),
   }));

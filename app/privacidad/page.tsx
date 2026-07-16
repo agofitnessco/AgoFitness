@@ -7,6 +7,16 @@ export const metadata: Metadata = {
   title: "Aviso de Privacidad",
   description:
     "Aviso de privacidad de Ago Fitness — qué datos personales recabamos, para qué los usamos y cómo ejercer tus derechos ARCO.",
+  alternates: {
+    canonical: "/privacidad",
+  },
+  openGraph: {
+    title: "Aviso de Privacidad",
+    description:
+      "Aviso de privacidad de Ago Fitness — qué datos personales recabamos, para qué los usamos y cómo ejercer tus derechos ARCO.",
+    url: "/privacidad",
+    type: "website",
+  },
 };
 
 function Pending({ children }: { children: React.ReactNode }) {

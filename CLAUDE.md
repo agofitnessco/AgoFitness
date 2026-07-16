@@ -405,3 +405,35 @@ no este archivo.
   `/terminos` y `/privacidad`** (16 julio 2026, a pedido del cliente) — el
   `<h1>` de las 4 páginas ahora es el primer elemento de la sección, sin
   el `<p className="... uppercase">Ago Fitness</p>` que iba arriba.
+- **Vercel Analytics instalado (16 julio 2026)** — `@vercel/analytics`
+  agregado a `package.json` y `<Analytics />` (de `@vercel/analytics/next`)
+  montado en `app/layout.tsx`, dentro de `<body>` como hermano de
+  `CartProvider`. Empieza a reportar page views tras el próximo deploy a
+  Vercel (no requiere variables de entorno adicionales). Ver `docs/stack.md`.
+- **SEO/AI-SEO del home reescrito de raíz (16 julio 2026)** — ver
+  `docs/decisiones.md` para el detalle completo y el razonamiento. Resumen:
+  `<html lang="en">` corregido a `"es"` (el sitio es 100% español y traía
+  el idioma mal declarado desde el scaffold), metadata del home reemplazada
+  (seguía con la descripción demo de Next.js Commerce), 3 bloques JSON-LD
+  nuevos en `app/page.tsx` (`Organization`/`WebSite`+`SearchAction`/
+  `ItemList` de "Lo más nuevo"), párrafo de marca visible en el DOM (no solo
+  metadata), `robots.ts` con `disallow` de rutas privadas, `sitemap.ts` con
+  las páginas propias que faltaban, y **`<ThreeItemGrid />`/`<Carousel />`
+  quitados del home** por depender de colecciones Shopify demo que no
+  existen en la tienda real (renderizaban `null` — peso muerto).
+- **SEO ronda 2 y 3 (16 julio 2026)** — ver `docs/decisiones.md` para el
+  detalle. Resumen: `/search/[collection]` tenía fallback de descripción
+  en inglés (`"Leggings products"`) en 9 de 11 colecciones reales sin
+  `description` en Shopify — corregido en código + **las 9 descripciones
+  ya están cargadas en el Admin de Shopify** (mismo tono que Mujer/Hombre).
+  `POPULAR_SEARCH_TERMS` traducido a español y alineado al catálogo real.
+  `FAQPage` schema agregado a `/soporte` (5 Q&A reales, antes sin schema).
+  `canonical`/`openGraph` agregados a `/contacto`, `/soporte`, `/terminos`,
+  `/privacidad`, `/guia-de-tallas`. `BreadcrumbList` schema en
+  `/product/[handle]` y `/search/[collection]`, reusando la misma lógica
+  que ya calcula el breadcrumb visible (`breadcrumbFor` exportada,
+  `parentGenderFor` nueva vía `MEGA_MENU`). Se borró la página "Contact"
+  del Admin de Shopify (leftover del scaffold, en inglés, sin contenido).
+  **Pendiente real, no de código:** fotografía de producto real (bloquea
+  SEO de imágenes) y un blog (palanca más grande de SEO a largo plazo,
+  sin empezar a propósito).

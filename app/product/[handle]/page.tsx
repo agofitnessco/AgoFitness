@@ -4,7 +4,10 @@ import { FeatureStory } from "components/product/feature-story";
 import { Gallery } from "components/product/gallery";
 import { InfoBadge } from "components/product/info-badge";
 import { OutfitGrid } from "components/product/outfit-grid";
-import { ProductDescription } from "components/product/product-description";
+import {
+  breadcrumbFor,
+  ProductDescription,
+} from "components/product/product-description";
 import { ProductInfoAccordion } from "components/product/product-info-accordion";
 import RecordRecentlyViewed from "components/product/record-recently-viewed";
 import { RecommendationsCarousel } from "components/product/recommendations-carousel";
@@ -13,6 +16,7 @@ import { HIDDEN_PRODUCT_TAG } from "lib/constants";
 import { climateFor, fitFor } from "lib/product-types";
 import { getProduct, getProductRecommendations } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
+import { baseUrl } from "lib/utils";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -91,12 +95,35 @@ export default async function ProductPage(props: {
     },
   };
 
+  // Mismo breadcrumb que ya se ve arriba del <h1> (ProductDescription) —
+  // se calcula una sola vez con `breadcrumbFor` para que el schema nunca
+  // se desincronice de lo que el usuario ve.
+  const { gender, typeEntry } = breadcrumbFor(product);
+  const breadcrumbItems = [
+    { name: "Comprar", url: `${baseUrl}/search` },
+    ...(gender ? [{ name: gender.title, url: `${baseUrl}${gender.path}` }] : []),
+    ...(typeEntry
+      ? [{ name: typeEntry.label, url: `${baseUrl}${typeEntry.path}` }]
+      : []),
+    { name: product.title, url: `${baseUrl}/product/${product.handle}` },
+  ];
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd),
+          __html: JSON.stringify([productJsonLd, breadcrumbJsonLd]),
         }}
       />
       <RecordRecentlyViewed product={product} />

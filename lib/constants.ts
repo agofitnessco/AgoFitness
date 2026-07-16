@@ -76,14 +76,18 @@ export const CATEGORY_LINKS = [
   { title: "Niños", path: "/search/ninos" },
 ];
 
+// En español y alineados a las colecciones reales del catálogo (ver
+// lib/shopify) — la lista anterior tenía términos en inglés y categorías
+// que Ago Fitness no vende (sports bra, running, yoga, hoodie, sneakers),
+// prometiendo resultados que no existían.
 export const POPULAR_SEARCH_TERMS = [
   "leggings",
-  "sports bra",
-  "running",
-  "yoga",
-  "hoodie",
+  "playeras",
   "shorts",
-  "sneakers",
+  "chamarras",
+  "conjuntos",
+  "faldas",
+  "tops",
 ];
 
 export type MegaMenuHero = {
