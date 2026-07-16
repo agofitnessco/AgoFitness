@@ -6,6 +6,7 @@ import {
   saveAddress,
 } from "app/cuenta/actions";
 import FillButton from "components/ui/fill-button";
+import { COUNTRIES } from "lib/constants";
 import type { CustomerAddress } from "lib/shopify/types";
 import { useActionState, useEffect, useRef, useState } from "react";
 
@@ -107,7 +108,24 @@ function AddressForm({
           className={inputClass}
         />
       </div>
-      <input type="hidden" name="country" value="México" />
+      <select
+        name="country"
+        required
+        defaultValue={address?.country ?? "México"}
+        className={inputClass}
+      >
+        {/* Si una dirección existente ya trae un país fuera de la lista
+            curada, lo agregamos como opción extra en vez de perderlo al
+            guardar. */}
+        {address?.country && !COUNTRIES.includes(address.country) ? (
+          <option value={address.country}>{address.country}</option>
+        ) : null}
+        {COUNTRIES.map((country) => (
+          <option key={country} value={country}>
+            {country}
+          </option>
+        ))}
+      </select>
 
       <label className="flex items-center gap-2 text-sm text-neutral-600">
         <input

@@ -45,6 +45,31 @@ export const DEFAULT_OPTION = "Default Title";
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2023-01/graphql.json";
 export const CUSTOMER_TOKEN_COOKIE = "customerToken";
 
+/**
+ * Países para el selector de direcciones (`app/cuenta`). Es solo el
+ * nombre que se guarda en `MailingAddressInput.country` — Shopify no lo
+ * valida contra las zonas de envío configuradas al guardar la dirección
+ * (esa validación pasa después, en el checkout), así que no hace falta
+ * limitarlo a "lo que ya envía la tienda" para que sea honesto. México va
+ * primero por ser el mercado real de Ago Fitness.
+ */
+export const COUNTRIES = [
+  "México",
+  "Estados Unidos",
+  "Canadá",
+  "Argentina",
+  "Chile",
+  "Colombia",
+  "Perú",
+  "España",
+  "Guatemala",
+  "Costa Rica",
+  "Panamá",
+  "Ecuador",
+  "Uruguay",
+  "República Dominicana",
+];
+
 export const CATEGORY_LINKS = [
   { title: "Mujer", path: "/search/mujer" },
   { title: "Hombre", path: "/search/hombre" },

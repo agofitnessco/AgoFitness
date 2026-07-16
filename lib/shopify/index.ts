@@ -26,6 +26,8 @@ import {
   customerAddressUpdateMutation,
   customerCreateMutation,
   customerDefaultAddressUpdateMutation,
+  customerRecoverMutation,
+  customerUpdateMutation,
 } from "./mutations/customer";
 import { getCartQuery } from "./queries/cart";
 import {
@@ -72,6 +74,8 @@ import {
   ShopifyCustomerCreateOperation,
   ShopifyCustomerDefaultAddressUpdateOperation,
   ShopifyCustomerOperation,
+  ShopifyCustomerRecoverOperation,
+  ShopifyCustomerUpdateOperation,
   ShopifyMenuOperation,
   ShopifyOrder,
   ShopifyPageOperation,
@@ -702,6 +706,51 @@ export async function setDefaultCustomerAddress(
   }
 
   return { success: true };
+}
+
+export async function recoverCustomerPassword(
+  email: string,
+): Promise<{ success: true } | { errors: CustomerUserError[] }> {
+  const res = await shopifyFetch<ShopifyCustomerRecoverOperation>({
+    query: customerRecoverMutation,
+    variables: { email },
+  });
+
+  const { customerUserErrors } = res.body.data.customerRecover;
+
+  if (customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return { success: true };
+}
+
+export async function updateCustomer(
+  customerAccessToken: string,
+  input: { firstName?: string; lastName?: string; phone?: string },
+): Promise<
+  | { accessToken: string | null; expiresAt: string | null }
+  | { errors: CustomerUserError[] }
+> {
+  const res = await shopifyFetch<ShopifyCustomerUpdateOperation>({
+    query: customerUpdateMutation,
+    variables: { customerAccessToken, customer: input },
+  });
+
+  const {
+    customer,
+    customerAccessToken: newToken,
+    customerUserErrors,
+  } = res.body.data.customerUpdate;
+
+  if (!customer || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return {
+    accessToken: newToken?.accessToken ?? null,
+    expiresAt: newToken?.expiresAt ?? null,
+  };
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.

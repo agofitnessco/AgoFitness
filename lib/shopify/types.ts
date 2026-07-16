@@ -480,3 +480,32 @@ export type ShopifyCustomerDefaultAddressUpdateOperation = {
     addressId: string;
   };
 };
+
+export type ShopifyCustomerRecoverOperation = {
+  data: {
+    customerRecover: {
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    email: string;
+  };
+};
+
+export type ShopifyCustomerUpdateOperation = {
+  data: {
+    customerUpdate: {
+      customer: { id: string } | null;
+      customerAccessToken: { accessToken: string; expiresAt: string } | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    customerAccessToken: string;
+    customer: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+    };
+  };
+};

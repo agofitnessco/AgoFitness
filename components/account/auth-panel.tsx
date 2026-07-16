@@ -1,6 +1,6 @@
 "use client";
 
-import { login, register } from "app/cuenta/actions";
+import { login, recoverPassword, register } from "app/cuenta/actions";
 import clsx from "clsx";
 import FillButton from "components/ui/fill-button";
 import { useActionState, useState } from "react";
@@ -8,8 +8,45 @@ import { useActionState, useState } from "react";
 const inputClass =
   "w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-black transition-colors placeholder:text-neutral-400 focus:border-black focus:outline-none";
 
+function RecoverForm({ onDone }: { onDone: () => void }) {
+  const [message, formAction] = useActionState(recoverPassword, null);
+
+  return (
+    <form action={formAction} className="flex flex-col gap-4">
+      <p className="text-sm text-neutral-600">
+        Escribe tu correo y te enviamos instrucciones para restablecer tu
+        contraseña.
+      </p>
+      <input
+        name="email"
+        type="email"
+        required
+        autoComplete="email"
+        placeholder="Correo electrónico"
+        className={inputClass}
+      />
+      {message ? <p className="text-sm text-neutral-700">{message}</p> : null}
+      <FillButton type="submit" className="w-full justify-center">
+        Enviar instrucciones
+      </FillButton>
+      <button
+        type="button"
+        onClick={onDone}
+        className="text-sm font-medium text-neutral-500 hover:text-black"
+      >
+        Volver a iniciar sesión
+      </button>
+    </form>
+  );
+}
+
 function LoginForm() {
   const [error, formAction] = useActionState(login, null);
+  const [recovering, setRecovering] = useState(false);
+
+  if (recovering) {
+    return <RecoverForm onDone={() => setRecovering(false)} />;
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -33,6 +70,13 @@ function LoginForm() {
       <FillButton type="submit" className="w-full justify-center">
         Entrar
       </FillButton>
+      <button
+        type="button"
+        onClick={() => setRecovering(true)}
+        className="self-start text-sm font-medium text-neutral-500 hover:text-black"
+      >
+        ¿Olvidaste tu contraseña?
+      </button>
     </form>
   );
 }
@@ -97,17 +141,23 @@ export default function AuthPanel() {
         Inicia sesión para ver tus pedidos, direcciones guardadas y más.
       </p>
 
-      <div className="mt-8 inline-flex rounded-full border border-neutral-200 bg-neutral-50 p-1">
+      <div className="relative mt-8 grid grid-cols-2 rounded-full border border-neutral-200 bg-neutral-50 p-1">
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-black transition-transform duration-300 ease-out"
+          style={{
+            transform:
+              tab === "register" ? "translateX(100%)" : "translateX(0)",
+          }}
+        />
         {(["login", "register"] as const).map((key) => (
           <button
             key={key}
             type="button"
             onClick={() => setTab(key)}
             className={clsx(
-              "rounded-full px-6 py-2 text-sm font-bold tracking-wide uppercase transition-colors",
-              tab === key
-                ? "bg-black text-white"
-                : "text-neutral-500 hover:text-black",
+              "relative z-10 rounded-full px-6 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:ring-black/25 focus-visible:ring-offset-0",
+              tab === key ? "text-white" : "text-neutral-500 hover:text-black",
             )}
           >
             {key === "login" ? "Entrar" : "Crear cuenta"}

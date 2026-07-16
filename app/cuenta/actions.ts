@@ -6,8 +6,10 @@ import {
   deleteCustomerAccessToken,
   deleteCustomerAddress,
   loginCustomer,
+  recoverCustomerPassword,
   registerCustomer,
   setDefaultCustomerAddress,
+  updateCustomer,
   updateCustomerAddress,
 } from "lib/shopify";
 import { revalidatePath } from "next/cache";
@@ -83,6 +85,51 @@ export async function register(prevState: any, formData: FormData) {
     expires: new Date(loginResult.expiresAt),
     path: "/",
   });
+
+  revalidatePath("/cuenta");
+}
+
+const RECOVER_CONFIRMATION =
+  "Si el correo está registrado, te enviamos instrucciones para restablecer tu contraseña.";
+
+export async function recoverPassword(prevState: any, formData: FormData) {
+  const email = String(formData.get("email") ?? "");
+
+  // Siempre se devuelve el mismo mensaje, exista o no una cuenta con ese
+  // correo — Shopify sí distingue el caso (UNIDENTIFIED_CUSTOMER) pero no
+  // hay razón para amplificar esa fuga de información en nuestra propia UI.
+  await recoverCustomerPassword(email);
+  return RECOVER_CONFIRMATION;
+}
+
+export async function updateProfile(prevState: any, formData: FormData) {
+  const token = (await cookies()).get(CUSTOMER_TOKEN_COOKIE)?.value;
+  if (!token) return "Sesión expirada, vuelve a iniciar sesión.";
+
+  const firstName = String(formData.get("firstName") ?? "");
+  const lastName = String(formData.get("lastName") ?? "");
+  const phone = String(formData.get("phone") ?? "");
+
+  const result = await updateCustomer(token, { firstName, lastName, phone });
+
+  if ("errors" in result) {
+    return friendlyError(
+      result.errors[0]?.message ?? "No se pudo actualizar tu perfil.",
+    );
+  }
+
+  // customerUpdate solo devuelve un token nuevo si Shopify decidió rotarlo
+  // (pasa con cambios de email/contraseña, no debería pasar aquí ya que
+  // solo editamos nombre/teléfono, pero se maneja por si acaso).
+  if (result.accessToken && result.expiresAt) {
+    (await cookies()).set(CUSTOMER_TOKEN_COOKIE, result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: new Date(result.expiresAt),
+      path: "/",
+    });
+  }
 
   revalidatePath("/cuenta");
 }

@@ -99,6 +99,43 @@ export const customerAddressDeleteMutation = /* GraphQL */ `
   }
 `;
 
+export const customerRecoverMutation = /* GraphQL */ `
+  mutation customerRecover($email: String!) {
+    customerRecover(email: $email) {
+      customerUserErrors {
+        code
+        field
+        message
+      }
+    }
+  }
+`;
+
+export const customerUpdateMutation = /* GraphQL */ `
+  mutation customerUpdate(
+    $customerAccessToken: String!
+    $customer: CustomerUpdateInput!
+  ) {
+    customerUpdate(
+      customerAccessToken: $customerAccessToken
+      customer: $customer
+    ) {
+      customer {
+        id
+      }
+      customerAccessToken {
+        accessToken
+        expiresAt
+      }
+      customerUserErrors {
+        code
+        field
+        message
+      }
+    }
+  }
+`;
+
 export const customerDefaultAddressUpdateMutation = /* GraphQL */ `
   mutation customerDefaultAddressUpdate(
     $customerAccessToken: String!

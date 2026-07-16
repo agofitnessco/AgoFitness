@@ -3,6 +3,7 @@
 import { logout } from "app/cuenta/actions";
 import AddressesPanel from "components/account/addresses-panel";
 import OrdersPanel from "components/account/orders-panel";
+import ProfilePanel from "components/account/profile-panel";
 import clsx from "clsx";
 import type { Customer } from "lib/shopify/types";
 import { useState } from "react";
@@ -40,17 +41,22 @@ export default function AccountDashboard({ customer }: { customer: Customer }) {
         </form>
       </div>
 
-      <div className="mt-8 inline-flex rounded-full border border-neutral-200 bg-neutral-50 p-1">
+      <div className="relative mt-8 grid grid-cols-3 rounded-full border border-neutral-200 bg-neutral-50 p-1 sm:inline-grid sm:w-auto">
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-1 left-1 w-[calc((100%-8px)/3)] rounded-full bg-black transition-transform duration-300 ease-out"
+          style={{
+            transform: `translateX(${TABS.findIndex((t) => t.key === tab) * 100}%)`,
+          }}
+        />
         {TABS.map(({ key, label }) => (
           <button
             key={key}
             type="button"
             onClick={() => setTab(key)}
             className={clsx(
-              "rounded-full px-6 py-2 text-sm font-bold tracking-wide uppercase transition-colors",
-              tab === key
-                ? "bg-black text-white"
-                : "text-neutral-500 hover:text-black",
+              "relative z-10 rounded-full px-6 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:ring-black/25 focus-visible:ring-offset-0",
+              tab === key ? "text-white" : "text-neutral-500 hover:text-black",
             )}
           >
             {label}
@@ -66,24 +72,7 @@ export default function AccountDashboard({ customer }: { customer: Customer }) {
             defaultAddressId={customer.defaultAddress?.id ?? null}
           />
         ) : null}
-        {tab === "perfil" ? (
-          <div className="max-w-sm rounded-lg border border-neutral-200 p-5">
-            <dl className="flex flex-col gap-4 text-sm">
-              <div>
-                <dt className="font-bold text-black">Nombre</dt>
-                <dd className="text-neutral-600">{fullName || "—"}</dd>
-              </div>
-              <div>
-                <dt className="font-bold text-black">Correo</dt>
-                <dd className="text-neutral-600">{customer.email}</dd>
-              </div>
-              <div>
-                <dt className="font-bold text-black">Teléfono</dt>
-                <dd className="text-neutral-600">{customer.phone || "—"}</dd>
-              </div>
-            </dl>
-          </div>
-        ) : null}
+        {tab === "perfil" ? <ProfilePanel customer={customer} /> : null}
       </div>
     </section>
   );
