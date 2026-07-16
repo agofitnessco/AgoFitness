@@ -51,7 +51,13 @@ const SOCIAL_LINKS = [
   { label: "Facebook", path: "#", Icon: FacebookIcon },
 ];
 
-export default async function Footer() {
+export default async function Footer({
+  hideCta = false,
+}: {
+  /** Oculta el CTA "Conócenos" — usar en /nosotros para no enlazar la
+   * página consigo misma. */
+  hideCta?: boolean;
+}) {
   const currentYear = new Date().getFullYear();
   const copyrightDate = 2026 + (currentYear > 2026 ? `-${currentYear}` : "");
 
@@ -61,14 +67,18 @@ export default async function Footer() {
         <p className="min-w-0 flex-1 text-lg font-bold leading-tight tracking-tight text-black md:text-4xl">
           Feel strong. Live confident.
         </p>
-        <div className="flex-none md:hidden">
-          <FillButton href="/nosotros" size="sm">
-            Conócenos
-          </FillButton>
-        </div>
-        <div className="hidden flex-none md:block">
-          <FillButton href="/nosotros">Conócenos</FillButton>
-        </div>
+        {hideCta ? null : (
+          <>
+            <div className="flex-none md:hidden">
+              <FillButton href="/nosotros" size="sm">
+                Conócenos
+              </FillButton>
+            </div>
+            <div className="hidden flex-none md:block">
+              <FillButton href="/nosotros">Conócenos</FillButton>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="border-t border-neutral-200">

@@ -24,11 +24,15 @@ const TOP_BAR_MESSAGES = [
 ];
 
 /**
- * Solo en el home el navbar arranca transparente sobre el hero (imagen a
- * pantalla completa) y se vuelve sólido al hacer scroll. En el resto de
- * páginas (sin hero de imagen debajo) se queda sólido siempre — ver
- * docs/navbar.md.
+ * En las páginas con hero de imagen a pantalla completa
+ * (`TRANSPARENT_HERO_PATHS`) el navbar arranca transparente sobre el hero
+ * y se vuelve sólido al hacer scroll. En el resto de páginas (sin hero de
+ * imagen debajo) se queda sólido siempre — ver docs/navbar.md. `/nosotros`
+ * se agregó el 16 julio 2026 junto con su hero
+ * (`components/about/about-hero.tsx`).
  */
+const TRANSPARENT_HERO_PATHS = ["/", "/nosotros"];
+
 export default function NavbarShell({
   siteName,
   menu,
@@ -37,7 +41,7 @@ export default function NavbarShell({
   menu: Menu[];
 }) {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = TRANSPARENT_HERO_PATHS.includes(pathname);
   const [scrolled, setScrolled] = useState(!isHome);
   const [messageIndex, setMessageIndex] = useState(0);
 
