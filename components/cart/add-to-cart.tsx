@@ -5,7 +5,8 @@ import clsx from "clsx";
 import { addItem } from "components/cart/actions";
 import { Product, ProductVariant } from "lib/shopify/types";
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useCart } from "./cart-context";
 
 function SubmitButton({
@@ -71,8 +72,15 @@ export function AddToCart({ product }: { product: Product }) {
     (variant) => variant.id === selectedVariantId,
   )!;
 
-  return (
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setPortalTarget(document.getElementById("mobile-add-to-cart-portal"));
+  }, []);
+
+  const formContent = (
     <form
+      className="w-full"
       action={async () => {
         addCartItem(finalVariant, product);
         addItemAction();
@@ -86,5 +94,20 @@ export function AddToCart({ product }: { product: Product }) {
         {message}
       </p>
     </form>
+  );
+
+  return (
+    <>
+      <div className="hidden w-full md:block">
+        {formContent}
+      </div>
+      {portalTarget ? (
+        createPortal(formContent, portalTarget)
+      ) : (
+        <div className="w-full md:hidden">
+          {formContent}
+        </div>
+      )}
+    </>
   );
 }

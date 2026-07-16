@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { Menu } from "lib/shopify/types";
 import NavMain from "./nav-main";
+import MobileNavBar from "./mobile-nav-bar";
 
 /**
  * Mensajes de la barra superior — rotan cada 4s con fade (`.topbar-fade`,
@@ -63,15 +64,16 @@ export default function NavbarShell({
   const transparent = isHome && !scrolled;
 
   return (
+    <>
     <div
       className={clsx(
         "left-0 right-0 top-0 z-40",
-        transparent ? "absolute" : "sticky",
+        transparent ? "absolute" : "absolute md:sticky",
       )}
     >
       <div
         className={clsx(
-          "transition-colors duration-500",
+          "transition-colors duration-500 hidden md:block",
           transparent ? "bg-transparent" : "bg-[#b48b8c]",
         )}
       >
@@ -94,5 +96,7 @@ export default function NavbarShell({
 
       <NavMain siteName={siteName} menu={menu} transparent={transparent} />
     </div>
+    <MobileNavBar menu={menu} transparent={transparent} />
+    </>
   );
 }

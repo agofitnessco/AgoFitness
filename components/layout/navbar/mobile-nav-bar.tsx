@@ -59,16 +59,17 @@ export default function MobileNavBar({
     <div className="md:hidden">
       <div
         className={clsx(
-          "fixed inset-x-0 bottom-0 z-50 transition-colors duration-500",
+          "fixed inset-x-0 bottom-0 z-[60] transition-colors duration-500",
           transparent && !isPanelOpen
             ? "bg-gradient-to-t from-black/55 via-black/20 to-transparent"
-            : "border-t border-neutral-200 bg-white",
+            : clsx("bg-white", !isPanelOpen && "border-t border-neutral-200"),
         )}
       >
         <div
-          className="mx-auto flex max-w-screen-2xl items-center justify-around px-2 pt-3"
+          className="mx-auto flex max-w-screen-2xl items-center px-2 pt-3"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.6rem)" }}
         >
+          <div className={clsx("flex flex-1 items-center justify-around", pathname.startsWith("/product/") && "hidden")}>
           <button
             type="button"
             aria-label="Buscar"
@@ -81,7 +82,7 @@ export default function MobileNavBar({
               activePanel === "search" && "opacity-60",
             )}
           >
-            <MagnifyingGlassIcon className="h-6 w-6" />
+            <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2} />
           </button>
 
           <NavFavorites transparent={transparent && !isPanelOpen} />
@@ -96,8 +97,13 @@ export default function MobileNavBar({
               transparent && !isPanelOpen ? "text-white" : "text-black",
             )}
           >
-            <UserIcon className="h-6 w-6" />
+            <UserIcon className="h-6 w-6" strokeWidth={2} />
           </Link>
+          </div>
+
+          {pathname.startsWith("/product/") && (
+            <div id="mobile-add-to-cart-portal" className="flex flex-1 items-center pr-2" />
+          )}
 
           <button
             type="button"
@@ -115,9 +121,9 @@ export default function MobileNavBar({
             )}
           >
             {isPanelOpen ? (
-              <XMarkIcon className="h-5 w-5" />
+              <XMarkIcon className="h-6 w-6" strokeWidth={2} />
             ) : (
-              <Bars3Icon className="h-6 w-6" />
+              <Bars3Icon className="h-6 w-6" strokeWidth={2} />
             )}
           </button>
         </div>

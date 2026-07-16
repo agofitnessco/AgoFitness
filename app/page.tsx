@@ -35,7 +35,7 @@ export default function HomePage() {
     <>
       <Hero />
       <CategoryShowcase />
-      <ProductShowcase title="Lo más nuevo" />
+      <ProductShowcase id="nueva-coleccion" title="Lo más nuevo" />
       {/* GymcoBanner desactivado a pedido del cliente (15 jul 2026) — componente
           intacto en components/gymco-banner.tsx, solo descomentar el import de
           arriba + esta línea para reactivarlo. Ver docs/decisiones.md. */}

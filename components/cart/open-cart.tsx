@@ -45,7 +45,7 @@ export default function OpenCart({
     >
       <BagIcon
         className={clsx(
-          "h-5 transition-all ease-in-out hover:scale-110",
+          "h-6 w-6 transition-all ease-in-out hover:scale-110",
           className,
         )}
       />

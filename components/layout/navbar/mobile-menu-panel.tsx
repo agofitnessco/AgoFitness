@@ -62,7 +62,7 @@ export default function MobileMenuPanel({
           <Dialog.Panel
             className="fixed inset-x-0 top-0 flex flex-col overflow-y-auto bg-white"
             style={{
-              bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
+              bottom: "calc(4.1rem + env(safe-area-inset-bottom))",
               paddingTop: "env(safe-area-inset-top)",
             }}
           >

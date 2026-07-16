@@ -16,7 +16,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import MobileNavBar from "./mobile-nav-bar";
 import MegaMenu from "./mega-menu";
 import { Menu, Product } from "lib/shopify/types";
 
@@ -356,13 +355,20 @@ export default function NavMain({
         "relative border-b transition-colors duration-500",
         transparent
           ? "border-transparent bg-transparent"
-          : "border-neutral-200 bg-white/95 backdrop-blur-md",
+          : "border-transparent bg-transparent md:border-neutral-200 md:bg-white/95 md:backdrop-blur-md",
       )}
     >
       <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-4">
-          <div className="flex items-center gap-8">
-            <Link href="/" prefetch={true} className="flex items-center">
+          <div className="flex w-full items-center justify-end md:w-auto md:justify-start md:gap-8">
+            <Link 
+              href="/" 
+              prefetch={true} 
+              className={clsx(
+                "items-center opacity-30 md:opacity-100 md:flex",
+                pathname.startsWith("/product/") ? "hidden" : "flex"
+              )}
+            >
               <Image
                 src="/imgs/logo-ago.png"
                 alt={siteName}
@@ -428,7 +434,7 @@ export default function NavMain({
                 flex: isSearchOpen ? "1 1 0%" : "0 0 12rem",
               }}
             >
-              <MagnifyingGlassIcon className="pointer-events-none ml-4 h-4 w-4 flex-none text-neutral-500" />
+              <MagnifyingGlassIcon className="pointer-events-none ml-4 h-4 w-4 flex-none text-neutral-500" strokeWidth={2} />
               <form onSubmit={handleSubmit} className="flex-1">
                 <input
                   ref={inputRef}
@@ -653,7 +659,6 @@ export default function NavMain({
         </div>
       </div>
     </nav>
-    <MobileNavBar menu={menu} transparent={transparent} />
     </>
   );
 }

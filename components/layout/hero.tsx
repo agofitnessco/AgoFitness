@@ -39,16 +39,16 @@ export default function Hero() {
           className="hero-fade mt-8 flex items-center gap-6"
           style={{ animationDelay: "0.44s" }}
         >
-          <FillButton href="/search" size="md" variant="light">
-            Comprar ahora
-          </FillButton>
-          <Link
-            href="/nosotros"
-            prefetch={true}
-            className="text-sm font-bold text-white underline underline-offset-4 transition-opacity hover:opacity-70"
-          >
-            Conócenos
-          </Link>
+          <div className="hidden sm:block">
+            <FillButton href="#nueva-coleccion" size="md" variant="light" arrowDirection="down" className="-ml-9">
+              Conoce la nueva colección
+            </FillButton>
+          </div>
+          <div className="block sm:hidden">
+            <FillButton href="#nueva-coleccion" size="sm" variant="light" arrowDirection="down" className="-ml-5">
+              Conoce la nueva colección
+            </FillButton>
+          </div>
         </div>
       </div>
     </section>

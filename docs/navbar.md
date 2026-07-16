@@ -358,6 +358,13 @@ inferior).
 `<main>` para que el contenido (y el footer) no quede tapado por la barra
 fija en mobile.
 
+### Ajustes visuales y correcciones (Julio 2026)
+
+- **Íconos unificados y más "pro":** Los íconos de la barra móvil (`MagnifyingGlassIcon`, `UserIcon`, `Bars3Icon`, `XMarkIcon`) y los compartidos (`HeartIcon`, `BagIcon` en Favoritos y Carrito) se unificaron a un tamaño de `h-6 w-6` (24x24px) y se les aplicó un grosor `strokeWidth={2}` para un look más bold y consistente. El ícono de búsqueda en desktop también recibió `strokeWidth={2}`.
+- **Top bar oculta y navbar no-sticky en móvil:** Para evitar tener dos barras compitiendo en pantalla ("otra navbar arriba"), se ocultó por completo la franja superior guinda (Ayuda/Mi cuenta) en la vista móvil (`hidden md:block` en `navbar-shell.tsx`). Además, el navbar superior pasó de ser siempre `sticky` a `absolute md:sticky`, por lo que en móvil se queda arriba al inicio pero desaparece al hacer scroll, dejando solo la barra inferior activa.
+- **Paneles "seamless" y fix de z-index (fondo grisáceo):** Se eliminó el `border-t` de la barra inferior cuando el buscador o menú están abiertos y se ajustó el tope inferior de los paneles de `4.5rem` a `4.1rem` para que conecten perfectamente sin huecos. Adicionalmente, el `MobileNavBar` se extrajo de `nav-main.tsx` hacia `navbar-shell.tsx` (fuera del contenedor `z-40`) y se le asignó `z-[60]`. Esto asegura que se posicione por encima del `backdrop` oscuro del `Dialog` de Headless UI, evitando que la barra inferior blanca se vea gris o "sucia" cuando se abre el menú, y devolviendo la interactividad al botón "Cerrar".
+- **Hero CTA y responsive:** Se simplificó la sección Hero eliminando el link "Conócenos" y se actualizó el botón principal a "Conoce la nueva colección" (apuntando al primer carrusel de productos mediante ancla `#nueva-coleccion` para scroll suave). Se agregó soporte a `FillButton` para `arrowDirection="down"` usando el ícono oficial, y se le hizo responsivo (`size="sm"` en móvil, `size="md"` en desktop con compensaciones `-ml-5` y `-ml-9` respectivamente). Esto arregló un bug donde el texto largo del botón desbordaba las pantallas móviles (`overflow-hidden` cortaba la flecha) y aseguró que su texto quede siempre perfectamente alineado a la izquierda con los encabezados superiores.
+
 ## Pendientes conocidos
 
 - Los links de categoría (`/search/mujer`, `/search/hombre`, `/search/ninos`)

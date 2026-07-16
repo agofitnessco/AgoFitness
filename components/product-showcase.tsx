@@ -148,9 +148,11 @@ function ProductCard({ product }: { product: ShowcaseProduct }) {
 }
 
 export default function ProductShowcase({
+  id,
   title = "Lo más nuevo",
   products = ELEMENT_PRODUCTS,
 }: {
+  id?: string;
   title?: string;
   products?: ShowcaseProduct[];
 }) {
@@ -164,7 +166,7 @@ export default function ProductShowcase({
   };
 
   return (
-    <section className="w-full py-16">
+    <section id={id} className="w-full py-16">
       {/*
         Breakout grid: 3 columnas [gutter | contenido (max 1536px) | gutter].
         El título y el carrusel arrancan en la misma columna (col-start-2),
