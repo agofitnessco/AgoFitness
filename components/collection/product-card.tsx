@@ -56,7 +56,13 @@ function groupByColor(product: Product): ColorGroup[] {
   return Array.from(groups.values());
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  className,
+}: {
+  product: Product;
+  className?: string;
+}) {
   const colors = groupByColor(product);
   const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [addedSize, setAddedSize] = useState<string | null>(null);
@@ -116,7 +122,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <li className="group">
+    <li className={clsx("group", className)}>
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
         <Link
           href={`/product/${product.handle}`}

@@ -184,3 +184,189 @@ sitio — no revivir estos archivos.
   de que el sitio reciba tráfico real** — si no, alguien podría comprar esas
   piezas gratis.
 - Niños sigue sin colección/productos — pendiente.
+
+## Página de producto individual (`/product/[handle]`)
+
+> Rediseñada por completo el 15 julio 2026, en 8 iteraciones sobre
+> referencias reales que mandó el cliente (On Running y Alo Yoga). Antes
+> era 100% el scaffold visual de Next.js Commerce: precio en píldora azul
+> (`bg-blue-600`), copy en inglés, clases `dark:` sueltas (el sitio fuerza
+> light mode siempre), y la galería quedaba en blanco porque ningún
+> producto tiene fotografía real todavía y el componente no tenía fallback
+> para `images.length === 0`. Esta sección documenta el **estado final**;
+> el detalle de qué referencia motivó cada pieza queda abajo en
+> "Por qué está cada pieza".
+
+### Mapa de archivos
+
+```
+app/product/[handle]/page.tsx        → orquesta todo, un solo fetch de
+                                        getProductRecommendations() para
+                                        las 3 secciones que usan productos
+                                        relacionados (ver "Datos" abajo)
+components/product/
+  gallery.tsx                        → foto(s) del producto — díptico
+  variant-selector.tsx               → swatches de color + tallas
+  product-description.tsx            → título, precio, cross-sell, cuotas
+  product-info-accordion.tsx         → talla/envío/cuidado/materiales
+  info-badge.tsx                     → botón "i" con popover (click, no hover)
+  outfit-grid.tsx                    → "Ideas para combinar" (shop-the-look)
+  feature-story.tsx                  → 3 paneles editoriales
+  recommendations-carousel.tsx       → carrusel final "Creemos que..."
+  record-recently-viewed.tsx         → (sin cambios en esta sesión)
+components/collection/product-card.tsx → reutilizada en el carrusel final
+  (se le agregó `className?: string` opcional al `<li>` raíz — no afecta
+  su uso existente en /search y /search/[collection])
+components/cart/add-to-cart.tsx      → botón reescrito en rosa Ago
+components/prose.tsx                 → sin clases `dark:`
+lib/color-placeholder.ts             → +`detailGradient` (3ra variante)
+lib/product-types.ts                 → +`fitFor`/`climateFor` (heurística)
+```
+
+### Layout de arriba a abajo
+
+```
+Hero (w-full, SIN max-w-screen-2xl) — galería 1fr + info 400px fijo
+  ├─ Gallery                  (columna ancha)
+  ├─ ProductInfoAccordion     (columna ancha, debajo de la galería)
+  └─ ProductDescription       (columna angosta, fija)
+        breadcrumb → título+corazón → precio → descripción real (Prose)
+        → VariantSelector → CompleteTheLook ("Queda bien con...")
+        → AddToCart → nota de cuotas
+FitClimateRow (full-width, debajo del grid 2-col)
+── mx-auto max-w-screen-2xl ──
+  OutfitGrid        "Ideas para combinar"        (shop-the-look, 1 foto + grid hotspot)
+  FeatureStory      3 paneles editoriales
+── fin del max-w-screen-2xl — breakout grid propio ──
+RecommendationsCarousel  "Creemos que también te gustará..."
+Footer
+```
+
+### Datos: un solo fetch de recomendaciones para 3 secciones
+
+`getProductRecommendations(product.id)` se pide **una sola vez** en
+`page.tsx` y se reparte:
+- `recommendations[0]` → "Queda bien con..." (`CompleteTheLook`, junto al
+  selector de variantes).
+- `recommendations.slice(1)` (hasta 6) → `OutfitGrid` ("Ideas para
+  combinar").
+- `recommendations` completo, sin recortar → `RecommendationsCarousel`
+  ("Creemos que también te gustará...").
+
+Es esperable que haya overlap entre "Ideas para combinar" y el carrusel
+final (mismo pool de productos relacionados, distinto tratamiento visual)
+— igual que en la referencia de On. Si el producto tiene más de 6
+recomendaciones, las que sobran en `OutfitGrid` simplemente no se muestran
+(aceptable con el catálogo actual de 20 Mujer / 3 Hombre; si el catálogo
+crece, subir el límite o paginar en vez de asumir que 6 siempre alcanza).
+
+### Placeholders — honestidad sobre fotografía real
+
+**Ningún producto tiene fotografía real todavía** (confirmado con el
+cliente: las fotos de estudio y de cada panel editorial las tomará el
+cliente mismo más adelante). En vez de cuadros en blanco o simular fotos
+falsas, toda la página usa un mismo lenguaje de placeholder consistente:
+
+- `lib/color-placeholder.ts` centraliza 3 variantes de gradiente por color
+  (`productGradient`, `modelGradient`, `detailGradient`) + el logo real
+  (`/imgs/logo-ago.png`) centrado muy tenue (`opacity-20 mix-blend-overlay`)
+  como watermark — se lee como un placeholder editorial intencional, no
+  como una imagen que falló en cargar.
+- Badge "Foto próximamente" en las piezas más grandes (galería, díptico,
+  `OutfitGrid`, `FeatureStory`) para que quede explícito.
+- **`Gallery` ya soporta el caso con fotos reales** sin tocar nada más:
+  en cuanto `product.images` deje de venir vacío desde Shopify, cae
+  automáticamente al carrusel real (ventana deslizante de 2 imágenes,
+  flechas, contador `n/N`, thumbnails con más de 2 fotos).
+- **`ArrowsRightLeftIcon`/`SunIcon`** (Ajuste/Clima) y los 3 paneles de
+  `FeatureStory` seguirán funcionando igual cuando haya fotos — solo
+  cambia qué se pinta detrás, no la estructura.
+
+### Sin fabricar datos comerciales — confirmado con el cliente antes de construir
+
+Tres decisiones donde se paró a preguntar en vez de inventar, porque son
+afirmaciones reales de cara al cliente final (no solo estética):
+
+1. **Cuotas de pago:** la referencia de On mostraba Klarna (que no opera
+   en México) y no hay ningún proveedor de MSI/BNPL integrado en esta
+   tienda. La nota debajo de "Añadir al carrito" (`MX$precio÷3`) es
+   **cálculo de referencia explícito**, sin nombrar proveedor ni prometer
+   "0% interés" — actualizar/nombrar el proveedor real en cuanto exista.
+2. **Ajuste/Clima:** no hay clasificación real por producto en Shopify.
+   `fitFor`/`climateFor` (`lib/product-types.ts`) son una **heurística por
+   `productType`** (ej. Chamarra→Frío) — aproximada, no exacta, confirmada
+   como aceptable por el cliente mientras no se clasifique el catálogo a
+   mano. Cada valor lleva un botón "i" (`InfoBadge`, popover de click con
+   botón de cerrar — no un `title` nativo de hover) que explica qué
+   significa cada valor y aclara que es estimado. Si el cliente clasifica
+   el catálogo real después, reemplazar `FIT_BY_TYPE`/`CLIMATE_BY_TYPE` por
+   un metafield real de Shopify.
+3. **Acordeón de info** (`ProductInfoAccordion`, debajo de la galería):
+   "Talla y ajuste" y "Envío y devolución" enlazan a páginas reales
+   (`/guia-de-tallas`, `/soporte`); "Instrucciones de cuidado" y
+   "Materiales y transparencia" muestran nota "pendiente" explícita — no
+   existe ese texto real todavía y no se inventó composición de tela ni
+   política de envíos.
+
+**Tampoco se agregó** el dato tipo "Callum mide 1.88m y lleva talla M"
+(modelo/fit por producto, de la referencia de On) ni el badge "TOP VENTAS"
+del carrusel final — ninguno de los dos existe como dato real en Shopify
+hoy (no hay medidas de modelo por producto, y `getProductRecommendations`
+no es lo mismo que el sort `BEST_SELLING` real de las colecciones).
+
+### Piezas construidas, por sección
+
+- **`Gallery`** — díptico (`grid grid-cols-2`), no un solo cuadro: panel
+  izquierdo = vista "producto solo", derecho = "con modelo" (estáticos,
+  simultáneos — un hover no aplica en un díptico de 2 fotos fijas). El hex
+  activo viene del color seleccionado en `VariantSelector` vía
+  `colorSwatches` que le pasa la página. Con fotos reales: ventana
+  deslizante de 2 imágenes, flechas, contador. El link "Ideas para
+  combinar ↓" vive en la misma fila que las flechas/contador y hace scroll
+  suave a `#ideas-para-combinar` (el ancla de `OutfitGrid`).
+- **`VariantSelector`** — "Color" renderiza swatches cuadrados
+  `h-14 w-14 rounded-md` pintados con `productGradient(hex)` (se ven como
+  mini-foto de la prenda, no un círculo de Pantone plano); "Talla" son
+  píldoras negro/blanco con link real a "Guía de tallas" en la misma fila.
+- **`ProductDescription`** — breadcrumb real "Comprar › Género › Tipo"
+  derivado de `product.tags` (las colecciones smart de Shopify se arman
+  con reglas de tag por género) + `MEGA_MENU`; corazón de favoritos
+  inline junto al título (`HeartButton` con `variant="inline"`, sin romper
+  su uso `variant="overlay"` en las tarjetas); precio como texto plano
+  `MX$1,234`; `CompleteTheLook` (cross-sell real, no inventado); nota de
+  cuotas.
+- **`ProductInfoAccordion`** — 4 secciones expandibles con el patrón
+  `grid-rows-[0fr]`→`[1fr]` (altura animable sin medir con JS ni usar
+  `<details>` nativo).
+- **`FitClimateRow`** (en `page.tsx`, full-width) — ver heurística arriba.
+- **`OutfitGrid`** — foto grande del outfit (color del producto que se
+  está viendo) + grid de hasta 6 piezas recomendadas, cada una con un
+  hotspot (punto blanco) que al hover revela tarjeta flotante: título,
+  precio, swatches de color reales, flecha al producto.
+- **`FeatureStory`** — 3 paneles foto+título+párrafo, cada uno con su
+  propio gradiente (`productGradient`/`modelGradient`/`detailGradient`)
+  para no verse idénticos. Copy: paneles 1-2 reusan `fitFor`/`climateFor`
+  con una frase genérica fija por valor; panel 3 usa `product.description`
+  real de Shopify (el mismo texto que ya va al JSON-LD).
+- **`RecommendationsCarousel`** — reutiliza tal cual el patrón "breakout
+  grid" de `components/product-showcase.tsx` (home) y la `ProductCard` de
+  `/search`/`/search/[collection]` (con el nuevo prop `className` opcional)
+  en vez de crear una tercera versión de tarjeta. Vive **fuera** del
+  `max-w-screen-2xl` de la página — ese wrapper duplicaría el límite de
+  ancho que el propio breakout grid ya resuelve.
+- **`components/cart/add-to-cart.tsx`** — botón rosa Ago (`#b48b8c`), copy
+  en español ("Añadir al carrito"/"Selecciona una opción"/"Agotado").
+- **`components/prose.tsx`** — sin clases `dark:` (también usado en
+  `app/[page]/page.tsx`, páginas legales/CMS).
+
+### Pendiente
+
+- Sustituir los placeholders de gradiente por fotografía real (galería,
+  díptico, `OutfitGrid`, `FeatureStory`) en cuanto el cliente la tome — no
+  requiere tocar código, solo que `product.images` deje de venir vacío.
+- Nombrar un proveedor real de MSI/BNPL cuando exista, en vez de la nota
+  de cálculo informativo.
+- Reemplazar la heurística `fitFor`/`climateFor` por un metafield real si
+  el cliente clasifica el catálogo a mano.
+- Texto real de envíos/devoluciones, cuidado de tela y materiales
+  (`ProductInfoAccordion` — hoy "pendiente" explícito).

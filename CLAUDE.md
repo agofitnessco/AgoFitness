@@ -207,8 +207,21 @@ no este archivo.
   quedado sin ese fix. Ver `docs/navbar.md`. Esa página sigue siendo en
   buena parte el scaffold sin rediseñar de Next.js Commerce visualmente —
   solo se arregló el crash, el rediseño sigue pendiente.
+- **`/product/[handle]` rediseñada por completo (15 julio 2026, 8
+  iteraciones sobre referencias de On Running y Alo Yoga)** — dejó de ser
+  el scaffold de Next.js Commerce. Ver `docs/tienda.md`, sección "Página de
+  producto individual", para el estado completo: galería en díptico con
+  placeholder de gradiente + watermark (soporta fotos reales sin tocar
+  código en cuanto existan), breadcrumb real por tags, swatches "foto",
+  acordeón de info, fila Ajuste/Clima (heurística por tipo de prenda, no
+  merchandising real), "Ideas para combinar" (shop-the-look), 3 paneles
+  editoriales (`FeatureStory`) y un carrusel final de recomendaciones.
+  **Nada de copy comercial se inventó sin confirmar** (cuotas de pago sin
+  proveedor real, ajuste/clima como estimado, envíos/cuidado/materiales
+  como "pendiente" explícito) — ver esa misma sección para el detalle de
+  qué se preguntó antes de construir.
 - Pendiente: crear colección `ninos` (aún sin catálogo), precio real de
   Kisu (hoy en $0.00), sustituir los placeholders (hero, categorías,
-  carrusel/tarjetas de colección, `featuredImage` del carrito) por
-  fotografía real de producto/modelo, rediseñar `/product/[handle]`
-  y seguir con el resto del home.
+  carrusel/tarjetas de colección, galería de producto, `featuredImage`
+  del carrito) por fotografía real de producto/modelo, y seguir con el
+  resto del home.

@@ -57,6 +57,11 @@ export function modelGradient(hex: string) {
   return `linear-gradient(135deg, ${hex} 0%, ${shade(hex, -35)} 55%, ${shade(hex, -70)} 100%)`;
 }
 
+/** Tercera variante — usada en paneles editoriales (ej. `FeatureStory`) que necesitan 3 fotos distintas de la misma prenda. */
+export function detailGradient(hex: string) {
+  return `linear-gradient(200deg, ${shade(hex, -20)} 0%, ${hex} 55%, ${shade(hex, 40)} 100%)`;
+}
+
 /**
  * Color de la primera variante de un producto — usado donde solo hace falta
  * UN color representativo (tarjetas chicas, snapshot de recientemente

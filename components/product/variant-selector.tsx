@@ -1,7 +1,9 @@
 "use client";
 
 import clsx from "clsx";
+import { colorHex, productGradient } from "lib/color-placeholder";
 import { ProductOption, ProductVariant } from "lib/shopify/types";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type Combination = {
@@ -45,62 +47,112 @@ export function VariantSelector({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  return options.map((option) => (
-    <form key={option.id}>
-      <dl className="mb-8">
-        <dt className="mb-4 text-sm uppercase tracking-wide">{option.name}</dt>
-        <dd className="flex flex-wrap gap-3">
-          {option.values.map((value) => {
-            const optionNameLowerCase = option.name.toLowerCase();
+  return options.map((option) => {
+    const optionNameLowerCase = option.name.toLowerCase();
+    const isColor = optionNameLowerCase === "color";
+    const isSize = optionNameLowerCase === "talla";
+    const selectedValue = searchParams.get(optionNameLowerCase) ?? option.values[0];
 
-            // Base option params on current searchParams so we can preserve any other param state.
-            const optionParams: Record<string, string> = {};
-            searchParams.forEach((v, k) => (optionParams[k] = v));
-            optionParams[optionNameLowerCase] = value;
-
-            // Filter out invalid options and check if the option combination is available for sale.
-            const filtered = Object.entries(optionParams).filter(
-              ([key, value]) =>
-                options.find(
-                  (option) =>
-                    option.name.toLowerCase() === key &&
-                    option.values.includes(value),
-                ),
-            );
-            const isAvailableForSale = combinations.find((combination) =>
-              filtered.every(
-                ([key, value]) =>
-                  combination[key] === value && combination.availableForSale,
-              ),
-            );
-
-            // The option is active if it's in the selected options.
-            const isActive = searchParams.get(optionNameLowerCase) === value;
-
-            return (
-              <button
-                formAction={() => updateOption(optionNameLowerCase, value)}
-                key={value}
-                aria-disabled={!isAvailableForSale}
-                disabled={!isAvailableForSale}
-                title={`${option.name} ${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
-                className={clsx(
-                  "flex min-w-[48px] items-center justify-center rounded-full border bg-neutral-100 px-2 py-1 text-sm dark:border-neutral-800 dark:bg-neutral-900",
-                  {
-                    "cursor-default ring-2 ring-blue-600": isActive,
-                    "ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-blue-600":
-                      !isActive && isAvailableForSale,
-                    "relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 dark:before:bg-neutral-700":
-                      !isAvailableForSale,
-                  },
-                )}
+    return (
+      <form key={option.id}>
+        <dl className="mb-6">
+          <dt className="mb-3 flex items-center justify-between text-xs font-bold tracking-[0.16em] text-neutral-500 uppercase">
+            <span>
+              {option.name}
+              {isColor && selectedValue ? (
+                <span className="ml-1 font-normal normal-case text-black">
+                  : {selectedValue}
+                </span>
+              ) : null}
+            </span>
+            {isSize ? (
+              <Link
+                href="/guia-de-tallas"
+                className="font-medium normal-case tracking-normal text-neutral-500 underline underline-offset-2 hover:text-black"
               >
-                {value}
-              </button>
-            );
-          })}
-        </dd>
-      </dl>
-    </form>
-  ));
+                Guía de tallas
+              </Link>
+            ) : null}
+          </dt>
+          <dd
+            className={
+              isSize
+                ? "grid grid-cols-4 gap-2 sm:grid-cols-5"
+                : "flex flex-wrap gap-2.5"
+            }
+          >
+            {option.values.map((value) => {
+              // Base option params on current searchParams so we can preserve any other param state.
+              const optionParams: Record<string, string> = {};
+              searchParams.forEach((v, k) => (optionParams[k] = v));
+              optionParams[optionNameLowerCase] = value;
+
+              // Filter out invalid options and check if the option combination is available for sale.
+              const filtered = Object.entries(optionParams).filter(
+                ([key, value]) =>
+                  options.find(
+                    (option) =>
+                      option.name.toLowerCase() === key &&
+                      option.values.includes(value),
+                  ),
+              );
+              const isAvailableForSale = combinations.find((combination) =>
+                filtered.every(
+                  ([key, value]) =>
+                    combination[key] === value && combination.availableForSale,
+                ),
+              );
+
+              // The option is active if it's in the selected options.
+              const isActive = searchParams.get(optionNameLowerCase) === value;
+
+              if (isColor) {
+                const hex = colorHex(value);
+                return (
+                  <button
+                    key={value}
+                    formAction={() => updateOption(optionNameLowerCase, value)}
+                    aria-disabled={!isAvailableForSale}
+                    disabled={!isAvailableForSale}
+                    aria-label={`Color ${value}${!isAvailableForSale ? " (agotado)" : ""}`}
+                    title={value}
+                    className={clsx(
+                      "h-14 w-14 overflow-hidden rounded-md border transition-shadow disabled:cursor-not-allowed disabled:opacity-30",
+                      isActive
+                        ? "border-black ring-1 ring-black"
+                        : "border-black/10",
+                    )}
+                    style={{ backgroundImage: productGradient(hex) }}
+                  />
+                );
+              }
+
+              return (
+                <button
+                  formAction={() => updateOption(optionNameLowerCase, value)}
+                  key={value}
+                  aria-disabled={!isAvailableForSale}
+                  disabled={!isAvailableForSale}
+                  title={`${option.name} ${value}${!isAvailableForSale ? " (agotado)" : ""}`}
+                  className={clsx(
+                    "flex items-center justify-center border text-sm font-medium transition-colors",
+                    isSize ? "rounded-md px-2 py-3" : "min-w-11 rounded-full px-3 py-1.5",
+                    {
+                      "border-black bg-black text-white": isActive,
+                      "border-neutral-300 text-black hover:border-black":
+                        !isActive && isAvailableForSale,
+                      "cursor-not-allowed border-neutral-200 text-neutral-300":
+                        !isAvailableForSale,
+                    },
+                  )}
+                >
+                  {value}
+                </button>
+              );
+            })}
+          </dd>
+        </dl>
+      </form>
+    );
+  });
 }

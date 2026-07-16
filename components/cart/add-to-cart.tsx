@@ -16,13 +16,15 @@ function SubmitButton({
   selectedVariantId: string | undefined;
 }) {
   const buttonClasses =
-    "relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white";
-  const disabledClasses = "cursor-not-allowed opacity-60 hover:opacity-60";
+    "flex w-full items-center justify-center gap-2 rounded-full p-4 text-sm font-bold tracking-wide transition-transform active:scale-[0.98]";
+  const disabledClasses =
+    "cursor-not-allowed bg-neutral-100 text-neutral-400";
+  const readyClasses = "bg-[#b48b8c] text-white hover:bg-[#a17879]";
 
   if (!availableForSale) {
     return (
       <button disabled className={clsx(buttonClasses, disabledClasses)}>
-        Out Of Stock
+        Agotado
       </button>
     );
   }
@@ -30,29 +32,23 @@ function SubmitButton({
   if (!selectedVariantId) {
     return (
       <button
-        aria-label="Please select an option"
+        aria-label="Selecciona una opción"
         disabled
         className={clsx(buttonClasses, disabledClasses)}
       >
-        <div className="absolute left-0 ml-4">
-          <PlusIcon className="h-5" />
-        </div>
-        Add To Cart
+        <PlusIcon className="h-5" />
+        Selecciona una opción
       </button>
     );
   }
 
   return (
     <button
-      aria-label="Add to cart"
-      className={clsx(buttonClasses, {
-        "hover:opacity-90": true,
-      })}
+      aria-label="Añadir al carrito"
+      className={clsx(buttonClasses, readyClasses)}
     >
-      <div className="absolute left-0 ml-4">
-        <PlusIcon className="h-5" />
-      </div>
-      Add To Cart
+      <PlusIcon className="h-5" />
+      Añadir al carrito
     </button>
   );
 }

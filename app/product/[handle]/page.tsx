@@ -1,13 +1,19 @@
-import { GridTileImage } from "components/grid/tile";
+import { ArrowsRightLeftIcon, SunIcon } from "@heroicons/react/24/outline";
 import Footer from "components/layout/footer";
+import { FeatureStory } from "components/product/feature-story";
 import { Gallery } from "components/product/gallery";
+import { InfoBadge } from "components/product/info-badge";
+import { OutfitGrid } from "components/product/outfit-grid";
 import { ProductDescription } from "components/product/product-description";
+import { ProductInfoAccordion } from "components/product/product-info-accordion";
 import RecordRecentlyViewed from "components/product/record-recently-viewed";
+import { RecommendationsCarousel } from "components/product/recommendations-carousel";
+import { colorHex } from "lib/color-placeholder";
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
+import { climateFor, fitFor } from "lib/product-types";
 import { getProduct, getProductRecommendations } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -56,6 +62,18 @@ export default async function ProductPage(props: {
 
   if (!product) return notFound();
 
+  const colorOption = product.options.find(
+    (option) => option.name.toLowerCase() === "color",
+  );
+  const colorSwatches = colorOption?.values.map((value) => ({
+    name: value,
+    hex: colorHex(value),
+  }));
+
+  const recommendations = await getProductRecommendations(product.id);
+  const completeWith = recommendations[0];
+  const otherRecommendations = recommendations.slice(1);
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -82,12 +100,12 @@ export default async function ProductPage(props: {
         }}
       />
       <RecordRecentlyViewed product={product} />
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
-        <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
-          <div className="h-full w-full basis-full lg:basis-4/6">
+      <div className="w-full px-4 py-8 lg:px-8 lg:py-12">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-16">
+          <div className="w-full">
             <Suspense
               fallback={
-                <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-neutral-100" />
               }
             >
               <Gallery
@@ -95,57 +113,71 @@ export default async function ProductPage(props: {
                   src: image.url,
                   altText: image.altText,
                 }))}
+                colorSwatches={colorSwatches}
               />
             </Suspense>
+            <ProductInfoAccordion />
           </div>
 
-          <div className="basis-full lg:basis-2/6">
+          <div className="w-full lg:pt-4">
             <Suspense fallback={null}>
-              <ProductDescription product={product} />
+              <ProductDescription product={product} completeWith={completeWith} />
             </Suspense>
           </div>
         </div>
-        <RelatedProducts id={product.id} />
+        <FitClimateRow productType={product.productType} />
       </div>
+      <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
+        <OutfitGrid heroProduct={product} pieces={otherRecommendations} />
+        <FeatureStory product={product} />
+      </div>
+      <RecommendationsCarousel products={recommendations} />
       <Footer />
     </>
   );
 }
 
-async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = await getProductRecommendations(id);
-
-  if (!relatedProducts.length) return null;
+function FitClimateRow({ productType }: { productType: string }) {
+  const estimateNote =
+    "Esta clasificación es una estimación por tipo de prenda, no una medición individual de esta pieza.";
 
   return (
-    <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
-      <ul className="flex w-full gap-4 overflow-x-auto pt-1">
-        {relatedProducts.map((product) => (
-          <li
-            key={product.handle}
-            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
-          >
-            <Link
-              className="relative h-full w-full"
-              href={`/product/${product.handle}`}
-              prefetch={true}
-            >
-              <GridTileImage
-                alt={product.title}
-                label={{
-                  title: product.title,
-                  amount: product.priceRange.maxVariantPrice.amount,
-                  currencyCode: product.priceRange.maxVariantPrice.currencyCode,
-                }}
-                src={product.featuredImage?.url}
-                fill
-                sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
-              />
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className="mt-10 grid grid-cols-1 gap-6 border-t border-neutral-200 pt-8 sm:grid-cols-2">
+      <div className="flex items-center gap-3">
+        <ArrowsRightLeftIcon className="h-6 w-6 flex-none text-neutral-400" />
+        <div>
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-neutral-500 uppercase">
+            Ajuste{" "}
+            <InfoBadge>
+              <p>Ajustado: se ciñe al cuerpo.</p>
+              <p className="mt-2">Holgado: corte amplio y cómodo.</p>
+              <p className="mt-2">Estándar: ni ceñido ni amplio.</p>
+              <p className="mt-4 text-xs text-white/60">{estimateNote}</p>
+            </InfoBadge>
+          </p>
+          <p className="text-xl font-bold text-black">
+            {fitFor(productType)}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <SunIcon className="h-6 w-6 flex-none text-neutral-400" />
+        <div>
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-neutral-500 uppercase">
+            Clima{" "}
+            <InfoBadge>
+              <p>Cálido: pensada para clima templado-caluroso.</p>
+              <p className="mt-2">Frío: pensada para clima frío.</p>
+              <p className="mt-2">Templado: temperaturas intermedias.</p>
+              <p className="mt-2">Todo el año: funciona en cualquier clima.</p>
+              <p className="mt-4 text-xs text-white/60">{estimateNote}</p>
+            </InfoBadge>
+          </p>
+          <p className="text-xl font-bold text-black">
+            {climateFor(productType)}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
