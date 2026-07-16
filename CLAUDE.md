@@ -220,6 +220,23 @@ no este archivo.
   proveedor real, ajuste/clima como estimado, envíos/cuidado/materiales
   como "pendiente" explícito) — ver esa misma sección para el detalle de
   qué se preguntó antes de construir.
+- **Fila Ajuste/Clima reubicada (15 julio 2026):** vivía como fila
+  full-width separada del grid de 2 columnas de `/product/[handle]` — se
+  sentía "flotando" con mucho espacio vacío a la derecha. Ahora vive dentro
+  de la misma columna angosta del acordeón de info, justo debajo, como
+  continuación del mismo bloque.
+- **Bug corregido — carrusel del home sin link al producto (15 julio
+  2026):** `components/product-showcase.tsx` (el carrusel "Lo más
+  nuevo"/"Tendencias actuales") nunca envolvía la imagen en un `<Link>` —
+  solo los swatches de color y "Añadir rápido" eran interactivos, la
+  tarjeta no llevaba a `/product/{handle}`. Se agregó el mismo patrón que
+  ya usa `collection/product-card.tsx` (Link solo alrededor de las capas
+  de imagen, hermano del corazón/flyout, no padre — para no anidar
+  botones dentro de un `<a>`).
+- **Banner de Gymco desactivado (no eliminado), 15 julio 2026** — a pedido
+  del cliente. Comentado en `app/page.tsx` (import + `<GymcoBanner />`),
+  componente intacto en `components/gymco-banner.tsx`. Ver
+  `docs/decisiones.md` para cómo reactivarlo.
 - Pendiente: crear colección `ninos` (aún sin catálogo), precio real de
   Kisu (hoy en $0.00), sustituir los placeholders (hero, categorías,
   carrusel/tarjetas de colección, galería de producto, `featuredImage`

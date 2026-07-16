@@ -10,6 +10,7 @@ import {
   ELEMENT_PRODUCTS,
   type ShowcaseProduct,
 } from "lib/product-showcase-data";
+import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 
 /**
@@ -66,16 +67,22 @@ function ProductCard({ product }: { product: ShowcaseProduct }) {
   return (
     <li className="group w-[75%] flex-none snap-start sm:w-[45%] lg:w-[23%]">
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
-        {/* producto solo */}
-        <div
-          className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0"
-          style={{ backgroundImage: productGradient(activeColor.hex) }}
-        />
-        {/* con modelo */}
-        <div
-          className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
-          style={{ backgroundImage: modelGradient(activeColor.hex) }}
-        />
+        <Link
+          href={`/product/${product.handle}`}
+          prefetch={true}
+          className="absolute inset-0"
+        >
+          {/* producto solo */}
+          <div
+            className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0"
+            style={{ backgroundImage: productGradient(activeColor.hex) }}
+          />
+          {/* con modelo */}
+          <div
+            className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+            style={{ backgroundImage: modelGradient(activeColor.hex) }}
+          />
+        </Link>
 
         <HeartButton
           item={{

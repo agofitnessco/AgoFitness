@@ -1,6 +1,6 @@
 import { Carousel } from "components/carousel";
 import CategoryShowcase from "components/category-showcase";
-import GymcoBanner from "components/gymco-banner";
+// import GymcoBanner from "components/gymco-banner"; // desactivado 15 jul 2026 — ver nota en <HomePage>
 import { ThreeItemGrid } from "components/grid/three-items";
 import Footer from "components/layout/footer";
 import Hero from "components/layout/hero";
@@ -36,7 +36,9 @@ export default function HomePage() {
       <Hero />
       <CategoryShowcase />
       <ProductShowcase title="Lo más nuevo" />
-      <GymcoBanner />
+      {/* GymcoBanner desactivado a pedido del cliente (15 jul 2026) — componente
+          intacto en components/gymco-banner.tsx, solo descomentar el import de
+          arriba + esta línea para reactivarlo. Ver docs/decisiones.md. */}
       <ProductShowcase title="Tendencias actuales" products={TRENDING_PRODUCTS} />
       <ThreeItemGrid />
       <Carousel />

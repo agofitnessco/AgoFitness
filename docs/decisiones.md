@@ -80,3 +80,15 @@ en vez de instalar una fuente geométrica nueva de Google Fonts.
 **Razón:** cero riesgo de derechos de autor, cero trabajo extra de carga de
 fuente, y Geist Bold ya da una sensación visual similar (sans geométrica,
 bold, tight tracking) a la referencia.
+
+## 2026-07-15 — Banner de Gymco desactivado (no eliminado) del home
+
+**Decisión:** se comentó el `import` y el `<GymcoBanner />` en
+`app/page.tsx` (entre los dos carruseles "Lo más nuevo"/"Tendencias
+actuales") a pedido del cliente. **El componente no se borró** —
+`components/gymco-banner.tsx` sigue intacto en el repo.
+
+**Para reactivarlo:** descomentar las dos líneas marcadas en
+`app/page.tsx` (el import y `<GymcoBanner />`). No requiere reconstruir
+nada — el componente sigue funcionando tal cual quedó documentado en
+`CLAUDE.md` (sección "Estado actual", banner de distribuidor Gymco).
