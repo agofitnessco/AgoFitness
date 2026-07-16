@@ -40,6 +40,66 @@ export type Collection = ShopifyCollection & {
   path: string;
 };
 
+export type CustomerAddress = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  province: string | null;
+  zip: string | null;
+  country: string | null;
+  phone: string | null;
+};
+
+export type CustomerAddressInput = {
+  firstName?: string;
+  lastName?: string;
+  address1?: string;
+  address2?: string;
+  city?: string;
+  province?: string;
+  zip?: string;
+  country?: string;
+  phone?: string;
+};
+
+export type OrderLineItem = {
+  title: string;
+  quantity: number;
+  variantTitle: string | null;
+  image: Image | null;
+};
+
+export type Order = {
+  id: string;
+  orderNumber: number;
+  processedAt: string;
+  financialStatus: string;
+  fulfillmentStatus: string;
+  statusUrl: string;
+  currentTotalPrice: Money;
+  lineItems: OrderLineItem[];
+};
+
+export type Customer = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  phone: string | null;
+  defaultAddress: CustomerAddress | null;
+  addresses: CustomerAddress[];
+  orders: Order[];
+};
+
+export type CustomerUserError = {
+  code: string;
+  field: string[] | null;
+  message: string;
+};
+
 export type Image = {
   url: string;
   altText: string;
@@ -269,5 +329,154 @@ export type ShopifyProductsOperation = {
     query?: string;
     reverse?: boolean;
     sortKey?: string;
+  };
+};
+
+export type ShopifyCustomerAddress = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  province: string | null;
+  zip: string | null;
+  country: string | null;
+  phone: string | null;
+};
+
+export type ShopifyOrderLineItem = {
+  title: string;
+  quantity: number;
+  variant: {
+    title: string;
+    image: Image | null;
+  } | null;
+};
+
+export type ShopifyOrder = {
+  id: string;
+  orderNumber: number;
+  processedAt: string;
+  financialStatus: string;
+  fulfillmentStatus: string;
+  statusUrl: string;
+  currentTotalPrice: Money;
+  lineItems: Connection<ShopifyOrderLineItem>;
+};
+
+export type ShopifyCustomer = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  phone: string | null;
+  defaultAddress: ShopifyCustomerAddress | null;
+  addresses: Connection<ShopifyCustomerAddress>;
+  orders: Connection<ShopifyOrder>;
+};
+
+export type ShopifyCustomerOperation = {
+  data: {
+    customer: ShopifyCustomer | null;
+  };
+  variables: {
+    customerAccessToken: string;
+  };
+};
+
+export type ShopifyCustomerAccessTokenCreateOperation = {
+  data: {
+    customerAccessTokenCreate: {
+      customerAccessToken: { accessToken: string; expiresAt: string } | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    input: { email: string; password: string };
+  };
+};
+
+export type ShopifyCustomerAccessTokenDeleteOperation = {
+  data: {
+    customerAccessTokenDelete: {
+      deletedAccessToken: string | null;
+      deletedCustomerAccessTokenId: string | null;
+      userErrors: { field: string[] | null; message: string }[];
+    };
+  };
+  variables: {
+    customerAccessToken: string;
+  };
+};
+
+export type ShopifyCustomerCreateOperation = {
+  data: {
+    customerCreate: {
+      customer: { id: string } | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    input: {
+      firstName?: string;
+      lastName?: string;
+      email: string;
+      password: string;
+      acceptsMarketing?: boolean;
+    };
+  };
+};
+
+export type ShopifyCustomerAddressCreateOperation = {
+  data: {
+    customerAddressCreate: {
+      customerAddress: { id: string } | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    customerAccessToken: string;
+    address: CustomerAddressInput;
+  };
+};
+
+export type ShopifyCustomerAddressUpdateOperation = {
+  data: {
+    customerAddressUpdate: {
+      customerAddress: { id: string } | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    customerAccessToken: string;
+    id: string;
+    address: CustomerAddressInput;
+  };
+};
+
+export type ShopifyCustomerAddressDeleteOperation = {
+  data: {
+    customerAddressDelete: {
+      deletedCustomerAddressId: string | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    customerAccessToken: string;
+    id: string;
+  };
+};
+
+export type ShopifyCustomerDefaultAddressUpdateOperation = {
+  data: {
+    customerDefaultAddressUpdate: {
+      customer: { id: string } | null;
+      customerUserErrors: CustomerUserError[];
+    };
+  };
+  variables: {
+    customerAccessToken: string;
+    addressId: string;
   };
 };

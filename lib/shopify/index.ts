@@ -18,12 +18,22 @@ import {
   editCartItemsMutation,
   removeFromCartMutation,
 } from "./mutations/cart";
+import {
+  customerAccessTokenCreateMutation,
+  customerAccessTokenDeleteMutation,
+  customerAddressCreateMutation,
+  customerAddressDeleteMutation,
+  customerAddressUpdateMutation,
+  customerCreateMutation,
+  customerDefaultAddressUpdateMutation,
+} from "./mutations/customer";
 import { getCartQuery } from "./queries/cart";
 import {
   getCollectionProductsQuery,
   getCollectionQuery,
   getCollectionsQuery,
 } from "./queries/collection";
+import { getCustomerQuery } from "./queries/customer";
 import { getMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
 import {
@@ -35,8 +45,13 @@ import {
   Cart,
   Collection,
   Connection,
+  Customer,
+  CustomerAddress,
+  CustomerAddressInput,
+  CustomerUserError,
   Image,
   Menu,
+  Order,
   Page,
   Product,
   ShopifyAddToCartOperation,
@@ -47,7 +62,18 @@ import {
   ShopifyCollectionProductsOperation,
   ShopifyCollectionsOperation,
   ShopifyCreateCartOperation,
+  ShopifyCustomer,
+  ShopifyCustomerAccessTokenCreateOperation,
+  ShopifyCustomerAccessTokenDeleteOperation,
+  ShopifyCustomerAddress,
+  ShopifyCustomerAddressCreateOperation,
+  ShopifyCustomerAddressDeleteOperation,
+  ShopifyCustomerAddressUpdateOperation,
+  ShopifyCustomerCreateOperation,
+  ShopifyCustomerDefaultAddressUpdateOperation,
+  ShopifyCustomerOperation,
   ShopifyMenuOperation,
+  ShopifyOrder,
   ShopifyPageOperation,
   ShopifyPagesOperation,
   ShopifyProduct,
@@ -141,7 +167,7 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
 };
 
 const reshapeCollection = (
-  collection: ShopifyCollection
+  collection: ShopifyCollection,
 ): Collection | undefined => {
   if (!collection) {
     return undefined;
@@ -183,7 +209,7 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
 
 const reshapeProduct = (
   product: ShopifyProduct,
-  filterHiddenProducts: boolean = true
+  filterHiddenProducts: boolean = true,
 ) => {
   if (
     !product ||
@@ -217,6 +243,35 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
   return reshapedProducts;
 };
 
+const reshapeCustomerAddress = (
+  address: ShopifyCustomerAddress,
+): CustomerAddress => ({ ...address });
+
+const reshapeOrder = (order: ShopifyOrder): Order => ({
+  ...order,
+  lineItems: removeEdgesAndNodes(order.lineItems).map((lineItem) => ({
+    title: lineItem.title,
+    quantity: lineItem.quantity,
+    variantTitle: lineItem.variant?.title ?? null,
+    image: lineItem.variant?.image ?? null,
+  })),
+});
+
+const reshapeCustomer = (customer: ShopifyCustomer): Customer => ({
+  id: customer.id,
+  firstName: customer.firstName,
+  lastName: customer.lastName,
+  email: customer.email,
+  phone: customer.phone,
+  defaultAddress: customer.defaultAddress
+    ? reshapeCustomerAddress(customer.defaultAddress)
+    : null,
+  addresses: removeEdgesAndNodes(customer.addresses).map(
+    reshapeCustomerAddress,
+  ),
+  orders: removeEdgesAndNodes(customer.orders).map(reshapeOrder),
+});
+
 export async function createCart(): Promise<Cart> {
   const res = await shopifyFetch<ShopifyCreateCartOperation>({
     query: createCartMutation,
@@ -226,7 +281,7 @@ export async function createCart(): Promise<Cart> {
 }
 
 export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[]
+  lines: { merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
@@ -253,7 +308,7 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart> {
 }
 
 export async function updateCart(
-  lines: { id: string; merchandiseId: string; quantity: number }[]
+  lines: { id: string; merchandiseId: string; quantity: number }[],
 ): Promise<Cart> {
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
@@ -292,7 +347,7 @@ export async function getCart(): Promise<Cart | undefined> {
 }
 
 export async function getCollection(
-  handle: string
+  handle: string,
 ): Promise<Collection | undefined> {
   "use cache";
   cacheTag(TAGS.collections);
@@ -323,7 +378,7 @@ export async function getCollectionProducts({
 
   if (!endpoint) {
     console.log(
-      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`
+      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`,
     );
     return [];
   }
@@ -343,7 +398,7 @@ export async function getCollectionProducts({
   }
 
   return reshapeProducts(
-    removeEdgesAndNodes(res.body.data.collection.products)
+    removeEdgesAndNodes(res.body.data.collection.products),
   );
 }
 
@@ -388,7 +443,7 @@ export async function getCollections(): Promise<Collection[]> {
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(shopifyCollections).filter(
-      (collection) => !collection.handle.startsWith("hidden")
+      (collection) => !collection.handle.startsWith("hidden"),
     ),
   ];
 
@@ -461,7 +516,7 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
 }
 
 export async function getProductRecommendations(
-  productId: string
+  productId: string,
 ): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.products);
@@ -500,6 +555,153 @@ export async function getProducts({
   });
 
   return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+}
+
+/**
+ * Cliente clásico de Shopify (Storefront API `customerAccessTokenCreate` +
+ * `customer(customerAccessToken:)`) — confirmado como funcional en esta
+ * tienda en julio 2026 (la tienda NO usa las "New Customer Accounts" de
+ * Shopify, que son OAuth-only y no permiten login custom). El
+ * `customerAccessToken` se guarda en una cookie httpOnly desde
+ * `app/cuenta/actions.ts`, igual que `cartId` para el carrito.
+ */
+export async function loginCustomer(
+  email: string,
+  password: string,
+): Promise<
+  { accessToken: string; expiresAt: string } | { errors: CustomerUserError[] }
+> {
+  const res = await shopifyFetch<ShopifyCustomerAccessTokenCreateOperation>({
+    query: customerAccessTokenCreateMutation,
+    variables: { input: { email, password } },
+  });
+
+  const { customerAccessToken, customerUserErrors } =
+    res.body.data.customerAccessTokenCreate;
+
+  if (!customerAccessToken || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return customerAccessToken;
+}
+
+export async function registerCustomer(input: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}): Promise<{ customerId: string } | { errors: CustomerUserError[] }> {
+  const res = await shopifyFetch<ShopifyCustomerCreateOperation>({
+    query: customerCreateMutation,
+    variables: { input },
+  });
+
+  const { customer, customerUserErrors } = res.body.data.customerCreate;
+
+  if (!customer || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return { customerId: customer.id };
+}
+
+export async function deleteCustomerAccessToken(
+  customerAccessToken: string,
+): Promise<void> {
+  await shopifyFetch<ShopifyCustomerAccessTokenDeleteOperation>({
+    query: customerAccessTokenDeleteMutation,
+    variables: { customerAccessToken },
+  });
+}
+
+export async function getCustomer(
+  customerAccessToken: string,
+): Promise<Customer | undefined> {
+  const res = await shopifyFetch<ShopifyCustomerOperation>({
+    query: getCustomerQuery,
+    variables: { customerAccessToken },
+  });
+
+  const customer = res.body.data.customer;
+  return customer ? reshapeCustomer(customer) : undefined;
+}
+
+export async function createCustomerAddress(
+  customerAccessToken: string,
+  address: CustomerAddressInput,
+): Promise<{ addressId: string } | { errors: CustomerUserError[] }> {
+  const res = await shopifyFetch<ShopifyCustomerAddressCreateOperation>({
+    query: customerAddressCreateMutation,
+    variables: { customerAccessToken, address },
+  });
+
+  const { customerAddress, customerUserErrors } =
+    res.body.data.customerAddressCreate;
+
+  if (!customerAddress || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return { addressId: customerAddress.id };
+}
+
+export async function updateCustomerAddress(
+  customerAccessToken: string,
+  id: string,
+  address: CustomerAddressInput,
+): Promise<{ addressId: string } | { errors: CustomerUserError[] }> {
+  const res = await shopifyFetch<ShopifyCustomerAddressUpdateOperation>({
+    query: customerAddressUpdateMutation,
+    variables: { customerAccessToken, id, address },
+  });
+
+  const { customerAddress, customerUserErrors } =
+    res.body.data.customerAddressUpdate;
+
+  if (!customerAddress || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return { addressId: customerAddress.id };
+}
+
+export async function deleteCustomerAddress(
+  customerAccessToken: string,
+  id: string,
+): Promise<{ success: true } | { errors: CustomerUserError[] }> {
+  const res = await shopifyFetch<ShopifyCustomerAddressDeleteOperation>({
+    query: customerAddressDeleteMutation,
+    variables: { customerAccessToken, id },
+  });
+
+  const { deletedCustomerAddressId, customerUserErrors } =
+    res.body.data.customerAddressDelete;
+
+  if (!deletedCustomerAddressId || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return { success: true };
+}
+
+export async function setDefaultCustomerAddress(
+  customerAccessToken: string,
+  addressId: string,
+): Promise<{ success: true } | { errors: CustomerUserError[] }> {
+  const res = await shopifyFetch<ShopifyCustomerDefaultAddressUpdateOperation>({
+    query: customerDefaultAddressUpdateMutation,
+    variables: { customerAccessToken, addressId },
+  });
+
+  const { customer, customerUserErrors } =
+    res.body.data.customerDefaultAddressUpdate;
+
+  if (!customer || customerUserErrors.length > 0) {
+    return { errors: customerUserErrors };
+  }
+
+  return { success: true };
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.

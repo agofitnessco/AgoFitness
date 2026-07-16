@@ -43,6 +43,7 @@ export const TAGS = {
 export const HIDDEN_PRODUCT_TAG = "nextjs-frontend-hidden";
 export const DEFAULT_OPTION = "Default Title";
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2023-01/graphql.json";
+export const CUSTOMER_TOKEN_COOKIE = "customerToken";
 
 export const CATEGORY_LINKS = [
   { title: "Mujer", path: "/search/mujer" },
@@ -129,7 +130,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
       },
     ],
   },
-  "Niños": {
+  Niños: {
     // Sin productos/colección real todavía — pendiente (ver docs/navbar.md).
     primaryLinks: [{ label: "Ver todo", path: "/search/ninos" }],
     secondaryLinks: [
