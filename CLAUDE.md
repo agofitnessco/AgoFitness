@@ -252,3 +252,22 @@ no este archivo.
   `mobile-menu-panel.tsx`) que suben desde abajo con Headless UI
   Transition/Dialog. El fetch de sugerencias de búsqueda se compartió
   entre desktop y mobile en `lib/use-search-suggest.ts`.
+- **Toast de bienvenida del template eliminado (15 julio 2026)** —
+  `components/welcome-toast.tsx` (el "🛍️ Welcome to Next.js Commerce!"
+  que salía a cualquier visitante nuevo) se quitó de `app/layout.tsx` y
+  se borró el archivo. Era copy del scaffold de Vercel, no de la marca.
+- **Favicon y app icons reales (15 julio 2026)** — el wordmark
+  `public/imgs/logo-ago.png` se recortó a su bounding box real y se
+  centró sobre un cuadro blanco (el logo es un wordmark ancho, no un
+  ícono cuadrado — a tamaños muy chicos como 16×16 se ve más como una
+  mancha rosa que como "AGO", es una limitación del propio logo, no del
+  recorte). Set completo generado: `app/favicon.ico` (multi-resolución
+  16/32/48/64), `public/favicon-{16,32,48,96}x{...}.png`,
+  `public/apple-touch-icon-{57,60,72,76,114,120,144,152,167,180}x{...}.png`
+  (set clásico completo, no solo el 180×180 que Apple recomienda hoy —
+  pedido explícito), `public/android-chrome-{192,512}x{...}.png` y
+  `public/site.webmanifest`. Todo declarado vía `metadata.icons` /
+  `metadata.manifest` en `app/layout.tsx` (no los file-conventions
+  `app/icon.png`/`app/apple-icon.png` de Next, que solo soportan un
+  tamaño cada uno sin `generateImageMetadata`). **Si el logo cambia,
+  regenerar todo el set** — no editar cada PNG a mano.
