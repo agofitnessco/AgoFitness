@@ -1,5 +1,5 @@
 import ProductCard from "components/collection/product-card";
-import { defaultSort, sorting } from "lib/constants";
+import { defaultSort, resolveSearchQuery, sorting } from "lib/constants";
 import { getProducts } from "lib/shopify";
 
 export const metadata = {
@@ -15,7 +15,11 @@ export default async function SearchPage(props: {
   const { sortKey, reverse } =
     sorting.find((item) => item.slug === sort) || defaultSort;
 
-  const products = await getProducts({ sortKey, reverse, query: searchValue });
+  const products = await getProducts({
+    sortKey,
+    reverse,
+    query: resolveSearchQuery(searchValue),
+  });
 
   return (
     <div className="mx-auto w-full max-w-screen-2xl px-4 py-12 lg:px-8">

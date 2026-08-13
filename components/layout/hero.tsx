@@ -1,16 +1,22 @@
 import FillButton from "components/ui/fill-button";
+import Image from "next/image";
 import Link from "next/link";
 
 /**
- * Placeholder de marca — sustituir el div de fondo por una foto real
- * (producto/modelo) cuando esté disponible. Ver docs/navbar.md para el
- * patrón de navbar transparente que depende de este componente ocupando
- * la primera pantalla completa.
+ * Ver docs/navbar.md para el patrón de navbar transparente que depende de
+ * este componente ocupando la primera pantalla completa.
  */
 export default function Hero() {
   return (
     <section className="relative flex h-[100svh] w-full flex-col justify-end overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_140%_90%_at_50%_-10%,#d9b7b8_0%,#8f6566_42%,#241819_100%)]" />
+      <Image
+        src="/imgs/hero/banner-1.jpg"
+        alt="Ago Fitness — nueva colección"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/5 to-black/70" />
 
       <div className="relative z-10 px-6 pb-20 sm:pb-24 lg:px-16 lg:pb-28">

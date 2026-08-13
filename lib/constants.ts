@@ -89,6 +89,32 @@ export const POPULAR_SEARCH_TERMS = [
   "tops",
 ];
 
+/**
+ * Shopify busca por texto libre sin stemming de plural→singular en
+ * español — `query: "playeras"` no encuentra productos con
+ * `product_type: "Playera"` aunque sea evidentemente la misma categoría
+ * ("no hay resultados" al hacer clic en la pill). Se traduce cada término
+ * de `POPULAR_SEARCH_TERMS` a una búsqueda estructurada por
+ * `product_type` (match exacto, sin ambigüedad de idioma) antes de
+ * mandarla a la Storefront API — el texto visible en el buscador/resultado
+ * sigue siendo el término bonito en español, solo la query real cambia.
+ * Usado en `app/search/page.tsx` y `app/api/search-suggest/route.ts`.
+ */
+const SEARCH_TERM_TO_QUERY: Record<string, string> = {
+  leggings: "product_type:Legging",
+  playeras: "product_type:Playera",
+  shorts: "product_type:Short",
+  chamarras: "product_type:Chamarra",
+  conjuntos: "product_type:Conjunto",
+  faldas: "product_type:Falda",
+  tops: "product_type:Top",
+};
+
+export function resolveSearchQuery(raw?: string) {
+  if (!raw) return raw;
+  return SEARCH_TERM_TO_QUERY[raw.trim().toLowerCase()] ?? raw;
+}
+
 export type MegaMenuHero = {
   title: string;
   subtitle: string;

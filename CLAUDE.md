@@ -539,3 +539,36 @@ no este archivo.
     sitio hoy (Ajuste/Clima), pero la regla es intencionalmente global —
     si se agrega un tercer `InfoBadge` en otro lado de la página, también
     respeta la regla de "solo uno abierto a la vez".
+- **Búsqueda — categorías en español sin resultados (13 agosto 2026):**
+  Shopify busca por texto libre sin stemming plural→singular en español —
+  `query: "playeras"` no encontraba nada con `product_type: "Playera"`
+  ("no hay resultados" al hacer clic en una pill sugerida). Fix:
+  `resolveSearchQuery()` en `lib/constants.ts` (mapa
+  `SEARCH_TERM_TO_QUERY`) traduce cada término de
+  `POPULAR_SEARCH_TERMS` a una query estructurada `product_type:X` antes
+  de llamar a la Storefront API; el texto visible (input, "Mostrando N
+  resultados para...") se queda igual, solo cambia la query real. Usado
+  en `app/search/page.tsx` y `app/api/search-suggest/route.ts`.
+- **Panel de búsqueda — tarjetas "Vistos recientemente"/"Productos" se
+  cortaban (13 agosto 2026):** las 3 listas horizontales scrolleables del
+  panel (`nav-main.tsx`) usaban `lg:justify-end` sobre
+  `overflow-x-auto` — con flex-end + contenido desbordado, el navegador
+  recorta visualmente el inicio del scroll de una forma que no se puede
+  scrollear de vuelta (gotcha de CSS, no bug de Next). Fix: se quitó
+  `lg:justify-end` de las 3 listas. Además, a pedido del cliente, se
+  ensancharon los contenedores de `lg:max-w-xs` (320px) a `lg:max-w-sm`
+  (384px) para que las 3 tarjetas quepan completas sin necesidad de
+  scroll.
+- **Hero — foto real de marca (13 agosto 2026):** `components/layout/hero.tsx`
+  dejó de usar el gradiente placeholder; ahora usa una foto real
+  (`public/imgs/hero/banner-1.jpg`, convertida a JPEG desde el PNG
+  entregado por el cliente) de fondo vía `next/image` (`fill`,
+  `priority`, `object-cover`). El overlay `black/50→black/5→black/70`
+  se mantiene para legibilidad del texto.
+- **Panel de búsqueda transparente — sombra sutil (13 agosto 2026):**
+  sobre el hero con foto real, el panel desplegable (pills, sugerencias,
+  vistos recientemente) se veía plano/poco distinguible sin el fondo
+  blanco sólido de siempre. Se agregó un overlay
+  `bg-gradient-to-b from-black/25 via-black/10 to-transparent` +
+  `box-shadow` detrás del contenido del panel, solo cuando
+  `displayTransparent` es true (no afecta el panel sobre navbar blanco).

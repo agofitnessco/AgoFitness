@@ -500,15 +500,18 @@ export default function NavMain({
       <div
         ref={panelRef}
         className={clsx(
-          "overflow-hidden border-t transition-colors duration-500",
+          "relative overflow-hidden border-t transition-colors duration-500",
           transparent ? "border-white/20" : "border-neutral-200",
         )}
         style={{ height: 0, opacity: 0 }}
       >
+        {displayTransparent && (
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-transparent shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]" />
+        )}
         <div
           ref={panelContentRef}
           className={clsx(
-            "mx-auto max-w-screen-2xl px-4 py-6 lg:px-8",
+            "relative mx-auto max-w-screen-2xl px-4 py-6 lg:px-8",
             displayTransparent && "flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between",
           )}
         >
@@ -551,7 +554,7 @@ export default function NavMain({
           {showRecentlyViewed ? (
             <div
               className={clsx(
-                displayTransparent ? "lg:max-w-xs lg:flex-none" : "mt-8",
+                displayTransparent ? "lg:max-w-sm lg:flex-none" : "mt-8",
               )}
             >
               <p
@@ -569,10 +572,7 @@ export default function NavMain({
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest("a")) closeSearch();
                 }}
-                className={clsx(
-                  "flex gap-4 overflow-x-auto",
-                  displayTransparent && "lg:justify-end",
-                )}
+                className="flex gap-4 overflow-x-auto"
               >
                 {recentlyViewed.map((item) => (
                   <RecentMiniCard
@@ -588,7 +588,7 @@ export default function NavMain({
             // Navbar sobre el hero: tarjetas chicas junto a las pills, no un
             // grid a lo ancho — así no tapan el copy/CTA del hero debajo.
             suggestProducts.length > 0 ? (
-              <div className="lg:max-w-xs lg:flex-none">
+              <div className="lg:max-w-sm lg:flex-none">
                 <p className="mb-3 text-sm font-semibold text-white lg:text-right">
                   Productos
                 </p>
@@ -597,7 +597,7 @@ export default function NavMain({
                     if ((e.target as HTMLElement).closest("a")) closeSearch();
                   }}
                   className={clsx(
-                    "flex gap-4 lg:justify-end",
+                    "flex gap-4 overflow-x-auto",
                     isSuggestLoading && "opacity-50",
                   )}
                 >
@@ -611,11 +611,11 @@ export default function NavMain({
                 </ul>
               </div>
             ) : isSuggestLoading ? (
-              <div className="lg:max-w-xs lg:flex-none">
+              <div className="lg:max-w-sm lg:flex-none">
                 <p className="mb-3 text-sm font-semibold text-white lg:text-right">
                   Productos
                 </p>
-                <ul className="flex gap-4 lg:justify-end">
+                <ul className="flex gap-4 overflow-x-auto">
                   {[0, 1, 2].map((i) => (
                     <MiniSkeletonCard key={i} />
                   ))}

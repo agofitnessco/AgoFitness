@@ -1,3 +1,4 @@
+import { resolveSearchQuery } from "lib/constants";
 import { getProducts } from "lib/shopify";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +9,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const products = await getProducts(
     query
-      ? { query, sortKey: "RELEVANCE" }
+      ? { query: resolveSearchQuery(query), sortKey: "RELEVANCE" }
       : { sortKey: "BEST_SELLING", reverse: true },
   );
 
