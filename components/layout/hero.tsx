@@ -10,12 +10,20 @@ export default function Hero() {
   return (
     <section className="relative flex h-[100svh] w-full flex-col justify-end overflow-hidden">
       <Image
+        src="/imgs/hero/banner-1-mobile.jpg"
+        alt="Ago Fitness — nueva colección"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover sm:hidden"
+      />
+      <Image
         src="/imgs/hero/banner-1.jpg"
         alt="Ago Fitness — nueva colección"
         fill
         priority
         sizes="100vw"
-        className="object-cover"
+        className="hidden object-cover sm:block"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/5 to-black/70" />
 

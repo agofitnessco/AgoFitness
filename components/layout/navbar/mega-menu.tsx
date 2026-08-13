@@ -38,8 +38,10 @@ function HeroCard({
 
 export default function MegaMenu({
   activeCategory,
+  transparent = false,
 }: {
   activeCategory: string | null;
+  transparent?: boolean;
 }) {
   const entry = activeCategory ? MEGA_MENU[activeCategory] : undefined;
   if (!entry) return null;
@@ -61,7 +63,10 @@ export default function MegaMenu({
               <Link
                 href={link.path}
                 prefetch={true}
-                className="inline-block py-1 text-2xl font-bold tracking-tight text-black transition-opacity hover:opacity-60"
+                className={clsx(
+                  "inline-block py-1 text-2xl font-bold tracking-tight transition-opacity hover:opacity-60",
+                  transparent ? "text-white" : "text-black",
+                )}
               >
                 {link.label}
               </Link>
@@ -69,13 +74,23 @@ export default function MegaMenu({
           ))}
         </ul>
 
-        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-neutral-200 pt-6">
+        <div
+          className={clsx(
+            "mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t pt-6",
+            transparent ? "border-white/20" : "border-neutral-200",
+          )}
+        >
           {entry.secondaryLinks.map((link) => (
             <Link
               key={link.label}
               href={link.path}
               prefetch={true}
-              className="text-sm text-neutral-500 transition-colors hover:text-black"
+              className={clsx(
+                "text-sm transition-colors",
+                transparent
+                  ? "text-white/70 hover:text-white"
+                  : "text-neutral-500 hover:text-black",
+              )}
             >
               {link.label}
             </Link>

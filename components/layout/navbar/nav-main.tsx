@@ -492,26 +492,28 @@ export default function NavMain({
         ref={megaMenuRef}
         onMouseEnter={() => activeCategory && openMegaMenu(activeCategory)}
         onMouseLeave={scheduleMegaClose}
-        className="invisible absolute left-0 right-0 top-full z-20 border-t border-neutral-200 bg-white opacity-0 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.18)]"
+        className={clsx(
+          "invisible absolute left-0 right-0 top-full z-20 opacity-0 transition-colors duration-500",
+          transparent
+            ? "border-t border-white/10 bg-black/10 backdrop-blur-2xl backdrop-saturate-150"
+            : "border-t border-neutral-200 bg-white shadow-[0_24px_48px_-24px_rgba(0,0,0,0.18)]",
+        )}
       >
-        <MegaMenu activeCategory={activeCategory} />
+        <MegaMenu activeCategory={activeCategory} transparent={transparent} />
       </div>
 
       <div
         ref={panelRef}
         className={clsx(
-          "relative overflow-hidden border-t transition-colors duration-500",
+          "overflow-hidden border-t transition-colors duration-500",
           transparent ? "border-white/20" : "border-neutral-200",
         )}
         style={{ height: 0, opacity: 0 }}
       >
-        {displayTransparent && (
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-transparent shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]" />
-        )}
         <div
           ref={panelContentRef}
           className={clsx(
-            "relative mx-auto max-w-screen-2xl px-4 py-6 lg:px-8",
+            "mx-auto max-w-screen-2xl px-4 py-6 lg:px-8",
             displayTransparent && "flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between",
           )}
         >

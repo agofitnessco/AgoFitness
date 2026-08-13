@@ -559,16 +559,38 @@ no este archivo.
   ensancharon los contenedores de `lg:max-w-xs` (320px) a `lg:max-w-sm`
   (384px) para que las 3 tarjetas quepan completas sin necesidad de
   scroll.
-- **Hero — foto real de marca (13 agosto 2026):** `components/layout/hero.tsx`
-  dejó de usar el gradiente placeholder; ahora usa una foto real
-  (`public/imgs/hero/banner-1.jpg`, convertida a JPEG desde el PNG
-  entregado por el cliente) de fondo vía `next/image` (`fill`,
-  `priority`, `object-cover`). El overlay `black/50→black/5→black/70`
-  se mantiene para legibilidad del texto.
-- **Panel de búsqueda transparente — sombra sutil (13 agosto 2026):**
-  sobre el hero con foto real, el panel desplegable (pills, sugerencias,
-  vistos recientemente) se veía plano/poco distinguible sin el fondo
-  blanco sólido de siempre. Se agregó un overlay
-  `bg-gradient-to-b from-black/25 via-black/10 to-transparent` +
-  `box-shadow` detrás del contenido del panel, solo cuando
-  `displayTransparent` es true (no afecta el panel sobre navbar blanco).
+- **Hero y tarjetas de categoría — fotos reales de marca (13 agosto 2026):**
+  `components/layout/hero.tsx` dejó de usar el gradiente placeholder.
+  Ahora usa dos fotos reales entregadas por el cliente (PNG → JPEG vía
+  `sips`): `public/imgs/hero/banner-1.jpg` (horizontal, `sm:block`) y
+  `public/imgs/hero/banner-1-mobile.jpg` (vertical, `sm:hidden`), cada
+  una con su propio `<Image fill priority>` — mismo patrón que ya usan
+  los botones del hero para alternar mobile/desktop. El overlay
+  `black/50→black/5→black/70` se mantiene para legibilidad del texto.
+  `components/category-showcase.tsx`: las tarjetas Mujer/Hombre también
+  cambiaron su gradiente (`CATEGORY_TINTS`) por fotos reales
+  (`CATEGORY_IMAGES` → `public/imgs/category-mujer.jpg` /
+  `category-hombre.jpg`) detrás del mismo overlay `black/65→transparent`.
+  La tarjeta de "Última colección → Second Skin" se queda con gradiente
+  (sin foto real todavía).
+- **Mega menu — ya no es un bloque blanco sólido sobre el hero (13 agosto
+  2026):** con la foto real de fondo, el dropdown de Mujer/Hombre
+  (`bg-white` fijo desde su creación) se veía como una caja opaca dura
+  encima de la foto. Fix en `nav-main.tsx`: cuando `transparent` es true
+  (navbar sobre el hero, sin scroll), el panel usa vidrio esmerilado real
+  — `bg-black/10` + `backdrop-blur-2xl backdrop-saturate-150`, sin
+  degradado oscuro extra (se probó un degradado `black/55→40→55` primero
+  pero se sentía como una sombra fea, no como transparencia; el usuario
+  pidió que se sintiera "full transparente" y se bajó a un tinte parejo
+  muy ligero apoyado solo en el blur). `MegaMenu` (`mega-menu.tsx`) ahora
+  recibe `transparent` y cambia texto/bordes a blanco/`white/20` en ese
+  modo; cuando `transparent` es false (navbar scrolleado, blanco) el
+  panel vuelve a `bg-white` sólido con texto negro de siempre — sin
+  cambios ahí.
+- **Nota dev — Turbopack sirvió imágenes nuevas con error hasta
+  reiniciar:** al agregar las fotos de hero mobile / categorías, el
+  navegador mostró el error boundary genérico de Next (`app/error.tsx`,
+  botón "Try Again") aunque los archivos y las rutas `/imgs/...`
+  respondían 200 por `curl`. Es el mismo síntoma ya conocido de caché
+  stale de Turbopack (ver tabla de bugs) — un `kill` + `npm run dev` lo
+  resolvió sin tocar código.
