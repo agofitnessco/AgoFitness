@@ -34,7 +34,7 @@ export default function CategoryShowcase() {
             className="group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-lg"
           >
             <Image
-              src={CATEGORY_IMAGES[category.title]}
+              src={CATEGORY_IMAGES[category.title] ?? "/imgs/category-mujer.jpg"}
               alt={category.title}
               fill
               sizes="(min-width: 768px) 33vw, 100vw"
