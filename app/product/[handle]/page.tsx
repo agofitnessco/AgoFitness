@@ -60,8 +60,10 @@ export async function generateMetadata(props: {
 
 export default async function ProductPage(props: {
   params: Promise<{ handle: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
   const product = await getProduct(params.handle);
 
   if (!product) return notFound();
@@ -73,6 +75,22 @@ export default async function ProductPage(props: {
     name: value,
     hex: colorHex(value),
   }));
+
+  // Fotos reales suben etiquetadas por color en el altText (ej. "Top Diamond
+  // Cross Cielo") — sin eso, un producto con varios colores mezclaría las
+  // fotos de todos los colores en una sola galería. Si el color activo no
+  // tiene fotos con match (línea Element, sin fotografía real todavía),
+  // cae a la lista completa sin filtrar.
+  const activeColorName =
+    (typeof searchParams.color === "string" ? searchParams.color : null) ??
+    colorSwatches?.[0]?.name;
+  const colorFilteredImages = activeColorName
+    ? product.images.filter((image) =>
+        image.altText?.toLowerCase().includes(activeColorName.toLowerCase()),
+      )
+    : [];
+  const galleryImages =
+    colorFilteredImages.length > 0 ? colorFilteredImages : product.images;
 
   const recommendations = await getProductRecommendations(product.id);
   const completeWith = recommendations[0];
@@ -136,7 +154,7 @@ export default async function ProductPage(props: {
               }
             >
               <Gallery
-                images={product.images.slice(0, 7).map((image: Image) => ({
+                images={galleryImages.slice(0, 7).map((image: Image) => ({
                   src: image.url,
                   altText: image.altText,
                 }))}

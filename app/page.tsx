@@ -3,6 +3,7 @@ import CategoryShowcase from "components/category-showcase";
 import Footer from "components/layout/footer";
 import Hero from "components/layout/hero";
 import ProductShowcase from "components/product-showcase";
+import SecondSkinShowcase from "components/second-skin-showcase";
 import { ELEMENT_PRODUCTS } from "lib/product-showcase-data";
 import { baseUrl } from "lib/utils";
 import type { Metadata } from "next";
@@ -118,15 +119,8 @@ export default function HomePage() {
       />
       <Hero />
       <CategoryShowcase />
-      <section className="mx-auto w-full max-w-screen-2xl px-4 py-10 lg:px-8 lg:py-14">
-        <p className="max-w-2xl text-lg leading-relaxed text-neutral-700 lg:text-xl">
-          <strong className="font-bold text-black">Ago Fitness</strong> es una
-          marca de activewear para mujer y hombre en México. Leggings, tops,
-          shorts, chamarras y conjuntos de la colección Element, diseñados
-          para moverse contigo — rendimiento real, sin sacrificar estilo.
-        </p>
-      </section>
       <ProductShowcase id="nueva-coleccion" title="Lo más nuevo" />
+      <SecondSkinShowcase id="second-skin" title="Colección Second Skin" />
       {/* GymcoBanner desactivado a pedido del cliente (15 jul 2026) — componente
           intacto en components/gymco-banner.tsx, solo descomentar el import de
           arriba + esta línea para reactivarlo. Ver docs/decisiones.md. */}

@@ -437,3 +437,69 @@ no este archivo.
   **Pendiente real, no de código:** fotografía de producto real (bloquea
   SEO de imágenes) y un blog (palanca más grande de SEO a largo plazo,
   sin empezar a propósito).
+- **Colección "Second Skin" agregada — primera con fotografía real (13
+  agosto 2026):** 9 productos nuevos (6 Mujer: Top Diamond Cross, Legging
+  Noire, Falda Active Luxe, Biker Cova, Jacket Elan, Top Atria; 3 Hombre:
+  Playera Apex Tee, Playera Atlas, Short Licra Range), vendor "Second
+  Skin", precios reales del cliente. **Falta "Soft Halo" ($869, Hombre)**
+  — el cliente no mandó fotos para ese producto, no se creó.
+  - **Fotos reales por color:** el cliente mandó ~58 fotos (PNG, 70MB) en
+    `Desktop/Collection second skin/{Mujeres,Hombres}/`, sin nombres de
+    color — solo `"<Producto> <n>.png"`. Se identificó cada color viendo
+    la imagen (Cielo, Arena, Blanco, Grafito, Terracota, Salvia, Negro,
+    Ciruela, Blush, Bruma, Marino, Plomo — nombres nuevos, no reutilizar
+    sin ver la foto real). Patrón de las fotos: el primer color de cada
+    producto trae 2 fotos (plano + con modelo), los demás colores solo 1
+    (plano) — no hay foto con modelo para todos los colores.
+  - Convertidas a JPEG (70MB→6.4MB) y guardadas en
+    `public/imgs/products/second-skin/{slug}/{n}.jpg`, subidas a Shopify
+    vía Admin API (`create-product` con `options: ["Color","Size"]`,
+    variantes = producto cartesiano color×talla — 153 variantes en
+    total), publicadas al canal Headless + Tienda Online, agregadas a
+    `Mujer`/`Hombre` (colecciones manuales) — las smart collections por
+    tipo (Tops/Leggings/Faldas/Shorts/Playeras/Chamarras) las tomaron
+    solas por `TAG`+`TYPE`.
+  - **Nuevo carrusel en el home:** `lib/second-skin-data.ts` (mismo shape
+    que `product-showcase-data.ts` pero con `image`/`modelImage` reales
+    en vez de gradiente) + `components/second-skin-showcase.tsx`
+    (`SecondSkinShowcase`, reutiliza el layout de `ProductShowcase` pero
+    con `<Image>` real y hover a foto-con-modelo solo cuando el color
+    activo la tiene). Insertado en `app/page.tsx` justo debajo de "Lo más
+    nuevo", `id="second-skin"`.
+  - **Bug corregido — talla/color no seleccionables:** los 153 variantes
+    se crearon con `inventoryItem.tracked: true` sin stock →
+    `availableForSale: false` en todos, todo se veía deshabilitado. La
+    línea Element usa `tracked: false` (siempre disponible, sin gestión
+    de inventario real) — se igualó Second Skin a ese mismo criterio vía
+    `productVariantsBulkUpdate`.
+  - **Bug corregido — swatches grises:** `colorHex()` en
+    `lib/color-placeholder.ts` no tenía los nombres nuevos y caía a un
+    gris por hash. Se agregaron los 10 colores de Second Skin al mapa
+    `COLOR_HEX` (mismos hex que `second-skin-data.ts`). Se aprovechó para
+    cambiar el swatch de color de `/product/[handle]`
+    (`variant-selector.tsx`) de cuadro-con-gradiente a círculo sólido
+    (`backgroundColor: hex`), igual que el carrusel/colección.
+  - **Bug corregido — fotos mezcladas entre colores:** tanto
+    `components/collection/product-card.tsx` (listados `/search/*`) como
+    `/product/[handle]` (`Gallery`, vía `product.images.slice(0,7)`)
+    ignoraban el color activo y mostraban/mezclaban las fotos de todos
+    los colores. Como no hay asociación formal imagen↔variante en
+    Shopify para este catálogo, el match se hace por `altText` (se subió
+    cada foto con alt tipo `"Top Diamond Cross Cielo"` /
+    `"... Cielo modelo"`) — `ProductCard` ahora filtra por
+    `altText.includes(colorValue)` con fallback al gradiente si el color
+    no tiene foto real (línea Element); `/product/[handle]` filtra
+    `product.images` por `?color=` (o el primer color) antes de
+    pasárselas a `Gallery`, con fallback a la lista completa sin filtrar
+    si no hay match.
+  - **Niños quitado del navbar** (sin catálogo, ver nota de arriba) —
+    `CATEGORY_LINKS` en `lib/constants.ts` pasó a solo
+    `[Mujer, Hombre]` (afecta navbar desktop + menú móvil
+    automáticamente) y se borró la entrada `Niños` de `MEGA_MENU`.
+    `components/category-showcase.tsx`: la tercera tarjeta del grid ya
+    no es una categoría — es un teaser fijo **"Última colección →
+    Second Skin"** (`LATEST_COLLECTION`, enlaza a `/#second-skin`),
+    mismo lenguaje visual (gradiente + overlay + botón circular).
+  - Párrafo suelto de marca que vivía entre `CategoryShowcase` y "Lo más
+    nuevo" en `app/page.tsx` se eliminó (el cliente lo pidió quitar, sin
+    reemplazo).

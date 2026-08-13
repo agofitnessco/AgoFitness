@@ -6,7 +6,8 @@ import { useCart } from "components/cart/cart-context";
 import HeartButton from "components/favorites/heart-button";
 import clsx from "clsx";
 import { colorHex, modelGradient, productGradient } from "lib/color-placeholder";
-import { Product } from "lib/shopify/types";
+import { Image as ShopifyImage, Product } from "lib/shopify/types";
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
@@ -16,6 +17,10 @@ type ColorGroup = {
   name: string;
   hex: string;
   variantsBySize: Record<string, string>;
+  /** foto real de producto para este color (si el catálogo ya la tiene) */
+  image?: ShopifyImage;
+  /** foto real con modelo para este color (no todos los colores la tienen) */
+  modelImage?: ShopifyImage;
 };
 
 /**
@@ -23,6 +28,12 @@ type ColorGroup = {
  * junta las tallas disponibles por color. Productos sin opción de color
  * (ej. los conjuntos Kisu, una sola combinación por título) caen en un solo
  * grupo neutro — sin swatches, solo tallas.
+ *
+ * Fotos reales: como Shopify no tiene una asociación formal imagen-variante
+ * para este catálogo, se hace matching por `altText` (ej. "Top Diamond
+ * Cross Cielo" / "Top Diamond Cross Cielo modelo" — ver
+ * docs/tienda.md y cómo se subieron en el Admin). Si no hay match, cae al
+ * gradiente placeholder (línea Element, sin fotografía real todavía).
  */
 function groupByColor(product: Product): ColorGroup[] {
   const hasColorOption = product.options.some(
@@ -42,10 +53,21 @@ function groupByColor(product: Product): ColorGroup[] {
 
     const name = colorValue ?? "Único";
     if (!groups.has(name)) {
+      const colorImages = colorValue
+        ? product.images.filter((img) =>
+            img.altText?.toLowerCase().includes(colorValue.toLowerCase()),
+          )
+        : [];
       groups.set(name, {
         name,
         hex: colorValue ? colorHex(colorValue) : NEUTRAL_HEX,
         variantsBySize: {},
+        image: colorImages.find(
+          (img) => !img.altText?.toLowerCase().includes("modelo"),
+        ),
+        modelImage: colorImages.find((img) =>
+          img.altText?.toLowerCase().includes("modelo"),
+        ),
       });
     }
     if (sizeValue) {
@@ -123,22 +145,51 @@ export default function ProductCard({
 
   return (
     <li className={clsx("group", className)}>
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-neutral-100">
         <Link
           href={`/product/${product.handle}`}
           prefetch={true}
           className="absolute inset-0"
         >
-          {/* producto solo */}
-          <div
-            className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0"
-            style={{ backgroundImage: productGradient(activeColor.hex) }}
-          />
-          {/* con modelo */}
-          <div
-            className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
-            style={{ backgroundImage: modelGradient(activeColor.hex) }}
-          />
+          {activeColor.image ? (
+            <>
+              {/* foto real de producto */}
+              <Image
+                key={`${activeColor.name}-flat`}
+                src={activeColor.image.url}
+                alt={activeColor.image.altText || product.title}
+                fill
+                sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 75vw"
+                className={clsx(
+                  "object-cover transition-opacity duration-500 ease-out",
+                  activeColor.modelImage && "group-hover:opacity-0",
+                )}
+              />
+              {/* foto real con modelo (si este color la tiene) */}
+              {activeColor.modelImage ? (
+                <Image
+                  key={`${activeColor.name}-model`}
+                  src={activeColor.modelImage.url}
+                  alt={activeColor.modelImage.altText || product.title}
+                  fill
+                  sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 75vw"
+                  className="object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                />
+              ) : null}
+            </>
+          ) : (
+            <>
+              {/* sin fotografía real todavía — placeholder de gradiente por color */}
+              <div
+                className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0"
+                style={{ backgroundImage: productGradient(activeColor.hex) }}
+              />
+              <div
+                className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                style={{ backgroundImage: modelGradient(activeColor.hex) }}
+              />
+            </>
+          )}
         </Link>
 
         <HeartButton item={favoriteItem} />

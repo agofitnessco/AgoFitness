@@ -73,7 +73,6 @@ export const COUNTRIES = [
 export const CATEGORY_LINKS = [
   { title: "Mujer", path: "/search/mujer" },
   { title: "Hombre", path: "/search/hombre" },
-  { title: "Niños", path: "/search/ninos" },
 ];
 
 // En español y alineados a las colecciones reales del catálogo (ver
@@ -156,22 +155,6 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Libertad de movimiento.",
         ctaLabel: "Ver ahora",
         path: "/search/shorts-hombre",
-      },
-    ],
-  },
-  Niños: {
-    // Sin productos/colección real todavía — pendiente (ver docs/navbar.md).
-    primaryLinks: [{ label: "Ver todo", path: "/search/ninos" }],
-    secondaryLinks: [
-      { label: "Guía de tallas", path: "/guia-de-tallas" },
-      { label: "Centro de ayuda", path: "/soporte" },
-    ],
-    heroes: [
-      {
-        title: "Próximamente",
-        subtitle: "Nueva línea infantil en camino.",
-        ctaLabel: "Ver ahora",
-        path: "/search/ninos",
       },
     ],
   },

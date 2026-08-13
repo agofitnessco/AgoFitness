@@ -22,6 +22,17 @@ export const COLOR_HEX: Record<string, string> = {
   Rosa: "#d98fa3",
   Naranja: "#d97a3f",
   "Naranja largo": "#d97a3f",
+  // Línea Second Skin (ver lib/second-skin-data.ts — mismos hex ahí)
+  Cielo: "#b8d3ea",
+  Arena: "#ede0d0",
+  Grafito: "#3a3a42",
+  Terracota: "#c17b57",
+  Salvia: "#a8bdac",
+  Ciruela: "#423d47",
+  Blush: "#f1dcd8",
+  Bruma: "#dfe4f2",
+  Marino: "#1c2438",
+  Plomo: "#6c7178",
 };
 
 function hashHex(name: string) {

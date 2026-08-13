@@ -2,7 +2,7 @@
 
 import { CheckIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import { colorHex, productGradient } from "lib/color-placeholder";
+import { colorHex } from "lib/color-placeholder";
 import { ProductOption, ProductVariant } from "lib/shopify/types";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -119,17 +119,17 @@ export function VariantSelector({
                     aria-label={`Color ${value}${!isAvailableForSale ? " (agotado)" : ""}`}
                     title={value}
                     className={clsx(
-                      "relative h-14 w-14 overflow-hidden rounded-md border transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100",
+                      "relative h-9 w-9 flex-none rounded-full border transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100",
                       "hover:scale-110 active:scale-90",
                       isActive
-                        ? "variant-pop border-black ring-2 ring-black ring-offset-2"
+                        ? "variant-pop border-black/10 ring-2 ring-black ring-offset-2"
                         : "border-black/10",
                     )}
-                    style={{ backgroundImage: productGradient(hex) }}
+                    style={{ backgroundColor: hex }}
                   >
                     {isActive ? (
-                      <span className="check-in absolute right-1 bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-black shadow-sm">
-                        <CheckIcon className="h-3.5 w-3.5 text-white" />
+                      <span className="check-in absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black shadow-sm">
+                        <CheckIcon className="h-2.5 w-2.5 text-white" />
                       </span>
                     ) : null}
                   </button>
