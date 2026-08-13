@@ -503,3 +503,39 @@ no este archivo.
   - Párrafo suelto de marca que vivía entre `CategoryShowcase` y "Lo más
     nuevo" en `app/page.tsx` se eliminó (el cliente lo pidió quitar, sin
     reemplazo).
+- **4 ajustes más sobre Second Skin (13 agosto 2026, mismo día):**
+  - **Bug corregido — mega menu se quedaba abierto al navegar:** un click
+    en cualquier link de adentro (ej. "Ver todo" de Mujer) llevaba a la
+    página pero el panel (`activeCategory` en `nav-main.tsx`) seguía
+    flotando encima. Fix: `useEffect` que resetea `activeCategory` a
+    `null` en cada cambio de `pathname` — mismo patrón que ya usaba el
+    menú móvil viejo para cerrarse al navegar.
+  - **Galería — una sola foto por color ya no se agranda:**
+    `components/product/gallery.tsx` colapsaba a `lg:grid-cols-1` cuando
+    `images.length === 1`, estirando la foto a todo el ancho. Ahora el
+    grid siempre es `lg:grid-cols-2`; con una sola foto, la segunda celda
+    simplemente no se renderiza (queda vacía) en vez de expandirse — la
+    foto se ve al mismo tamaño que cuando sí hay 2. Sustituir por el
+    layout normal en cuanto el catálogo tenga 2+ fotos por color en todos
+    los productos.
+  - **Ajuste (fit) corregido para 5 productos Second Skin:** la
+    heurística genérica de `lib/product-types.ts` (por `productType`) le
+    ponía "Holgado" a Biker Cova, Jacket Elan, Playera Apex Tee, Playera
+    Atlas y Short Licra Range — pero los 5 son de compresión/corte
+    ajustado según su propia descripción ("compresión", "licra", "corte
+    atlético") y las fotos reales. Se agregó `FIT_OVERRIDE_BY_TITLE` (por
+    título de producto, no por tipo) que gana sobre el default genérico;
+    `fitFor()` ahora acepta `title` opcional. El resto del catálogo
+    (Element/Kisu, sin foto real) se queda con el estimado genérico. No
+    se tocó "Clima" — sin evidencia visual clara para justificar un
+    override, se dejó el default.
+  - **InfoBadge — ya no se pueden abrir dos a la vez:** los popovers "i"
+    de Ajuste y Clima (`components/product/info-badge.tsx`) tenían estado
+    100% independiente — abrir los dos a la vez los encimaba visualmente
+    (se veían recortados uno sobre otro). Fix: variable module-level
+    (`closeOpenBadge`, un solo `InfoBadge` puede estar abierto en toda la
+    página) que guarda la función de cierre del que esté abierto; al
+    abrir otro, primero cierra al anterior. Solo hay 2 instancias en el
+    sitio hoy (Ajuste/Clima), pero la regla es intencionalmente global —
+    si se agrega un tercer `InfoBadge` en otro lado de la página, también
+    respeta la regla de "solo uno abierto a la vez".

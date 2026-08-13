@@ -55,7 +55,7 @@ function Panel({
 
 export function FeatureStory({ product }: { product: Product }) {
   const hex = firstColorHex(product);
-  const fit = fitFor(product.productType);
+  const fit = fitFor(product.productType, product.title);
   const climate = climateFor(product.productType);
 
   const panels = [

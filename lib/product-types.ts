@@ -34,7 +34,24 @@ const CLIMATE_BY_TYPE: Record<string, string> = {
   Conjunto: "Templado",
 };
 
-export function fitFor(productType: string) {
+/**
+ * Overrides por producto — para la línea Second Skin (única con fotografía
+ * real hasta ahora) el default por tipo se ve mal: son shorts/playeras de
+ * compresión, no genéricos "Holgado". Visto directo en la foto + la propia
+ * descripción del producto (todas dicen "compresión"/"licra"), no
+ * inventado. El resto del catálogo (Element/Kisu, sin foto real) se queda
+ * con el estimado genérico por tipo hasta que se pueda confirmar igual.
+ */
+const FIT_OVERRIDE_BY_TITLE: Record<string, string> = {
+  "Biker Cova": "Ajustado",
+  "Jacket Elan": "Ajustado",
+  "Playera Apex Tee": "Ajustado",
+  "Playera Atlas": "Ajustado",
+  "Short Licra Range": "Ajustado",
+};
+
+export function fitFor(productType: string, title?: string) {
+  if (title && FIT_OVERRIDE_BY_TITLE[title]) return FIT_OVERRIDE_BY_TITLE[title];
   return FIT_BY_TYPE[productType] ?? "Estándar";
 }
 

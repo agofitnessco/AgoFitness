@@ -208,13 +208,13 @@ export function Gallery({
         ) : null}
       </div>
 
-      {/* Desktop: layout original de 2 imágenes */}
-      <div
-        className={clsx(
-          "hidden gap-3 md:gap-4 lg:grid",
-          images.length > 1 ? "lg:grid-cols-2" : "lg:grid-cols-1",
-        )}
-      >
+      {/* Desktop: layout de 2 imágenes lado a lado. Con una sola foto por
+          color, el grid sigue siendo de 2 columnas pero solo se ocupa la
+          primera celda — así la foto queda al mismo tamaño que en el caso
+          de 2 fotos, en vez de estirarse a ancho completo. Sustituir por
+          `images.length > 1` sin la condición cuando el catálogo tenga
+          2+ fotos reales por color en todos los productos. */}
+      <div className="hidden gap-3 md:gap-4 lg:grid lg:grid-cols-2">
         <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-neutral-100">
           {images[imageIndex] && (
             <Image

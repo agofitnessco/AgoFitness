@@ -332,6 +332,13 @@ export default function NavMain({
     closeSearch();
   };
 
+  // Cierra el mega menu al navegar — sin esto, un click en cualquier link
+  // de adentro (ej. "Ver todo" de Mujer) llevaba a la página pero el panel
+  // se quedaba abierto/flotando encima del contenido nuevo.
+  useEffect(() => {
+    setActiveCategory(null);
+  }, [pathname]);
+
   // Escape cierra lo que esté abierto — buscador primero (si ambos están
   // abiertos a la vez es porque el usuario entró al buscador desde el mega
   // menu, así que cerrar la búsqueda es lo que se espera primero).

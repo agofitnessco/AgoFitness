@@ -174,7 +174,7 @@ export default async function ProductPage(props: {
           </div>
 
           <div className="w-full lg:col-start-2 lg:row-start-2">
-            <FitClimateRow productType={product.productType} />
+            <FitClimateRow productType={product.productType} title={product.title} />
           </div>
         </div>
       </div>
@@ -188,7 +188,13 @@ export default async function ProductPage(props: {
   );
 }
 
-function FitClimateRow({ productType }: { productType: string }) {
+function FitClimateRow({
+  productType,
+  title,
+}: {
+  productType: string;
+  title: string;
+}) {
   const estimateNote =
     "Esta clasificación es una estimación por tipo de prenda, no una medición individual de esta pieza.";
 
@@ -207,7 +213,7 @@ function FitClimateRow({ productType }: { productType: string }) {
             </InfoBadge>
           </p>
           <p className="text-xl font-bold text-black">
-            {fitFor(productType)}
+            {fitFor(productType, title)}
           </p>
         </div>
       </div>
