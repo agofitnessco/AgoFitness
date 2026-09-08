@@ -179,9 +179,12 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Ligereza y rendimiento diario.",
         ctaLabel: "Ver ahora",
         path: "/search/playeras",
-        // ?v= evita que el navegador/optimizador de Next sirva la copia
-        // vieja cuando se reemplaza el archivo manteniendo el mismo nombre.
-        image: "/imgs/mega-menu/hombre-playeras.jpg?v=2",
+        // Nombre de archivo -v2: next/image en rutas locales no admite
+        // query strings de cache-busting (rompe con "using a query string
+        // which is not configured in images.localPatterns"), así que al
+        // reemplazar una foto hay que renombrar el archivo, no versionar
+        // la URL.
+        image: "/imgs/mega-menu/hombre-playeras-v2.jpg",
       },
       {
         title: "Shorts",
