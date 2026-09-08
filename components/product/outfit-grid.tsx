@@ -122,6 +122,16 @@ export function OutfitGrid({
 }) {
   if (!pieces.length) return null;
 
+  // Con el filtro de Conjunto/Enterizo (ver page.tsx) a veces sobran menos
+  // de 6 piezas — mostrar, digamos, 4 deja una tarjetita sola y huérfana
+  // en la última fila de 3 columnas. Se recorta al múltiplo de 3 más
+  // grande disponible (o a todo lo que haya si son 1-2) para que la
+  // última fila siempre quede completa.
+  const capped = pieces.slice(0, 6);
+  const visibleCount =
+    capped.length >= 3 ? Math.floor(capped.length / 3) * 3 : capped.length;
+  const visiblePieces = capped.slice(0, visibleCount);
+
   return (
     <div
       id="ideas-para-combinar"
@@ -149,7 +159,7 @@ export function OutfitGrid({
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {pieces.slice(0, 6).map((product) => (
+          {visiblePieces.map((product) => (
             <LookTile key={product.handle} product={product} />
           ))}
         </div>
