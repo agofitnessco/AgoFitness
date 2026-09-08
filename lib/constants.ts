@@ -188,6 +188,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Libertad de movimiento.",
         ctaLabel: "Ver ahora",
         path: "/search/shorts-hombre",
+        image: "/imgs/mega-menu/hombre-shorts.jpg",
       },
     ],
   },
