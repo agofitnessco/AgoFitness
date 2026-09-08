@@ -179,7 +179,7 @@ export default async function ProductPage(props: {
           </div>
 
           <div className="w-full lg:col-start-1 lg:row-start-2">
-            <ProductInfoAccordion />
+            <ProductInfoAccordion product={product} />
           </div>
 
           <div className="w-full lg:col-start-2 lg:row-start-2">

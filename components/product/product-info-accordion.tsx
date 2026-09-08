@@ -1,52 +1,71 @@
 "use client";
 
 import clsx from "clsx";
+import { fitFor } from "lib/product-types";
+import { Product } from "lib/shopify/types";
 import Link from "next/link";
 import { useState } from "react";
 
-const SECTIONS: { title: string; body: React.ReactNode }[] = [
-  {
-    title: "Talla y ajuste",
-    body: (
-      <>
-        Consulta las medidas reales por talla en nuestra{" "}
-        <Link
-          href="/guia-de-tallas"
-          className="font-medium text-black underline underline-offset-2"
-        >
-          guía de tallas
-        </Link>
-        . El ajuste específico de esta prenda se confirma pronto.
-      </>
-    ),
-  },
-  {
-    title: "Envío y devolución",
-    body: (
-      <>
-        Estamos terminando de definir tiempos de envío y política de
-        devoluciones.{" "}
-        <Link
-          href="/soporte"
-          className="font-medium text-black underline underline-offset-2"
-        >
-          Escríbenos
-        </Link>{" "}
-        si tienes dudas mientras tanto.
-      </>
-    ),
-  },
-  {
-    title: "Instrucciones de cuidado",
-    body: "Pendiente — instrucciones de cuidado por línea (Element/Kisu).",
-  },
-  {
-    title: "Materiales y transparencia",
-    body: "Pendiente — composición de tela por prenda.",
-  },
-];
+/**
+ * Antes esta sección era texto genérico idéntico para los ~40 productos
+ * del catálogo ("el ajuste se confirma pronto", envío "en definición" —
+ * ya no es cierto, el envío quedó configurado en Shopify a $150 MXN plano
+ * a toda la República). Talla y ajuste reutiliza `fitFor()` (misma fuente
+ * que el badge "Ajuste" del feature-story) en vez de duplicar el dato.
+ * Cuidado/Materiales se quedan en lenguaje honesto y genérico para tela
+ * técnica de compresión — no se inventa composición exacta (%) porque
+ * nadie del lado del cliente la ha confirmado todavía.
+ */
+function buildSections(product: Product): { title: string; body: React.ReactNode }[] {
+  const fit = fitFor(product.productType, product.title);
 
-export function ProductInfoAccordion() {
+  return [
+    {
+      title: "Talla y ajuste",
+      body: (
+        <>
+          Ajuste: <span className="font-medium text-black">{fit}</span>.
+          Consulta las medidas reales por talla en nuestra{" "}
+          <Link
+            href="/guia-de-tallas"
+            className="font-medium text-black underline underline-offset-2"
+          >
+            guía de tallas
+          </Link>
+          .
+        </>
+      ),
+    },
+    {
+      title: "Envío y devolución",
+      body: (
+        <>
+          Envío estándar a toda la República Mexicana por $150 MXN. La
+          política completa de cambios y devoluciones sigue en definición
+          —{" "}
+          <Link
+            href="/soporte"
+            className="font-medium text-black underline underline-offset-2"
+          >
+            escríbenos
+          </Link>{" "}
+          si tienes dudas mientras tanto.
+        </>
+      ),
+    },
+    {
+      title: "Instrucciones de cuidado",
+      body: "Lavar a máquina con agua fría en ciclo delicado. Evitar cloro y suavizante — reducen la elasticidad de la tela técnica. Secar a la sombra o en secadora a baja temperatura. No planchar directamente sobre estampados.",
+    },
+    {
+      title: "Materiales y transparencia",
+      body: "Tela técnica de alto desempeño (stretch, transpirable). Estamos confirmando con el proveedor el desglose exacto de composición (poliéster/elastano) para publicarlo aquí.",
+    },
+  ];
+}
+
+export function ProductInfoAccordion({ product }: { product: Product }) {
+  const SECTIONS = buildSections(product);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (

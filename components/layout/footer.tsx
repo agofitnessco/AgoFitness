@@ -20,7 +20,6 @@ const HELP_LINKS = [
 const COMPANY_LINKS = [
   { label: "Nosotros", path: "/nosotros" },
   { label: "Contacto", path: "/contacto" },
-  { label: "Trabaja con nosotros", path: "/contacto" },
 ];
 
 const LEGAL_LINKS = [
