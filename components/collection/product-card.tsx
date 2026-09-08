@@ -53,11 +53,14 @@ function groupByColor(product: Product): ColorGroup[] {
 
     const name = colorValue ?? "Único";
     if (!groups.has(name)) {
+      // Sin opción "Color" (producto de un solo colorway) no hay valor
+      // contra el que filtrar por altText — usamos todas las fotos del
+      // producto directamente en vez de dejar el grupo sin imagen.
       const colorImages = colorValue
         ? product.images.filter((img) =>
             img.altText?.toLowerCase().includes(colorValue.toLowerCase()),
           )
-        : [];
+        : product.images;
       groups.set(name, {
         name,
         hex: colorValue ? colorHex(colorValue) : NEUTRAL_HEX,
