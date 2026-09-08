@@ -594,3 +594,43 @@ no este archivo.
   respondían 200 por `curl`. Es el mismo síntoma ya conocido de caché
   stale de Turbopack (ver tabla de bugs) — un `kill` + `npm run dev` lo
   resolvió sin tocar código.
+
+- **Catálogo Kisu completo — fotos reales + precios (8 septiembre
+  2026):** el cliente entregó 52 fotos (`Desktop/Diseño sin título/`,
+  numeradas 1-52, pares flat+modelo por color) y una tabla de precios
+  (MXN + venta sugerida). Se identificaron 12-13 estilos por inspección
+  visual (mismo método que Second Skin, sin PDF de referencia — se buscó
+  uno y no existía). Las fotos se organizaron en
+  `public/imgs/products/kisu/<estilo>/<color>-{flat,modelo}.jpg` y se
+  subieron a los 12 productos Kisu ya existentes en Shopify (antes en
+  $0.00 sin fotos) vía `update-product`, con `altText` `"<Título>
+  <Color>"` / `"... modelo"` — mismo patrón de matching por altText que
+  ya usa `product-card.tsx`/`product/[handle]/page.tsx` para Second Skin,
+  así que no hizo falta tocar código de frontend.
+  - **Precios**: se usó la columna "Venta sugerida" MXN de la tabla del
+    cliente. Para los productos "Conjunto" (top + bottom), el precio
+    final = suma de la fila del top + la fila del bottom correspondiente
+    (ej. Conjunto Leggings = top cierre básico $750 + legging básica
+    $1,200 = $1,950). Para Enterizos y leggings-solas se usó la fila
+    única directa. Chart y Sunset Leggings no tenían fila exacta en la
+    tabla — se estimaron por analogía con estilos similares ($2,100 y
+    $1,250 respectivamente) y quedó marcado como estimado, no exacto.
+  - **Colores por producto**: se respetó exactamente la lista de colores
+    ya configurada en cada producto de Shopify (`options: Color`), no la
+    agrupación que se infirió de las fotos — ej. la foto "cocoa" de la
+    serie Lines en realidad pertenece a `Kisu Conjunto Cocoa` (producto
+    aparte, sin opción de color), porque `Kisu Conjunto Lines` solo tiene
+    Blanco/Negro/Gris configurados. Mismo criterio para "Enterizo Largo"
+    (su color "Gris" recibió las fotos que a simple vista parecían
+    blancas).
+  - **Fotos sin producto**: 3 colorways fotografiados no tienen dónde ir
+    en el catálogo actual y se dejaron sin subir — Blocks Enterizo
+    Naranja en negro/blanco (el producto solo tiene un color, sin opción
+    Color), Enterizo Corto en naranja (el producto solo tiene
+    Negro/Blanco), y un estilo nuevo completo (top espalda cruzada +
+    short blanco con bloques, sin ningún producto Kisu que le
+    corresponda). Pendiente: decidir si se agregan como opción de color
+    nueva o se crea un producto nuevo.
+  - Los 12 productos ya estaban con `inventoryItem.tracked: false`
+    (disponibles para compra) desde su creación — a diferencia de Second
+    Skin, aquí no hizo falta la corrección de disponibilidad.
