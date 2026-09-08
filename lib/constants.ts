@@ -159,6 +159,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Movimiento sin restricciones.",
         ctaLabel: "Ver ahora",
         path: "/search/leggings",
+        image: "/imgs/mega-menu/mujer-leggings.jpg",
       },
     ],
   },
