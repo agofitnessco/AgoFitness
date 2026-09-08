@@ -179,7 +179,9 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Ligereza y rendimiento diario.",
         ctaLabel: "Ver ahora",
         path: "/search/playeras",
-        image: "/imgs/mega-menu/hombre-playeras.jpg",
+        // ?v= evita que el navegador/optimizador de Next sirva la copia
+        // vieja cuando se reemplaza el archivo manteniendo el mismo nombre.
+        image: "/imgs/mega-menu/hombre-playeras.jpg?v=2",
       },
       {
         title: "Shorts",
