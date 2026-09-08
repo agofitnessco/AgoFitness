@@ -152,7 +152,15 @@ export function OutfitGrid({
         Ideas para combinar
       </h2>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_2fr]">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-lg lg:aspect-auto">
+        {/*
+          Antes usaba lg:aspect-auto para estirarse y llenar la altura de
+          las piezas de la derecha. Cuando la grilla de piezas quedaba en
+          una sola fila (3 piezas, ver visibleCount arriba) esa altura era
+          muy corta y esta tarjeta se veía aplastada/cortada. Se deja con
+          proporción fija siempre, sin importar cuántas filas de piezas
+          haya al lado.
+        */}
+        <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
           <div
             className="absolute inset-0"
             style={{ backgroundImage: modelGradient(firstColorHex(heroProduct)) }}
