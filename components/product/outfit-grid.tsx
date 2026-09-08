@@ -23,33 +23,10 @@ function uniqueColorHexes(product: Product): string[] {
   return Array.from(names).map(colorHex);
 }
 
-/**
- * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
- * suben con el color en el `altText`. Sin esto, esta sección siempre caía
- * al gradiente aunque el producto ya tuviera fotografía real subida.
- */
-function firstProductImage(product: Product) {
-  const firstColor = product.variants[0]?.selectedOptions.find(
-    (o) => o.name.toLowerCase() === "color",
-  )?.value;
-
-  const candidates = firstColor
-    ? product.images.filter((img) =>
-        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
-      )
-    : product.images;
-
-  return (
-    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
-    candidates[0]
-  );
-}
-
 function LookTile({ product }: { product: Product }) {
   const [hover, setHover] = useState(false);
   const price = product.priceRange.minVariantPrice;
   const colors = uniqueColorHexes(product);
-  const image = firstProductImage(product);
 
   return (
     <div
@@ -57,28 +34,17 @@ function LookTile({ product }: { product: Product }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {image ? (
-        <Image
-          src={image.url}
-          alt={image.altText || product.title}
-          fill
-          className="object-cover"
-        />
-      ) : (
-        <>
-          <div
-            className="absolute inset-0"
-            style={{ backgroundImage: productGradient(firstColorHex(product)) }}
-          />
-          <Image
-            src="/imgs/logo-ago.png"
-            alt=""
-            aria-hidden="true"
-            fill
-            className="object-contain p-8 opacity-20 mix-blend-overlay"
-          />
-        </>
-      )}
+      <div
+        className="absolute inset-0"
+        style={{ backgroundImage: productGradient(firstColorHex(product)) }}
+      />
+      <Image
+        src="/imgs/logo-ago.png"
+        alt=""
+        aria-hidden="true"
+        fill
+        className="object-contain p-8 opacity-20 mix-blend-overlay"
+      />
 
       <span className="absolute top-3 left-3 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/10">
         <span className="h-1.5 w-1.5 rounded-full bg-black" />
@@ -122,27 +88,6 @@ export function OutfitGrid({
 }) {
   if (!pieces.length) return null;
 
-  // Las recomendaciones de Shopify no saben qué línea ya tiene fotografía
-  // real (Second Skin/Kisu) y cuál sigue en placeholder (Element) — sin
-  // esto, a un producto le puede tocar una fila entera de gradientes
-  // negros aunque el catálogo ya tenga fotos reales disponibles. Se
-  // prioriza mostrar primero las piezas con foto real.
-  const sorted = [...pieces].sort((a, b) => {
-    const aHasImage = firstProductImage(a) ? 1 : 0;
-    const bHasImage = firstProductImage(b) ? 1 : 0;
-    return bHasImage - aHasImage;
-  });
-
-  // Con el filtro de Conjunto/Enterizo (ver page.tsx) a veces sobran menos
-  // de 6 piezas — mostrar, digamos, 4 deja una tarjetita sola y huérfana
-  // en la última fila de 3 columnas. Se recorta al múltiplo de 3 más
-  // grande disponible (o a todo lo que haya si son 1-2) para que la
-  // última fila siempre quede completa.
-  const capped = sorted.slice(0, 6);
-  const visibleCount =
-    capped.length >= 3 ? Math.floor(capped.length / 3) * 3 : capped.length;
-  const visiblePieces = capped.slice(0, visibleCount);
-
   return (
     <div
       id="ideas-para-combinar"
@@ -152,15 +97,7 @@ export function OutfitGrid({
         Ideas para combinar
       </h2>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_2fr]">
-        {/*
-          Antes usaba lg:aspect-auto para estirarse y llenar la altura de
-          las piezas de la derecha. Cuando la grilla de piezas quedaba en
-          una sola fila (3 piezas, ver visibleCount arriba) esa altura era
-          muy corta y esta tarjeta se veía aplastada/cortada. Se deja con
-          proporción fija siempre, sin importar cuántas filas de piezas
-          haya al lado.
-        */}
-        <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-lg lg:aspect-auto">
           <div
             className="absolute inset-0"
             style={{ backgroundImage: modelGradient(firstColorHex(heroProduct)) }}
@@ -178,7 +115,7 @@ export function OutfitGrid({
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {visiblePieces.map((product) => (
+          {pieces.slice(0, 6).map((product) => (
             <LookTile key={product.handle} product={product} />
           ))}
         </div>

@@ -94,16 +94,7 @@ export default async function ProductPage(props: {
 
   const recommendations = await getProductRecommendations(product.id);
   const completeWith = recommendations[0];
-  // "Ideas para combinar" son piezas sueltas para armar un outfit con la
-  // prenda actual — un conjunto o enterizo ya es un outfit completo, no
-  // tiene sentido "combinarlo". Los Enterizo de Kisu están tipados como
-  // "Conjunto" en Shopify (no tienen su propio productType), así que se
-  // filtran también por título.
-  const outfitPieces = recommendations.slice(1).filter((piece) => {
-    const type = piece.productType.toLowerCase();
-    const title = piece.title.toLowerCase();
-    return type !== "conjunto" && !title.includes("enterizo");
-  });
+  const otherRecommendations = recommendations.slice(1);
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -188,7 +179,7 @@ export default async function ProductPage(props: {
         </div>
       </div>
       <div className="mx-auto max-w-screen-2xl px-4 lg:px-8">
-        <OutfitGrid heroProduct={product} pieces={outfitPieces} />
+        <OutfitGrid heroProduct={product} pieces={otherRecommendations} />
         <FeatureStory product={product} />
       </div>
       <RecommendationsCarousel products={recommendations} />
