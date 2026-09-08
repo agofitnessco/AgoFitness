@@ -634,3 +634,69 @@ no este archivo.
   - Los 12 productos ya estaban con `inventoryItem.tracked: false`
     (disponibles para compra) desde su creación — a diferencia de Second
     Skin, aquí no hizo falta la corrección de disponibilidad.
+  - **Correcciones de mapeo (8 septiembre 2026, mismo día)**: el cliente
+    corrigió 2 asignaciones — fotos 9-14 (naranja/negro con
+    cuadros/blanco) son en realidad los 4 colores de `Kisu Conjunto
+    Chart` (Naranja, Negro con cuadros blanco, Blanco, Tono a tono), no
+    de `Kisu Blocks Enterizo Naranja`; y ese último producto usa las
+    fotos 43-44 (mono corto naranja/durazno), no las 9-10. Se
+    reorganizaron carpetas y se corrigió en Shopify — al reemplazar
+    fotos reusando el mismo nombre de archivo, Shopify sube un
+    `MediaImage` nuevo pero deja el viejo (quedaron duplicados que hubo
+    que borrar con `removeMediaIds`).
+
+- **Fotos reales en mega menu + footer/acordeón/ayuda (8 septiembre
+  2026):**
+  - `MegaMenuHero` (`lib/constants.ts`) ganó un campo `image?` opcional
+    — `HeroCard` en `mega-menu.tsx` lo usa en vez del gradiente cuando
+    está presente. Las 4 tarjetas hero (Hombre: Playeras/Shorts, Mujer:
+    Conjuntos/Leggings) ya tienen foto real.
+  - **Gotcha de cache real (no Turbopack esta vez)**: al reemplazar una
+    foto de mega menu manteniendo el mismo nombre de archivo, tanto el
+    navegador como el optimizador de imágenes de Next sirven la copia
+    vieja. Poner `?v=2` en el `src` de un `next/image` con ruta LOCAL
+    rompe con "using a query string which is not configured in
+    images.localPatterns" — la solución real es renombrar el archivo
+    (`-v2.jpg`, `-v3.jpg`...), no versionar la URL.
+  - Footer: se quitó "Trabaja con nosotros" (sin proceso de reclutamiento
+    activo).
+  - `product-info-accordion.tsx` dejó de ser texto genérico idéntico en
+    los ~40 productos del catálogo — "Talla y ajuste" ahora reutiliza
+    `fitFor()` (recibe `product` como prop), y el texto de envío ya no
+    dice "en definición" en ningún lado del sitio (5 archivos: el
+    acordeón, `help-center.tsx`, `contact-faq.tsx`, `soporte/page.tsx`,
+    `terminos/page.tsx`) — el cliente confirmó que el envío es por DHL,
+    así que ahora dice tiempos estimados reales (1-3 días hábiles zonas
+    urbanas, hasta 5 el resto del país, $150 MXN, despacho 24-48h) y
+    devoluciones a 15 días naturales (este último es un estándar
+    razonable de la industria, no un número que el cliente haya
+    confirmado — pendiente que lo ajuste si su política real es
+    distinta).
+  - Segunda pasada de pulido en `help-center.tsx`/`contact-faq.tsx`/
+    `soporte/page.tsx` (JSON-LD debe reflejar el mismo copy que el
+    acordeón visible, hay un comentario en el archivo que lo recuerda):
+    se agregó que no hace falta cuenta para comprar (checkout como
+    invitado), quién paga el envío de regreso en devoluciones (el
+    cliente, salvo defecto/error nuestro — mismo criterio que
+    `terminos/page.tsx`), mención al badge de Ajuste por producto en la
+    sección de tallas, y marcas de tarjeta aceptadas (Visa/Mastercard/
+    Amex — soporte estándar de Shopify Payments México, no confirmado
+    explícitamente por el cliente pero es lo que Shopify Payments MX
+    soporta por defecto).
+  - **"Ideas para combinar" (`outfit-grid.tsx`) — vaivén de cambios,
+    terminó revertido a lo mínimo**: se intentó (a) mostrar fotos reales
+    en las tarjetas chicas, (b) filtrar Conjunto/Enterizo de las
+    sugerencias, (c) recortar a múltiplo de 3 para evitar tarjeta
+    huérfana, (d) ordenar por disponibilidad de foto real, (e) quitar el
+    `lg:aspect-auto` de la tarjeta grande (se aplastaba con pocas
+    piezas). El cliente pidió revertir todo excepto (a) — la sección
+    quedó igual que su diseño original (sin filtro, sin recorte, sin
+    aspect-ratio fijo, tarjeta grande siempre con gradiente + "Foto
+    próximamente"), solo con el fix de fotos reales en las tarjetas
+    chicas cuando el producto ya las tiene subidas a Shopify. Si se
+    vuelve a tocar esta sección: el bug real de "se ve aplastada/cortada"
+    NO era Turbopack ni CSS (se verificó con curl + inspección del CSS
+    compilado, ambos correctos) — era que con pocas piezas recomendadas
+    (1 sola fila) la tarjeta grande se estiraba menos por el
+    `lg:aspect-auto`. Quedó fuera del alcance pedido, documentado por si
+    se retoma.

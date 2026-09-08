@@ -12,12 +12,13 @@ const FAQS: LegalSection[] = [
     title: "¿Dónde puedo comprobar el estado de mi pedido?",
     body: (
       <p>
-        Inicia sesión en{" "}
+        No necesitas crear una cuenta para comprar, pero si la creas
+        puedes ver el historial completo de tus pedidos desde{" "}
         <Link href="/cuenta" className={linkClass}>
           tu cuenta
-        </Link>{" "}
-        para ver el historial de tus pedidos. El tracking en vivo por
-        paquetería está pendiente de conectar.
+        </Link>
+        . El tracking en vivo por paquetería está pendiente de conectar
+        — mientras tanto, escríbenos y te confirmamos el estatus.
       </p>
     ),
   },
@@ -25,13 +26,16 @@ const FAQS: LegalSection[] = [
     title: "¿Cómo devuelvo un pedido?",
     body: (
       <p>
+        Si tu pedido llega con un defecto o no corresponde a lo que
+        ordenaste, contáctanos y lo resolvemos sin costo para ti. Fuera
+        de esos casos, aceptamos cambios y devoluciones dentro de los 15
+        días naturales posteriores a la entrega, con la prenda sin usar y
+        etiqueta original; el envío de regreso corre por tu cuenta.
         Escríbenos con el formulario de esta página o a{" "}
         <a href="mailto:hola@agofitness.com" className={linkClass}>
           hola@agofitness.com
-        </a>
-        . Aceptamos cambios y devoluciones dentro de los 15 días naturales
-        posteriores a la entrega, con la prenda sin usar y etiqueta
-        original — revisa el detalle en{" "}
+        </a>{" "}
+        — revisa el detalle completo en{" "}
         <Link href="/terminos" className={linkClass}>
           Términos y Condiciones
         </Link>
@@ -43,12 +47,13 @@ const FAQS: LegalSection[] = [
     title: "¿Qué talla debo pedir?",
     body: (
       <p>
-        Revisa nuestra{" "}
+        Cada prenda muestra su ajuste (ajustado, estándar u holgado) en
+        la ficha de producto — úsalo junto con nuestra{" "}
         <Link href="/guia-de-tallas" className={linkClass}>
           guía de tallas
         </Link>{" "}
-        con medidas reales por prenda. Si sigues con dudas, escríbenos con
-        este formulario.
+        de medidas reales por prenda. Si sigues con dudas, escríbenos con
+        este formulario antes de comprar.
       </p>
     ),
   },
@@ -59,7 +64,8 @@ const FAQS: LegalSection[] = [
         Enviamos por DHL a toda la República Mexicana ($150 MXN). Tu
         pedido se procesa y despacha en 24–48 horas hábiles; la entrega
         estimada de DHL es de 1 a 3 días hábiles en zonas urbanas
-        principales y hasta 5 días hábiles en el resto del país.
+        principales (CDMX, Guadalajara, Monterrey y otras capitales) y
+        hasta 5 días hábiles en el resto del país.
       </p>
     ),
   },
@@ -68,7 +74,9 @@ const FAQS: LegalSection[] = [
     body: (
       <p>
         El pago se procesa de forma segura en el checkout de Shopify, en
-        pesos mexicanos (MXN).
+        pesos mexicanos (MXN) con tarjeta de crédito o débito (Visa,
+        Mastercard, American Express). No almacenamos el número completo
+        de tu tarjeta. ¿Necesitas factura? Escríbenos con este formulario.
       </p>
     ),
   },
@@ -80,8 +88,8 @@ const FAQS: LegalSection[] = [
         <Link href="/cuenta" className={linkClass}>
           tu cuenta
         </Link>{" "}
-        puedes editar tu perfil y tus direcciones de envío en cualquier
-        momento.
+        puedes editar tu perfil, tus direcciones de envío y consultar tu
+        historial de pedidos en cualquier momento.
       </p>
     ),
   },

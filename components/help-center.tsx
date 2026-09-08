@@ -18,23 +18,26 @@ const FAQS: FaqItem[] = [
   {
     id: "pedidos",
     title: "Pedidos y envío",
-    keywords: "pedido envío entrega tracking rastreo",
+    keywords: "pedido envío entrega tracking rastreo guest invitado",
     body: (
       <>
         <p>
-          Inicia sesión en{" "}
+          No necesitas crear una cuenta para comprar, pero si la creas
+          puedes ver el historial completo de tus pedidos desde{" "}
           <Link href="/cuenta" className={linkClass}>
             tu cuenta
-          </Link>{" "}
-          para ver el historial de tus pedidos.
+          </Link>
+          .
         </p>
         <p>
           Enviamos por DHL a toda la República Mexicana ($150 MXN). Tu
           pedido se procesa y despacha en 24–48 horas hábiles; el tiempo
           de entrega estimado de DHL es de 1 a 3 días hábiles en zonas
-          urbanas principales y hasta 5 días hábiles en el resto del
-          país. El tracking en vivo por paquetería está pendiente de
-          conectar.
+          urbanas principales (CDMX, Guadalajara, Monterrey y otras
+          capitales) y hasta 5 días hábiles en el resto del país. El
+          tracking en vivo por paquetería está pendiente de conectar —
+          mientras tanto, cualquier duda sobre tu envío la resolvemos por
+          correo.
         </p>
       </>
     ),
@@ -42,21 +45,23 @@ const FAQS: FaqItem[] = [
   {
     id: "cambios",
     title: "Cambios y devoluciones",
-    keywords: "cambio devolución devolver reembolso garantía",
+    keywords: "cambio devolución devolver reembolso garantía defecto",
     body: (
       <p>
-        Si tu pedido llega con un defecto, o quieres cambiarlo por otra
-        talla, escríbenos con el{" "}
+        Si tu pedido llega con un defecto o no corresponde a lo que
+        ordenaste, contáctanos y lo resolvemos sin costo para ti. Fuera
+        de esos casos, aceptamos cambios y devoluciones dentro de los 15
+        días naturales posteriores a la entrega, con la prenda sin usar y
+        etiqueta original; el envío de regreso corre por tu cuenta. Para
+        iniciar el proceso, escríbenos con el{" "}
         <Link href="/contacto" className={linkClass}>
           formulario de contacto
         </Link>{" "}
         o a{" "}
         <a href="mailto:hola@agofitness.com" className={linkClass}>
           hola@agofitness.com
-        </a>
-        . Aceptamos cambios y devoluciones dentro de los 15 días naturales
-        posteriores a la entrega, con la prenda sin usar y etiqueta
-        original — revisa el detalle en{" "}
+        </a>{" "}
+        — revisa el detalle completo en{" "}
         <Link href="/terminos" className={linkClass}>
           Términos y Condiciones
         </Link>
@@ -67,44 +72,47 @@ const FAQS: FaqItem[] = [
   {
     id: "tallas",
     title: "Talla y ajuste",
-    keywords: "talla tallas ajuste medidas guia guía",
+    keywords: "talla tallas ajuste medidas guia guía holgado ajustado",
     body: (
       <p>
-        Revisa nuestra{" "}
+        Cada prenda muestra su ajuste (ajustado, estándar u holgado) en
+        la ficha de producto — úsalo junto con nuestra{" "}
         <Link href="/guia-de-tallas" className={linkClass}>
           guía de tallas
         </Link>{" "}
-        con medidas reales en centímetros por prenda. Si sigues con dudas
-        sobre qué talla pedir, escríbenos con el formulario de esta página.
+        de medidas reales en centímetros para elegir mejor. Si sigues con
+        dudas sobre qué talla pedir, escríbenos con el formulario de esta
+        página antes de comprar.
       </p>
     ),
   },
   {
     id: "pagos",
     title: "Pagos y facturación",
-    keywords: "pago pagos facturación factura tarjeta cargo",
+    keywords: "pago pagos facturación factura tarjeta cargo visa mastercard",
     body: (
       <p>
         El pago se procesa de forma segura en el checkout de Shopify, en
-        pesos mexicanos (MXN). No almacenamos el número completo de tu
-        tarjeta — eso lo procesa directamente la pasarela de pago. Si tienes
-        un cargo duplicado o incorrecto, escríbenos de inmediato con el
-        formulario de contacto.
+        pesos mexicanos (MXN) con tarjeta de crédito o débito (Visa,
+        Mastercard, American Express). No almacenamos el número completo
+        de tu tarjeta — eso lo procesa directamente la pasarela de pago.
+        ¿Necesitas factura o tienes un cargo duplicado o incorrecto?
+        Escríbenos de inmediato con el formulario de contacto.
       </p>
     ),
   },
   {
     id: "cuenta",
     title: "Mi cuenta",
-    keywords: "cuenta perfil contraseña dirección direcciones",
+    keywords: "cuenta perfil contraseña dirección direcciones favoritos",
     body: (
       <p>
         Desde{" "}
         <Link href="/cuenta" className={linkClass}>
           tu cuenta
         </Link>{" "}
-        puedes editar tu perfil, tus direcciones guardadas y recuperar tu
-        contraseña si la olvidaste.
+        puedes editar tu perfil, guardar direcciones de envío, revisar tu
+        historial de pedidos y recuperar tu contraseña si la olvidaste.
       </p>
     ),
   },
