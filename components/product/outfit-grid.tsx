@@ -122,12 +122,6 @@ export function OutfitGrid({
 }) {
   if (!pieces.length) return null;
 
-  const heroFlat = firstProductImage(heroProduct);
-  const heroModel = heroProduct.images.find((img) =>
-    img.altText?.toLowerCase().includes("modelo"),
-  );
-  const heroImage = heroModel ?? heroFlat;
-
   return (
     <div
       id="ideas-para-combinar"
@@ -138,31 +132,20 @@ export function OutfitGrid({
       </h2>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_2fr]">
         <div className="relative aspect-[3/4] overflow-hidden rounded-lg lg:aspect-auto">
-          {heroImage ? (
-            <Image
-              src={heroImage.url}
-              alt={heroImage.altText || heroProduct.title}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <>
-              <div
-                className="absolute inset-0"
-                style={{ backgroundImage: modelGradient(firstColorHex(heroProduct)) }}
-              />
-              <Image
-                src="/imgs/logo-ago.png"
-                alt=""
-                aria-hidden="true"
-                fill
-                className="object-contain p-20 opacity-20 mix-blend-overlay"
-              />
-              <div className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold tracking-[0.15em] text-neutral-500 uppercase backdrop-blur-sm">
-                Foto próximamente
-              </div>
-            </>
-          )}
+          <div
+            className="absolute inset-0"
+            style={{ backgroundImage: modelGradient(firstColorHex(heroProduct)) }}
+          />
+          <Image
+            src="/imgs/logo-ago.png"
+            alt=""
+            aria-hidden="true"
+            fill
+            className="object-contain p-20 opacity-20 mix-blend-overlay"
+          />
+          <div className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold tracking-[0.15em] text-neutral-500 uppercase backdrop-blur-sm">
+            Foto próximamente
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
