@@ -23,10 +23,33 @@ function uniqueColorHexes(product: Product): string[] {
   return Array.from(names).map(colorHex);
 }
 
+/**
+ * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
+ * suben con el color en el `altText`. Sin esto, esta tarjeta siempre caía
+ * al gradiente aunque el producto ya tuviera fotografía real subida.
+ */
+function firstProductImage(product: Product) {
+  const firstColor = product.variants[0]?.selectedOptions.find(
+    (o) => o.name.toLowerCase() === "color",
+  )?.value;
+
+  const candidates = firstColor
+    ? product.images.filter((img) =>
+        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
+      )
+    : product.images;
+
+  return (
+    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
+    candidates[0]
+  );
+}
+
 function LookTile({ product }: { product: Product }) {
   const [hover, setHover] = useState(false);
   const price = product.priceRange.minVariantPrice;
   const colors = uniqueColorHexes(product);
+  const image = firstProductImage(product);
 
   return (
     <div
@@ -34,17 +57,28 @@ function LookTile({ product }: { product: Product }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <div
-        className="absolute inset-0"
-        style={{ backgroundImage: productGradient(firstColorHex(product)) }}
-      />
-      <Image
-        src="/imgs/logo-ago.png"
-        alt=""
-        aria-hidden="true"
-        fill
-        className="object-contain p-8 opacity-20 mix-blend-overlay"
-      />
+      {image ? (
+        <Image
+          src={image.url}
+          alt={image.altText || product.title}
+          fill
+          className="object-cover"
+        />
+      ) : (
+        <>
+          <div
+            className="absolute inset-0"
+            style={{ backgroundImage: productGradient(firstColorHex(product)) }}
+          />
+          <Image
+            src="/imgs/logo-ago.png"
+            alt=""
+            aria-hidden="true"
+            fill
+            className="object-contain p-8 opacity-20 mix-blend-overlay"
+          />
+        </>
+      )}
 
       <span className="absolute top-3 left-3 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/10">
         <span className="h-1.5 w-1.5 rounded-full bg-black" />
