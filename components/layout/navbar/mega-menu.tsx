@@ -1,6 +1,7 @@
 "use client";
 
 import { MEGA_MENU, MegaMenuHero } from "lib/constants";
+import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 
@@ -21,7 +22,17 @@ function HeroCard({
         compact ? "aspect-[4/5]" : "aspect-[16/9]",
       )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#b48b8c]/25 via-neutral-100 to-neutral-200" />
+      {hero.image ? (
+        <Image
+          src={hero.image}
+          alt={hero.title}
+          fill
+          sizes="(min-width: 1024px) 30vw, 90vw"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#b48b8c]/25 via-neutral-100 to-neutral-200" />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
       <div className="relative z-10 p-6">
         <p className="text-2xl font-bold tracking-tight text-white">

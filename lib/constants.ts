@@ -120,6 +120,8 @@ export type MegaMenuHero = {
   subtitle: string;
   ctaLabel: string;
   path: string;
+  /** Foto real opcional — sin esto la tarjeta cae al gradiente de marca. */
+  image?: string;
 };
 
 export type MegaMenuEntry = {
@@ -175,6 +177,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Ligereza y rendimiento diario.",
         ctaLabel: "Ver ahora",
         path: "/search/playeras",
+        image: "/imgs/mega-menu/hombre-playeras.jpg",
       },
       {
         title: "Shorts",
