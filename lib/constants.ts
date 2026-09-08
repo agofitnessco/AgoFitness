@@ -152,6 +152,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Sets completos, listos para moverte.",
         ctaLabel: "Ver ahora",
         path: "/search/conjuntos",
+        image: "/imgs/mega-menu/mujer-conjuntos.jpg",
       },
       {
         title: "Leggings",
