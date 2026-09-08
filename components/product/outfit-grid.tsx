@@ -122,12 +122,23 @@ export function OutfitGrid({
 }) {
   if (!pieces.length) return null;
 
+  // Las recomendaciones de Shopify no saben qué línea ya tiene fotografía
+  // real (Second Skin/Kisu) y cuál sigue en placeholder (Element) — sin
+  // esto, a un producto le puede tocar una fila entera de gradientes
+  // negros aunque el catálogo ya tenga fotos reales disponibles. Se
+  // prioriza mostrar primero las piezas con foto real.
+  const sorted = [...pieces].sort((a, b) => {
+    const aHasImage = firstProductImage(a) ? 1 : 0;
+    const bHasImage = firstProductImage(b) ? 1 : 0;
+    return bHasImage - aHasImage;
+  });
+
   // Con el filtro de Conjunto/Enterizo (ver page.tsx) a veces sobran menos
   // de 6 piezas — mostrar, digamos, 4 deja una tarjetita sola y huérfana
   // en la última fila de 3 columnas. Se recorta al múltiplo de 3 más
   // grande disponible (o a todo lo que haya si son 1-2) para que la
   // última fila siempre quede completa.
-  const capped = pieces.slice(0, 6);
+  const capped = sorted.slice(0, 6);
   const visibleCount =
     capped.length >= 3 ? Math.floor(capped.length / 3) * 3 : capped.length;
   const visiblePieces = capped.slice(0, visibleCount);
