@@ -29,12 +29,12 @@ const FAQ_JSON_LD_ITEMS = [
   {
     question: "¿Quieres saber el estado de tu pedido o el tiempo de envío?",
     answer:
-      "Inicia sesión en tu cuenta para ver el historial de tus pedidos. México es nuestro mercado principal: la paquetería y los tiempos de entrega exactos por zona todavía están en definición y se publicarán en cuanto estén confirmados. El tracking en vivo por paquetería también está pendiente de conectar.",
+      "Inicia sesión en tu cuenta para ver el historial de tus pedidos. Enviamos por DHL a toda la República Mexicana ($150 MXN): tu pedido se procesa y despacha en 24–48 horas hábiles, y la entrega estimada de DHL es de 1 a 3 días hábiles en zonas urbanas principales y hasta 5 días hábiles en el resto del país. El tracking en vivo por paquetería está pendiente de conectar.",
   },
   {
     question: "¿Quieres cambiar de talla o hacer una devolución?",
     answer:
-      "Si tu pedido llega con un defecto o quieres cambiarlo por otra talla, escríbenos con el formulario de contacto o a hola@agofitness.com. La política completa de cambios y devoluciones sigue en definición — puedes ver lo confirmado hasta ahora en Términos y Condiciones.",
+      "Si tu pedido llega con un defecto o quieres cambiarlo por otra talla, escríbenos con el formulario de contacto o a hola@agofitness.com. Aceptamos cambios y devoluciones dentro de los 15 días naturales posteriores a la entrega, con la prenda sin usar y etiqueta original — revisa el detalle en Términos y Condiciones.",
   },
   {
     question: "¿Quieres más información sobre nuestras tallas?",

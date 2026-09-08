@@ -104,37 +104,30 @@ const SECTIONS: LegalSection[] = [
   {
     title: "Envíos y entregas",
     body: (
-      <>
-        <p>
-          Enviamos a las direcciones disponibles en el checkout. Los
-          tiempos de entrega estimados se muestran durante el proceso de
-          compra y pueden variar según destino y disponibilidad de la
-          paquetería.
-        </p>
-        <Pending>
-          la paquetería específica con la que trabajamos y la tabla
-          detallada de tiempos/costos de envío por zona — se publicará aquí
-          y en el centro de ayuda en cuanto esté confirmada con el cliente.
-        </Pending>
-      </>
+      <p>
+        Enviamos por DHL a toda la República Mexicana, con un costo de
+        envío estándar de $150 MXN. Tu pedido se procesa y despacha en
+        24–48 horas hábiles; el tiempo de entrega estimado de DHL es de 1
+        a 3 días hábiles en zonas urbanas principales (CDMX, Guadalajara,
+        Monterrey y otras capitales) y hasta 5 días hábiles en el resto
+        del país. Estos tiempos son estimados de la paquetería y pueden
+        variar por destino o disponibilidad.
+      </p>
     ),
   },
   {
     title: "Cambios y devoluciones",
     body: (
-      <>
-        <p>
-          Si tu pedido llega con un defecto o no corresponde a lo que
-          ordenaste, contáctanos por correo y te ayudamos a resolverlo sin
-          costo para ti.
-        </p>
-        <Pending>
-          la política completa de cambios y devoluciones por talla o
-          preferencia (plazos exactos, condición de la prenda, quién cubre
-          el costo de envío de regreso) — se publicará aquí en cuanto el
-          cliente la defina.
-        </Pending>
-      </>
+      <p>
+        Si tu pedido llega con un defecto o no corresponde a lo que
+        ordenaste, contáctanos por correo y te ayudamos a resolverlo sin
+        costo para ti. Fuera de esos casos, aceptamos cambios y
+        devoluciones dentro de los 15 días naturales posteriores a la
+        entrega, siempre que la prenda esté sin usar y con la etiqueta
+        original. El costo de envío de regreso corre por cuenta del
+        cliente salvo que el pedido haya llegado con defecto o error
+        nuestro.
+      </p>
     ),
   },
   {

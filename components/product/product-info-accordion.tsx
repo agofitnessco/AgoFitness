@@ -40,16 +40,22 @@ function buildSections(product: Product): { title: string; body: React.ReactNode
       title: "Envío y devolución",
       body: (
         <>
-          Envío estándar a toda la República Mexicana por $150 MXN. La
-          política completa de cambios y devoluciones sigue en definición
-          —{" "}
+          Envío estándar por DHL a toda la República Mexicana — $150 MXN.
+          Tu pedido se procesa y despacha en 24–48 horas hábiles; el
+          tiempo de entrega estimado de DHL es de 1 a 3 días hábiles en
+          zonas urbanas principales (CDMX, Guadalajara, Monterrey y otras
+          capitales) y hasta 5 días hábiles en el resto del país.
+          <br />
+          Cambios y devoluciones dentro de los 15 días naturales
+          posteriores a la entrega, con la prenda sin usar y etiqueta
+          original.{" "}
           <Link
             href="/soporte"
             className="font-medium text-black underline underline-offset-2"
           >
-            escríbenos
+            Escríbenos
           </Link>{" "}
-          si tienes dudas mientras tanto.
+          para iniciar el proceso.
         </>
       ),
     },

@@ -29,8 +29,9 @@ const FAQS: LegalSection[] = [
         <a href="mailto:hola@agofitness.com" className={linkClass}>
           hola@agofitness.com
         </a>
-        . La política detallada de cambios y devoluciones sigue en
-        definición — puedes ver lo confirmado hasta ahora en{" "}
+        . Aceptamos cambios y devoluciones dentro de los 15 días naturales
+        posteriores a la entrega, con la prenda sin usar y etiqueta
+        original — revisa el detalle en{" "}
         <Link href="/terminos" className={linkClass}>
           Términos y Condiciones
         </Link>
@@ -55,9 +56,10 @@ const FAQS: LegalSection[] = [
     title: "¿A dónde hacen envíos?",
     body: (
       <p>
-        México es nuestro mercado principal. La paquetería y los tiempos de
-        entrega exactos por zona todavía están en definición — se
-        publicarán en cuanto estén confirmados.
+        Enviamos por DHL a toda la República Mexicana ($150 MXN). Tu
+        pedido se procesa y despacha en 24–48 horas hábiles; la entrega
+        estimada de DHL es de 1 a 3 días hábiles en zonas urbanas
+        principales y hasta 5 días hábiles en el resto del país.
       </p>
     ),
   },

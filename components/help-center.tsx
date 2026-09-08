@@ -29,10 +29,12 @@ const FAQS: FaqItem[] = [
           para ver el historial de tus pedidos.
         </p>
         <p>
-          México es nuestro mercado principal. La paquetería y los tiempos de
-          entrega exactos por zona todavía están en definición — se
-          publicarán aquí en cuanto estén confirmados. El tracking en vivo
-          por paquetería también está pendiente de conectar.
+          Enviamos por DHL a toda la República Mexicana ($150 MXN). Tu
+          pedido se procesa y despacha en 24–48 horas hábiles; el tiempo
+          de entrega estimado de DHL es de 1 a 3 días hábiles en zonas
+          urbanas principales y hasta 5 días hábiles en el resto del
+          país. El tracking en vivo por paquetería está pendiente de
+          conectar.
         </p>
       </>
     ),
@@ -52,8 +54,9 @@ const FAQS: FaqItem[] = [
         <a href="mailto:hola@agofitness.com" className={linkClass}>
           hola@agofitness.com
         </a>
-        . La política completa de cambios y devoluciones sigue en definición
-        — puedes ver lo confirmado hasta ahora en{" "}
+        . Aceptamos cambios y devoluciones dentro de los 15 días naturales
+        posteriores a la entrega, con la prenda sin usar y etiqueta
+        original — revisa el detalle en{" "}
         <Link href="/terminos" className={linkClass}>
           Términos y Condiciones
         </Link>
