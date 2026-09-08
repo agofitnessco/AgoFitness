@@ -57,10 +57,6 @@ const FAQS: FaqItem[] = [
         <Link href="/contacto" className={linkClass}>
           formulario de contacto
         </Link>{" "}
-        o a{" "}
-        <a href="mailto:hola@agofitness.com" className={linkClass}>
-          hola@agofitness.com
-        </a>{" "}
         — revisa el detalle completo en{" "}
         <Link href="/terminos" className={linkClass}>
           Términos y Condiciones

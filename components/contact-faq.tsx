@@ -31,11 +31,8 @@ const FAQS: LegalSection[] = [
         de esos casos, aceptamos cambios y devoluciones dentro de los 15
         días naturales posteriores a la entrega, con la prenda sin usar y
         etiqueta original; el envío de regreso corre por tu cuenta.
-        Escríbenos con el formulario de esta página o a{" "}
-        <a href="mailto:hola@agofitness.com" className={linkClass}>
-          hola@agofitness.com
-        </a>{" "}
-        — revisa el detalle completo en{" "}
+        Escríbenos con el formulario de esta página — revisa el detalle
+        completo en{" "}
         <Link href="/terminos" className={linkClass}>
           Términos y Condiciones
         </Link>

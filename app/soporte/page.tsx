@@ -34,7 +34,7 @@ const FAQ_JSON_LD_ITEMS = [
   {
     question: "¿Quieres cambiar de talla o hacer una devolución?",
     answer:
-      "Si tu pedido llega con un defecto o no corresponde a lo que ordenaste, contáctanos y lo resolvemos sin costo para ti. Fuera de esos casos, aceptamos cambios y devoluciones dentro de los 15 días naturales posteriores a la entrega, con la prenda sin usar y etiqueta original; el envío de regreso corre por tu cuenta. Escríbenos con el formulario de contacto o a hola@agofitness.com — revisa el detalle completo en Términos y Condiciones.",
+      "Si tu pedido llega con un defecto o no corresponde a lo que ordenaste, contáctanos y lo resolvemos sin costo para ti. Fuera de esos casos, aceptamos cambios y devoluciones dentro de los 15 días naturales posteriores a la entrega, con la prenda sin usar y etiqueta original; el envío de regreso corre por tu cuenta. Escríbenos con el formulario de contacto — revisa el detalle completo en Términos y Condiciones.",
   },
   {
     question: "¿Quieres más información sobre nuestras tallas?",

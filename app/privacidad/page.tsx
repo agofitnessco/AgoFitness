@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import Footer from "components/layout/footer";
 import { LegalAccordion, type LegalSection } from "components/legal-accordion";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Aviso de Privacidad",
@@ -175,10 +176,10 @@ const SECTIONS: LegalSection[] = [
     body: (
       <p>
         Para cualquier duda o solicitud sobre tus datos personales,
-        escríbenos a{" "}
-        <a href="mailto:hola@agofitness.com" className="underline">
-          hola@agofitness.com
-        </a>
+        escríbenos con el{" "}
+        <Link href="/contacto" className="underline">
+          formulario de contacto
+        </Link>
         .
       </p>
     ),

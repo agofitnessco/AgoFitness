@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import Link from "next/link";
 import { useState } from "react";
 
 type SizeRow = {
@@ -113,10 +114,10 @@ export default function SizeGuide() {
         <span className="font-semibold text-black">Línea Kisu</span>{" "}
         (conjuntos, leggings, enterizos) usa tallas S/M/L/XL — la tabla de
         medidas específica para esta línea está pendiente de que el
-        proveedor la comparta. Mientras tanto, contáctanos por{" "}
-        <a href="mailto:hola@agofitness.com" className="underline">
-          correo
-        </a>{" "}
+        proveedor la comparta. Mientras tanto, escríbenos con el{" "}
+        <Link href="/contacto" className="underline">
+          formulario de contacto
+        </Link>{" "}
         si necesitas ayuda para elegir talla en estas piezas.
       </div>
 

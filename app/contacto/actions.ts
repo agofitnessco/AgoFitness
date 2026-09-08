@@ -36,7 +36,7 @@ export async function sendContactMessage(
     return {
       ok: false,
       error:
-        "El formulario no está conectado todavía. Escríbenos directamente a hola@agofitness.com mientras tanto.",
+        "No se pudo enviar tu mensaje en este momento. Intenta de nuevo en unos minutos.",
     };
   }
 

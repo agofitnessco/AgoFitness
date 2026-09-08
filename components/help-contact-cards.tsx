@@ -1,20 +1,12 @@
-import { EnvelopeIcon, ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { InstagramIcon } from "components/icons/social";
 import Link from "next/link";
 
 const CHANNELS = [
   {
-    label: "Correo electrónico",
-    Icon: EnvelopeIcon,
-    desc: "Escríbenos cuando quieras — te respondemos a tu correo en menos de 24 horas.",
-    cta: "Escribir correo",
-    href: "mailto:hola@agofitness.com",
-    external: false,
-  },
-  {
     label: "Formulario de contacto",
     Icon: ChatBubbleLeftRightIcon,
-    desc: "Cuéntanos el motivo de tu consulta y te contactamos por correo.",
+    desc: "Cuéntanos el motivo de tu consulta y te contactamos por correo en menos de 24 horas.",
     cta: "Ir al formulario",
     href: "/contacto",
     external: false,
@@ -35,7 +27,7 @@ export default function HelpContactCards() {
       <h2 className="text-xl font-bold tracking-tight text-black lg:text-2xl">
         ¿No encontraste tu respuesta? Ponte en contacto con nosotros.
       </h2>
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {CHANNELS.map(({ label, Icon, desc, cta, href, external }) => (
           <div
             key={label}
