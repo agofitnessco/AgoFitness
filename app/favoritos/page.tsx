@@ -4,6 +4,7 @@ import Footer from "components/layout/footer";
 import HeartButton from "components/favorites/heart-button";
 import { productGradient } from "lib/color-placeholder";
 import { useFavorites } from "lib/use-favorites";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function FavoritosPage() {
@@ -37,10 +38,19 @@ export default function FavoritosPage() {
                     prefetch={true}
                     className="absolute inset-0"
                   >
-                    <div
-                      className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105"
-                      style={{ backgroundImage: productGradient(item.colorHex) }}
-                    />
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105"
+                        style={{ backgroundImage: productGradient(item.colorHex) }}
+                      />
+                    )}
                   </Link>
                   <HeartButton item={item} />
                 </div>

@@ -4,6 +4,8 @@ export type FavoriteItem = {
   price: string;
   currencyCode: string;
   colorHex: string;
+  /** Foto real del producto, si ya la tiene subida — si no, cae al gradiente de colorHex. */
+  image?: string;
 };
 
 const STORAGE_KEY = "ago:favorites";

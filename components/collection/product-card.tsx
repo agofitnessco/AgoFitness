@@ -144,6 +144,7 @@ export default function ProductCard({
     price: price.amount,
     currencyCode: price.currencyCode,
     colorHex: activeColor.hex,
+    image: activeColor.image?.url,
   };
 
   return (

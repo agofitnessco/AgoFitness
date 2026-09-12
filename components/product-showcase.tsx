@@ -122,6 +122,7 @@ function ProductCard({ product }: { product: ShowcaseProduct }) {
             price: product.price.toFixed(2),
             currencyCode: "MXN",
             colorHex: activeColor.hex,
+            image: activeColor.image,
           }}
         />
 

@@ -105,6 +105,7 @@ function ProductCard({ product }: { product: SecondSkinProduct }) {
             price: product.price.toFixed(2),
             currencyCode: "MXN",
             colorHex: activeColor.hex,
+            image: activeColor.image,
           }}
         />
 

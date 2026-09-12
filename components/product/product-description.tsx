@@ -121,6 +121,7 @@ export function ProductDescription({
             price: price.amount,
             currencyCode: price.currencyCode,
             colorHex: firstColorHex(product),
+            image: firstProductImage(product)?.url,
           }}
         />
       </div>
