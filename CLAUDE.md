@@ -784,3 +784,33 @@ no este archivo.
     silencio. Sin Resend — esto usa el sistema nativo de clientes +
     Shopify Email, no un servicio externo de correo (a diferencia del
     formulario de `/contacto`, que sí es custom y sí necesita Resend).
+  - **Resend del formulario de `/contacto` — ya en producción**: el
+    cliente creó cuenta en Resend, verificó el dominio `agofitnessco.com`
+    y generó el API key. `RESEND_API_KEY`, `CONTACT_FROM_EMAIL` (`Ago
+    Fitness <contacto@agofitnessco.com>`, dominio ya verificado — no usa
+    el sandbox `onboarding@resend.dev`) y `CONTACT_TO_EMAIL`
+    (`agofitnessco@gmail.com`) quedaron cargadas tanto en `.env.local`
+    como en Vercel (todas las variables de entorno). Probado end-to-end
+    con un envío real vía `resend.emails.send()` antes de dar por
+    bueno — el correo llegó. El formulario de `/contacto` queda
+    resuelto en producción.
+  - **Newsletter del footer — cambio de plan, ya no usa Shopify**: en vez
+    de la app de Shopify con `write_customers` (planteada arriba), el
+    cliente prefirió reutilizar Resend — más simple, sin app nueva que
+    mantener. `app/actions/newsletter.ts` se reescribió para usar
+    **Resend Audiences** (`resend.contacts.create`) en vez de
+    `customerCreate` de Shopify Admin API. Detalle importante: la
+    `RESEND_API_KEY` original tenía permiso "Sending access" (solo
+    `emails.send`) — Resend separa por scope, y `contacts`/`audiences`
+    necesitan **"Full access"**; el cliente subió el permiso de la
+    misma key en vez de generar una nueva. Se creó la audiencia
+    "Newsletter Ago Fitness" por API (`resend.audiences.create`) y su ID
+    va en `RESEND_NEWSLETTER_AUDIENCE_ID` (nueva variable, agregada a
+    `.env.local`/`.env.example` — **pendiente que el cliente la cargue
+    también en Vercel**, junto con confirmar que la `RESEND_API_KEY` de
+    Vercel ya tenga el permiso Full access actualizado, no la versión
+    vieja Sending-only). Probado end-to-end con `contacts.create()` real
+    antes de dar por bueno. Los correos del newsletter viven en Resend
+    (Audiences → ahí se mandan campañas), no como clientes de Shopify —
+    si más adelante hace falta cruzar "suscritos" con "compraron algo",
+    esa unión ya no es automática.

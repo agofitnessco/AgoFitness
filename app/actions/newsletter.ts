@@ -1,25 +1,24 @@
 "use server";
 
+import { Resend } from "resend";
+
 /**
- * Suscripción al newsletter del footer — a diferencia del formulario de
- * contacto (Resend), esto usa el sistema nativo de Shopify: crea/actualiza
- * un Customer con `emailMarketingConsentState: SUBSCRIBED`. No hace falta
- * ningún servicio externo — las campañas se mandan gratis desde Shopify
- * Email, y el correo queda visible en Clientes → segmento "suscritos a
- * marketing por correo electrónico".
+ * Suscripción al newsletter del footer — usa Resend Audiences (no Shopify
+ * Admin API). Más simple que crear una app aparte en Shopify con scope
+ * write_customers: reutiliza el mismo RESEND_API_KEY que ya usa el
+ * formulario de contacto, solo que con permiso "Full access" (el de
+ * "Sending access" no puede crear/leer audiencias ni contactos).
  *
- * Usa el Admin API (no el Storefront API) porque `customerCreate` de
- * Storefront exige contraseña — crearía una cuenta de login completa, que
- * no es lo que queremos para un simple "avísame de novedades". El Admin
- * API sí permite un cliente sin contraseña, solo con el consentimiento.
+ * Los correos capturados aquí viven en Resend (Audiences → mandas
+ * campañas desde ahí), no como clientes de Shopify — si en algún momento
+ * se necesita cruzar "suscritos al newsletter" con "compraron algo", esa
+ * unión ya no es automática, quedaría pendiente si se necesita.
  */
 
 export type NewsletterState = {
   ok: boolean;
   error: string | null;
 } | null;
-
-const ADMIN_API_VERSION = "2025-01";
 
 export async function subscribeToNewsletter(
   _prevState: NewsletterState,
@@ -31,12 +30,12 @@ export async function subscribeToNewsletter(
     return { ok: false, error: "Escribe un correo válido." };
   }
 
-  const domain = process.env.SHOPIFY_STORE_DOMAIN;
-  const token = process.env.SHOPIFY_ADMIN_API_ACCESS_TOKEN;
+  const apiKey = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_NEWSLETTER_AUDIENCE_ID;
 
-  if (!domain || !token) {
+  if (!apiKey || !audienceId) {
     console.error(
-      "SHOPIFY_ADMIN_API_ACCESS_TOKEN no está configurada — no se pudo suscribir al newsletter.",
+      "RESEND_API_KEY o RESEND_NEWSLETTER_AUDIENCE_ID no están configuradas — no se pudo suscribir al newsletter.",
     );
     return {
       ok: false,
@@ -44,62 +43,16 @@ export async function subscribeToNewsletter(
     };
   }
 
-  const query = `
-    mutation SubscribeNewsletter($input: CustomerInput!) {
-      customerCreate(input: $input) {
-        customer { id }
-        userErrors { field message }
-      }
-    }
-  `;
+  const resend = new Resend(apiKey);
 
-  const res = await fetch(
-    `https://${domain}/admin/api/${ADMIN_API_VERSION}/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": token,
-      },
-      body: JSON.stringify({
-        query,
-        variables: {
-          input: {
-            email,
-            emailMarketingConsent: {
-              marketingState: "SUBSCRIBED",
-              marketingOptInLevel: "SINGLE_OPT_IN",
-            },
-          },
-        },
-      }),
-    },
-  );
+  const { error } = await resend.contacts.create({
+    email,
+    unsubscribed: false,
+    audienceId,
+  });
 
-  if (!res.ok) {
-    console.error("Shopify Admin API error:", res.status, await res.text());
-    return {
-      ok: false,
-      error: "No se pudo procesar tu suscripción. Intenta de nuevo.",
-    };
-  }
-
-  const json = await res.json();
-  const userErrors = json?.data?.customerCreate?.userErrors as
-    | { field: string[]; message: string }[]
-    | undefined;
-
-  // Si el email ya existe como cliente, Shopify regresa un userError de
-  // "Email has already been taken" — no es un error real para el usuario,
-  // solo significa que ya estaba en la lista (o es cliente por otra
-  // razón). En ese caso lo tratamos como éxito silencioso.
-  const alreadyExists = userErrors?.some((e) =>
-    e.message.toLowerCase().includes("ya se ha tomado") ||
-    e.message.toLowerCase().includes("already been taken"),
-  );
-
-  if (userErrors && userErrors.length > 0 && !alreadyExists) {
-    console.error("Shopify customerCreate userErrors:", userErrors);
+  if (error) {
+    console.error("Resend contacts.create error:", error);
     return {
       ok: false,
       error: "No se pudo procesar tu suscripción. Intenta de nuevo.",
