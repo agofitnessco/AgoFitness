@@ -14,7 +14,7 @@ import { RecommendationsCarousel } from "components/product/recommendations-caro
 import { colorHex } from "lib/color-placeholder";
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
 import { climateFor, fitFor } from "lib/product-types";
-import { getProduct, getProductRecommendations } from "lib/shopify";
+import { getProduct, getProductRecommendations, getProducts } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
 import { baseUrl } from "lib/utils";
 import type { Metadata } from "next";
@@ -100,11 +100,35 @@ export default async function ProductPage(props: {
   // filtrar — usa `recommendations` sin tocar, no esta lista. Los
   // Enterizo de Kisu están tipados como "Conjunto" en Shopify (no tienen
   // su propio productType), así que el filtro también revisa el título.
-  const outfitOnlyRecommendations = recommendations.filter((product) => {
-    const type = product.productType.toLowerCase();
-    const title = product.title.toLowerCase();
+  const isOutfitPiece = (candidate: { productType: string; title: string }) => {
+    const type = candidate.productType.toLowerCase();
+    const title = candidate.title.toLowerCase();
     return type !== "conjunto" && !title.includes("enterizo");
-  });
+  };
+  let outfitOnlyRecommendations = recommendations.filter(isOutfitPiece);
+
+  // Las recomendaciones de Shopify son una lista corta y fija — filtrar
+  // conjuntos/enterizos ahí puede dejar muy pocas piezas (ej. 5→2) y un
+  // espacio vacío en la última fila del grid. Se apunta a 7 (1 para "Queda
+  // bien con..." + 6 para "Ideas para combinar", múltiplo de 3) y se
+  // rellena con otro producto real del catálogo (best-sellers, sin
+  // repetir lo que ya está ni mostrar la prenda actual) si hace falta.
+  const TARGET_COUNT = 7;
+  if (outfitOnlyRecommendations.length < TARGET_COUNT) {
+    const usedHandles = new Set([
+      product.handle,
+      ...outfitOnlyRecommendations.map((p) => p.handle),
+    ]);
+    const catalog = await getProducts({ sortKey: "BEST_SELLING" });
+    const fillers = catalog
+      .filter(isOutfitPiece)
+      .filter((p) => !usedHandles.has(p.handle));
+    outfitOnlyRecommendations = [
+      ...outfitOnlyRecommendations,
+      ...fillers.slice(0, TARGET_COUNT - outfitOnlyRecommendations.length),
+    ];
+  }
+
   const completeWith = outfitOnlyRecommendations[0];
   const otherRecommendations = outfitOnlyRecommendations.filter(
     (product) => product.handle !== completeWith?.handle,
