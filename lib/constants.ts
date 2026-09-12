@@ -159,7 +159,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         subtitle: "Movimiento sin restricciones.",
         ctaLabel: "Ver ahora",
         path: "/search/leggings",
-        image: "/imgs/mega-menu/mujer-leggings.jpg",
+        image: "/imgs/mega-menu/mujer-leggings-v2.jpg",
       },
     ],
   },
@@ -184,7 +184,7 @@ export const MEGA_MENU: Record<string, MegaMenuEntry> = {
         // which is not configured in images.localPatterns"), así que al
         // reemplazar una foto hay que renombrar el archivo, no versionar
         // la URL.
-        image: "/imgs/mega-menu/hombre-playeras-v2.jpg",
+        image: "/imgs/mega-menu/hombre-playeras-v3.jpg",
       },
       {
         title: "Shorts",
