@@ -884,3 +884,40 @@ no este archivo.
   la instrucción directa de usarla). Guardada en
   `public/imgs/category-second-skin.jpg`, renderizada igual que las
   tarjetas de Mujer/Hombre (mismo patrón `<Image fill>` + overlay).
+
+- **Recomendaciones: prioriza prenda complementaria (arriba/abajo) en vez
+  de repetir el mismo tipo (12 septiembre 2026, mismo día):** el cliente
+  notó que un legging (Kisu Leg Arabesco) recomendaba en "Queda bien
+  con..." otro legging (Kisu Sunset Leggings) — sin sentido para armar
+  un outfit. Nueva `slotFor(productType)` en `lib/product-types.ts`
+  clasifica cada tipo en `"top"` (Top, Playera, Chamarra) o `"bottom"`
+  (Legging, Short, Falda). En `app/product/[handle]/page.tsx`,
+  `outfitOnlyRecommendations` (alimenta tanto "Queda bien con..." como
+  "Ideas para combinar") ahora se ordena con `bySlotPriority` — la
+  prenda del slot opuesto va primero (sort estable: dentro de cada grupo
+  se conserva el orden real de Shopify/best-sellers), sin descartar del
+  todo el mismo tipo si no hay suficiente variedad complementaria (mejor
+  mostrar algo que dejar un espacio vacío). El orden por slot también se
+  aplica a los fillers del catálogo de respaldo antes de recortarlos, y
+  se reordena una vez más después de mezclar el respaldo. El carrusel de
+  abajo (`bottomRecommendations`) no lleva este filtro — sigue siendo
+  "también te puede gustar" general, no una herramienta de armar outfit.
+  Verificado con curl en `/product/kisu-leg-arabesco`: "Queda bien
+  con..." pasó de otro legging a "Element Performance Jacket", e "Ideas
+  para combinar" ahora empieza con tops (Motion Top, Top Diamond Cross)
+  antes de mostrar más leggings/faldas.
+  - **Nota aparte (mismo hilo, sin cambio de código):** el cliente
+    preguntó por qué "Ideas para combinar" se ve más corto en productos
+    de Hombre que en Mujer — no es un bug, es el catálogo real: solo hay
+    6 productos tageados Hombre en Shopify (`element-easy-short`,
+    `element-second-playera`, `element-shift-playera`,
+    `playera-apex-tee`, `playera-atlas`, `short-licra-range`) contra 26+
+    de Mujer. Con la segmentación por género (ver entrada anterior del
+    12 sep), un producto Hombre solo tiene ~4-5 piezas disponibles tras
+    excluirse a sí mismo — no alcanza el objetivo de 6 para la grid, y
+    el recorte a múltiplo de 3 (`outfit-grid.tsx`) lo deja en 3 en vez
+    de 6. Antes de la segmentación por género probablemente se rellenaba
+    con productos de Mujer para verse completo — exactamente el bug que
+    ya se pidió corregir. Se queda así (honesto con el inventario real)
+    hasta que el catálogo Hombre crezca; no se rellena con género
+    incorrecto para disimularlo.

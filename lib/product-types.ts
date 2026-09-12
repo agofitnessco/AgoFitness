@@ -60,6 +60,27 @@ export function climateFor(productType: string) {
 }
 
 /**
+ * "Parte de arriba" / "parte de abajo" por tipo de prenda — para que
+ * "Queda bien con..." e "Ideas para combinar" prioricen la prenda
+ * complementaria (un legging recomienda un top, no otro legging) en vez
+ * de repetir el mismo tipo. Conjunto no aplica (ya es un outfit completo
+ * y se excluye de estas recomendaciones antes de llegar aquí, ver
+ * `isOutfitPiece` en app/product/[handle]/page.tsx).
+ */
+const SLOT_BY_TYPE: Record<string, "top" | "bottom"> = {
+  Top: "top",
+  Playera: "top",
+  Chamarra: "top",
+  Legging: "bottom",
+  Short: "bottom",
+  Falda: "bottom",
+};
+
+export function slotFor(productType: string): "top" | "bottom" | "other" {
+  return SLOT_BY_TYPE[productType] ?? "other";
+}
+
+/**
  * Género real del producto a partir de sus tags de Shopify ("Mujer" /
  * "Hombre" — misma fuente que usa el breadcrumb, ver `breadcrumbFor` en
  * components/product/product-description.tsx). Si el producto no trae

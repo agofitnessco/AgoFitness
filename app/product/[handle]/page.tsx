@@ -13,7 +13,7 @@ import RecordRecentlyViewed from "components/product/record-recently-viewed";
 import { RecommendationsCarousel } from "components/product/recommendations-carousel";
 import { colorHex } from "lib/color-placeholder";
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
-import { climateFor, fitFor, sameGender } from "lib/product-types";
+import { climateFor, fitFor, sameGender, slotFor } from "lib/product-types";
 import { getProduct, getProductRecommendations, getProducts } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
 import { baseUrl } from "lib/utils";
@@ -120,6 +120,24 @@ export default async function ProductPage(props: {
     isOutfitPiece,
   );
 
+  // El cliente no quiere que un legging recomiende otro legging — "Queda
+  // bien con..." e "Ideas para combinar" deben priorizar la prenda
+  // complementaria (arriba recomienda abajo, y viceversa) sobre repetir
+  // el mismo tipo. No se descarta el mismo tipo por completo (mejor
+  // mostrar algo que dejar un espacio vacío si no hay suficiente
+  // variedad) — solo se ordena primero lo complementario. Sort estable:
+  // dentro de cada grupo se conserva el orden real de Shopify/best-sellers.
+  const currentSlot = slotFor(product.productType);
+  const oppositeSlot =
+    currentSlot === "top" ? "bottom" : currentSlot === "bottom" ? "top" : null;
+  const bySlotPriority = (a: { productType: string }, b: { productType: string }) => {
+    if (!oppositeSlot) return 0;
+    const aPriority = slotFor(a.productType) === oppositeSlot ? 0 : 1;
+    const bPriority = slotFor(b.productType) === oppositeSlot ? 0 : 1;
+    return aPriority - bPriority;
+  };
+  outfitOnlyRecommendations = [...outfitOnlyRecommendations].sort(bySlotPriority);
+
   // Las recomendaciones de Shopify son una lista corta y fija — filtrar
   // por género y luego por tipo ahí puede dejar muy pocas piezas y
   // espacios vacíos en la última fila del grid, o un carrusel de abajo
@@ -145,12 +163,17 @@ export default async function ProductPage(props: {
     ]);
     const fillers = sameGenderCatalog
       .filter(isOutfitPiece)
-      .filter((p) => !usedHandles.has(p.handle));
+      .filter((p) => !usedHandles.has(p.handle))
+      .sort(bySlotPriority);
     outfitOnlyRecommendations = [
       ...outfitOnlyRecommendations,
       ...fillers.slice(0, OUTFIT_TARGET - outfitOnlyRecommendations.length),
     ];
   }
+  // Reordena una última vez ya con el respaldo del catálogo mezclado —
+  // sin esto, los fillers complementarios quedarían pegados al final en
+  // vez de subir antes que las piezas del mismo tipo que ya estaban.
+  outfitOnlyRecommendations = [...outfitOnlyRecommendations].sort(bySlotPriority);
 
   const completeWith = outfitOnlyRecommendations[0];
   const otherRecommendations = outfitOnlyRecommendations.filter(
