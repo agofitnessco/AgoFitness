@@ -700,3 +700,41 @@ no este archivo.
     (1 sola fila) la tarjeta grande se estiraba menos por el
     `lg:aspect-auto`. Quedó fuera del alcance pedido, documentado por si
     se retoma.
+
+- **Catálogo Element completo — fotos reales, los 11 productos (12
+  septiembre 2026):** el cliente entregó 74 fotos
+  (`Desktop/Diseño sin título/`, numeradas 1-74, mismo patrón
+  flat+modelo por color que Second Skin/Kisu, sin PDF de referencia —
+  otra vez se buscó y no existía). A diferencia de Kisu, los 11
+  productos Element **ya tenían precios reales** desde su creación
+  ($579-$929 MXN) — esta tanda fue solo fotos, sin tocar pricing.
+  - **Identificación de color por proceso de eliminación**: los colores
+    de Element (Negro, Cacto, Passion, Skylilac, Azzure, Blanco, Ohana,
+    Herb, Cocoa, Gris) ya estaban configurados como opciones en cada
+    producto de Shopify — se identificó el nombre de cada color viendo
+    la paleta contra la lista de opciones ya existente del producto
+    (mismo criterio que se usó para corregir Kisu: la fuente de verdad
+    es lo que ya está configurado en Shopify, no una agrupación inferida
+    a ciegas de las fotos).
+  - **Mapeo final** (imagen inicio-fin → producto, colores):
+    1-6 Element Top (Negro/Cacto/Passion), 7-12 Motion Top
+    (Negro/Cacto/Passion), 13-22 Force Soft (Negro/Passion/Skylilac/
+    Azzure/Blanco), 23-32 Alpha Soft (Blanco/Azzure/Passion/Negro/
+    Skylilac), 33-38 Performance Jacket (Cacto/Negro/Passion), 39-44
+    Nova Falda (Cacto/Negro/Passion), 45-50 Lume Biker (Negro/Cacto/
+    Passion), 51-56 Dynamic Legging (Negro/Passion/Cacto), 57-64 Second
+    Playera — línea hombre (Ohana/Negro/Herb/Cocoa), 65-68 Shift
+    Playera — línea hombre, solo 2 de 4 colores fotografiados (Negro/
+    Herb; faltan Ohana/Cocoa), 69-74 Easy Short — línea hombre (Negro/
+    Gris/Herb).
+  - Fotos organizadas en
+    `public/imgs/products/element/<producto>/<color>-{flat,modelo}.jpg`,
+    subidas vía `update-product` con `altText` `"Element <Producto>
+    <Color>"` / `"... modelo"` — mismo patrón de matching por altText
+    que ya usa `product-card.tsx`, no hizo falta tocar frontend.
+  - Verificado en `/product/element-top` (mujer) y
+    `/product/element-second-playera` (hombre): `og:image` ya apunta al
+    CDN de Shopify con la foto real, no al gradiente placeholder.
+  - **Pendiente**: Element Shift Playera solo tiene fotos de 2 de sus 4
+    colores (Negro, Herb) — Ohana y Cocoa se quedan con gradiente hasta
+    que el cliente mande esas fotos.
