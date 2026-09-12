@@ -93,8 +93,22 @@ export default async function ProductPage(props: {
     colorFilteredImages.length > 0 ? colorFilteredImages : product.images;
 
   const recommendations = await getProductRecommendations(product.id);
-  const completeWith = recommendations[0];
-  const otherRecommendations = recommendations.slice(1);
+  // "Queda bien con..." e "Ideas para combinar" son piezas sueltas para
+  // armar un outfit con la prenda actual — un conjunto o enterizo ya es
+  // un outfit completo, no tiene sentido "combinarlo". El carrusel
+  // completo de abajo (RecommendationsCarousel) SÍ muestra todo, sin
+  // filtrar — usa `recommendations` sin tocar, no esta lista. Los
+  // Enterizo de Kisu están tipados como "Conjunto" en Shopify (no tienen
+  // su propio productType), así que el filtro también revisa el título.
+  const outfitOnlyRecommendations = recommendations.filter((product) => {
+    const type = product.productType.toLowerCase();
+    const title = product.title.toLowerCase();
+    return type !== "conjunto" && !title.includes("enterizo");
+  });
+  const completeWith = outfitOnlyRecommendations[0];
+  const otherRecommendations = outfitOnlyRecommendations.filter(
+    (product) => product.handle !== completeWith?.handle,
+  );
 
   const productJsonLd = {
     "@context": "https://schema.org",
