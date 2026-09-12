@@ -858,3 +858,16 @@ no este archivo.
     tiene ni un solo link a los handles de `/search/hombre` (y viceversa
     con `/product/element-easy-short`) — intersección vacía en ambas
     direcciones antes de hacer commit.
+
+- **Fix: warning de Next Image en Favoritos + carrito sin "Impuestos" (12
+  septiembre 2026, mismo día):**
+  - `app/favoritos/page.tsx` usaba `<Image fill>` sin `sizes` — Next.js
+    lo marca como error de consola ("has 'fill' but is missing 'sizes'
+    prop") en cuanto el componente monta; el cliente lo vio como "un
+    pequeño error" al quitar un favorito (el remount del grid al filtrar
+    el array dispara el warning de nuevo). Se agregó
+    `sizes="(min-width: 1024px) 23vw, 45vw"`, a juego con el grid real
+    de la página (`grid-cols-2 lg:grid-cols-4`).
+  - `components/cart/modal.tsx`: por pedido del cliente, se quitó la
+    fila "Impuestos" del resumen del carrito — se queda solo Envío
+    ("Se calcula en el pago") y Total.

@@ -229,14 +229,6 @@ export function CartPanel() {
                 <CartUpsell />
                 <div className="py-4 text-sm text-neutral-500">
                   <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-3">
-                    <p>Impuestos</p>
-                    <Price
-                      className="text-right text-base text-black"
-                      amount={cart.cost.totalTaxAmount.amount}
-                      currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                    />
-                  </div>
-                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-3">
                     <p>Envío</p>
                     <p className="text-right">Se calcula en el pago</p>
                   </div>
