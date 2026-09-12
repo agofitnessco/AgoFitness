@@ -1,6 +1,6 @@
 "use client";
 
-import { firstColorHex } from "lib/color-placeholder";
+import { firstColorHex, firstProductImage } from "lib/color-placeholder";
 import { recordRecentlyViewed } from "lib/recently-viewed";
 import type { Product } from "lib/shopify/types";
 import { useEffect } from "react";
@@ -11,23 +11,6 @@ import { useEffect } from "react";
  * cliente ni backend). Alimenta la sección "Vistos recientemente" del panel
  * de búsqueda del navbar (`nav-main.tsx`).
  */
-function firstProductImage(product: Product) {
-  const firstColor = product.variants[0]?.selectedOptions.find(
-    (o) => o.name.toLowerCase() === "color",
-  )?.value;
-
-  const candidates = firstColor
-    ? product.images.filter((img) =>
-        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
-      )
-    : product.images;
-
-  return (
-    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
-    candidates[0]
-  );
-}
-
 export default function RecordRecentlyViewed({ product }: { product: Product }) {
   useEffect(() => {
     recordRecentlyViewed({

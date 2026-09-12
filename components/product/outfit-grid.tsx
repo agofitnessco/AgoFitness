@@ -4,6 +4,7 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import {
   colorHex,
   firstColorHex,
+  firstProductImage,
   modelGradient,
   productGradient,
 } from "lib/color-placeholder";
@@ -21,28 +22,6 @@ function uniqueColorHexes(product: Product): string[] {
     if (color) names.add(color);
   }
   return Array.from(names).map(colorHex);
-}
-
-/**
- * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
- * suben con el color en el `altText`. Sin esto, esta tarjeta siempre caía
- * al gradiente aunque el producto ya tuviera fotografía real subida.
- */
-function firstProductImage(product: Product) {
-  const firstColor = product.variants[0]?.selectedOptions.find(
-    (o) => o.name.toLowerCase() === "color",
-  )?.value;
-
-  const candidates = firstColor
-    ? product.images.filter((img) =>
-        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
-      )
-    : product.images;
-
-  return (
-    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
-    candidates[0]
-  );
 }
 
 function LookTile({ product }: { product: Product }) {

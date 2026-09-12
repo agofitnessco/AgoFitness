@@ -6,7 +6,7 @@ import ProductCard from "components/collection/product-card";
 import { Flip } from "gsap/Flip";
 import gsap from "gsap";
 import { CATEGORY_LINKS, POPULAR_SEARCH_TERMS } from "lib/constants";
-import { firstColorHex, productGradient } from "lib/color-placeholder";
+import { firstColorHex, firstProductImage, productGradient } from "lib/color-placeholder";
 import { useRecentlyViewed } from "lib/use-recently-viewed";
 import { useSearchSuggest } from "lib/use-search-suggest";
 import type { RecentlyViewedItem } from "lib/recently-viewed";
@@ -27,29 +27,6 @@ gsap.registerPlugin(Flip);
  * swatches, quick-add) tapaba el copy del hero. Texto blanco fijo porque
  * este componente nunca se renderiza sobre fondo sólido.
  */
-/**
- * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
- * suben con el color en el `altText`. Sin esto, las tarjetas del panel de
- * búsqueda siempre caían al gradiente aunque el producto ya tuviera
- * fotografía real subida.
- */
-function firstProductImage(product: Product) {
-  const firstColor = product.variants[0]?.selectedOptions.find(
-    (o) => o.name.toLowerCase() === "color",
-  )?.value;
-
-  const candidates = firstColor
-    ? product.images.filter((img) =>
-        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
-      )
-    : product.images;
-
-  return (
-    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
-    candidates[0]
-  );
-}
-
 function MiniProductCard({
   product,
   onNavigate,

@@ -1,35 +1,13 @@
 import { AddToCart } from "components/cart/add-to-cart";
 import HeartButton from "components/favorites/heart-button";
 import Prose from "components/prose";
-import { firstColorHex, productGradient } from "lib/color-placeholder";
+import { firstColorHex, firstProductImage, productGradient } from "lib/color-placeholder";
 import { CATEGORY_LINKS, MEGA_MENU } from "lib/constants";
 import { typeLabel } from "lib/product-types";
 import { Product } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
 import { VariantSelector } from "./variant-selector";
-
-/**
- * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
- * suben con el color en el `altText`. Sin esto, "Queda bien con..." siempre
- * caía al gradiente aunque el producto ya tuviera fotografía real subida.
- */
-function firstProductImage(product: Product) {
-  const firstColor = product.variants[0]?.selectedOptions.find(
-    (o) => o.name.toLowerCase() === "color",
-  )?.value;
-
-  const candidates = firstColor
-    ? product.images.filter((img) =>
-        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
-      )
-    : product.images;
-
-  return (
-    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
-    candidates[0]
-  );
-}
 
 function CompleteTheLook({ product }: { product: Product }) {
   const price = product.priceRange.minVariantPrice;

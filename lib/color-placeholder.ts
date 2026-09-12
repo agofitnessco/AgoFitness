@@ -94,3 +94,33 @@ export function firstColorHex(product: Product): string {
   )?.value;
   return colorValue ? colorHex(colorValue) : NEUTRAL_HEX;
 }
+
+/**
+ * ÚNICA fuente de verdad para "¿este producto ya tiene foto real?" — antes
+ * cada tarjeta/carrusel (product-card, outfit-grid, product-showcase,
+ * second-skin-showcase, product-description, nav-main) traía su propia
+ * copia de esta misma función, y cada vez que se armaba un componente
+ * nuevo se le olvidaba, cayendo siempre al gradiente aunque el producto ya
+ * tuviera foto subida a Shopify. Usar SIEMPRE esta versión (importada, no
+ * copiada) para que un componente nuevo la herede gratis.
+ *
+ * Las fotos reales suben con el color en el `altText` (ej. "Top Diamond
+ * Cross Cielo" / "... Cielo modelo") porque no hay asociación formal
+ * imagen↔variante en Shopify para este catálogo.
+ */
+export function firstProductImage(product: Product) {
+  const firstColor = product.variants[0]?.selectedOptions.find(
+    (o) => o.name.toLowerCase() === "color",
+  )?.value;
+
+  const candidates = firstColor
+    ? product.images.filter((img) =>
+        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
+      )
+    : product.images;
+
+  return (
+    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
+    candidates[0]
+  );
+}
