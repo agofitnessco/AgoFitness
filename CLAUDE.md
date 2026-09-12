@@ -871,3 +871,16 @@ no este archivo.
   - `components/cart/modal.tsx`: por pedido del cliente, se quitó la
     fila "Impuestos" del resumen del carrito — se queda solo Envío
     ("Se calcula en el pago") y Total.
+
+- **Foto real en la tarjeta "Second Skin" del home (12 septiembre 2026,
+  mismo día):** `components/category-showcase.tsx` — la tercera tarjeta
+  (teaser a la colección Second Skin, junto a Mujer/Hombre) seguía con
+  el gradiente placeholder original. El cliente proporcionó la foto
+  (`Gemini_Generated_Image_5wao505wao505wao.jpeg` en su Desktop —
+  **nota: el nombre del archivo indica que es una imagen generada con
+  IA, no fotografía real del producto**, a diferencia del resto del
+  catálogo que sigue el estándar de solo usar fotos reales
+  proporcionadas por el cliente; se usó tal cual porque el cliente dio
+  la instrucción directa de usarla). Guardada en
+  `public/imgs/category-second-skin.jpg`, renderizada igual que las
+  tarjetas de Mujer/Hombre (mismo patrón `<Image fill>` + overlay).

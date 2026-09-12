@@ -9,7 +9,7 @@ import Link from "next/link";
  *
  * La tercera tarjeta no es una categoría (Niños se quitó — sin catálogo
  * todavía, ver docs/decisiones.md) sino un teaser fijo a la colección más
- * reciente (Second Skin, aún sin foto real → sigue con gradiente).
+ * reciente (Second Skin).
  */
 const CATEGORY_IMAGES: Record<string, string> = {
   Mujer: "/imgs/category-mujer.jpg",
@@ -20,6 +20,7 @@ const LATEST_COLLECTION = {
   title: "Second Skin",
   eyebrow: "Última colección",
   path: "/#second-skin",
+  image: "/imgs/category-second-skin.jpg",
 };
 
 export default function CategoryShowcase() {
@@ -56,7 +57,13 @@ export default function CategoryShowcase() {
           href={LATEST_COLLECTION.path}
           className="group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-lg"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-[#cdd8a8] via-[#5f6b45] to-[#1a2013] transition-transform duration-700 ease-out group-hover:scale-105" />
+          <Image
+            src={LATEST_COLLECTION.image}
+            alt={LATEST_COLLECTION.title}
+            fill
+            sizes="(min-width: 768px) 33vw, 100vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/0 to-transparent" />
           <div className="relative z-10 p-6">
             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
