@@ -11,7 +11,7 @@ type FillButtonProps = {
   variant?: "dark" | "light";
   className?: string;
 } & (
-  | { href: string; type?: never; onClick?: never; disabled?: never }
+  | { href: string; type?: never; onClick?: () => void; disabled?: never }
   | {
       href?: undefined;
       type: "submit" | "button";
@@ -92,7 +92,12 @@ export default function FillButton({
 
   if ("href" in rest && rest.href) {
     return (
-      <Link href={rest.href} prefetch={true} className={baseClass}>
+      <Link
+        href={rest.href}
+        prefetch={true}
+        onClick={rest.onClick}
+        className={baseClass}
+      >
         {inner}
       </Link>
     );

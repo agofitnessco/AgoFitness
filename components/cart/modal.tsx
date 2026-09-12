@@ -6,6 +6,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import BagIcon from "components/icons/bag";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
+import FillButton from "components/ui/fill-button";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
@@ -102,10 +103,24 @@ export function CartPanel() {
 
             {!cart || cart.lines.length === 0 ? (
               <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
-                <BagIcon className="h-16 w-16" strokeWidth={1.5} />
+                <BagIcon
+                  className="h-16 w-16 text-[#b48b8c]"
+                  strokeWidth={1.5}
+                />
                 <p className="mt-6 text-center text-2xl font-bold">
                   Tu carrito está vacío.
                 </p>
+                <p className="mt-2 text-center text-sm text-neutral-500">
+                  Explora la colección y arma tu outfit.
+                </p>
+                <FillButton
+                  href="/search"
+                  size="sm"
+                  className="mt-6"
+                  onClick={closeCart}
+                >
+                  Seguir comprando
+                </FillButton>
               </div>
             ) : (
               <div className="flex h-full flex-col justify-between overflow-hidden p-1">
@@ -146,11 +161,11 @@ export function CartPanel() {
                               />
                             </div>
                             <div className="flex flex-row">
-                              <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-200 bg-neutral-100">
+                              <div className="relative h-20 w-20 flex-none overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                                 <Image
                                   className="h-full w-full object-cover"
-                                  width={64}
-                                  height={64}
+                                  width={80}
+                                  height={80}
                                   alt={
                                     item.merchandise.product.featuredImage
                                       ?.altText ||
@@ -165,10 +180,10 @@ export function CartPanel() {
                               <Link
                                 href={merchandiseUrl}
                                 onClick={closeCart}
-                                className="z-30 ml-2 flex flex-row space-x-4"
+                                className="z-30 ml-3 flex flex-row space-x-4"
                               >
                                 <div className="flex flex-1 flex-col text-base">
-                                  <span className="leading-tight">
+                                  <span className="leading-tight font-medium">
                                     {item.merchandise.product.title}
                                   </span>
                                   {item.merchandise.title !== DEFAULT_OPTION ? (
@@ -179,7 +194,7 @@ export function CartPanel() {
                                 </div>
                               </Link>
                             </div>
-                            <div className="flex h-16 flex-col justify-between">
+                            <div className="flex h-20 flex-col justify-between">
                               <Price
                                 className="flex justify-end space-y-2 text-right text-sm"
                                 amount={item.cost.totalAmount.amount}
@@ -211,7 +226,7 @@ export function CartPanel() {
                     })}
                 </ul>
                 <div className="py-4 text-sm text-neutral-500">
-                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1">
+                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-3">
                     <p>Impuestos</p>
                     <Price
                       className="text-right text-base text-black"
@@ -219,14 +234,14 @@ export function CartPanel() {
                       currencyCode={cart.cost.totalTaxAmount.currencyCode}
                     />
                   </div>
-                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1">
+                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-3">
                     <p>Envío</p>
                     <p className="text-right">Se calcula en el pago</p>
                   </div>
-                  <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1">
-                    <p>Total</p>
+                  <div className="flex items-center justify-between border-b-2 border-[#b48b8c] pb-3">
+                    <p className="font-medium text-black">Total</p>
                     <Price
-                      className="text-right text-base text-black"
+                      className="text-right text-lg font-bold text-black"
                       amount={cart.cost.totalAmount.amount}
                       currencyCode={cart.cost.totalAmount.currencyCode}
                     />
@@ -261,12 +276,12 @@ function CheckoutButton() {
   const { pending } = useFormStatus();
 
   return (
-    <button
-      className="block w-full rounded-full bg-black p-3 text-center text-sm font-medium uppercase tracking-wide text-white opacity-90 hover:opacity-100"
+    <FillButton
       type="submit"
       disabled={pending}
+      className="w-full justify-center"
     >
       {pending ? <LoadingDots className="bg-white" /> : "Ir a pagar"}
-    </button>
+    </FillButton>
   );
 }
