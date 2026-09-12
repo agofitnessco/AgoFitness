@@ -121,7 +121,12 @@ function ProductCard({ product }: { product: ShowcaseProduct }) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-1.5">
+      {/* pl-1: el track del carrusel arranca sin padding izquierdo (a
+          propósito, para alinear con el título — ver comentario en
+          ProductShowcase). Sin este respiro, el ring-offset del swatch
+          activo de la primera tarjeta se recorta contra el borde del
+          scroll y no se puede desplazar para verlo completo. */}
+      <div className="mt-3 flex items-center gap-1.5 pl-1">
         {product.colors.map((color, i) => (
           <button
             key={color.name}

@@ -10,15 +10,24 @@ import type { Product } from "lib/shopify/types";
 export const NEUTRAL_HEX = "#c9c9c4";
 
 export const COLOR_HEX: Record<string, string> = {
-  Negro: "#171717",
-  Cacto: "#7a8a6a",
-  Passion: "#8f3b4a",
-  Blanco: "#f2f2ee",
-  Azzure: "#4a6fa5",
-  Skylilac: "#b9aed6",
-  Ohana: "#2f6f6b",
-  Cocoa: "#6b4a3a",
-  Gris: "#8a8a8a",
+  Negro: "#1a1a1a",
+  // Verde oliva medio (fotos reales Element: Top/Jacket/Falda/Biker/Legging Cacto)
+  Cacto: "#6e7c5a",
+  // Rosa polvo/dusty rose (fotos reales — NO es rojo ladrillo)
+  Passion: "#b1616d",
+  Blanco: "#f5f5f2",
+  // Azul cielo pastel, claro (fotos reales Force Soft/Alpha Soft Azzure)
+  Azzure: "#a9d2e8",
+  // Lila muy pálido, casi blanco con tinte lavanda (fotos reales Skylilac)
+  Skylilac: "#dcd7ea",
+  // Azul-gris pálido (fotos reales Element Second Playera — NO es verde/teal)
+  Ohana: "#cbd6dc",
+  // Salvia/verde sage claro (fotos reales Second/Shift Playera, Easy Short)
+  Herb: "#a9bfa0",
+  // Terracota/cocoa cálido — compromiso entre el tono Element (más naranja)
+  // y el tono Kisu (más mauve/café) ya que ambas líneas usan el mismo nombre
+  Cocoa: "#a56a4a",
+  Gris: "#7d7d7d",
   Rosa: "#d98fa3",
   Naranja: "#d97a3f",
   "Naranja largo": "#d97a3f",

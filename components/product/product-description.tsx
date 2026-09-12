@@ -5,11 +5,35 @@ import { firstColorHex, productGradient } from "lib/color-placeholder";
 import { CATEGORY_LINKS, MEGA_MENU } from "lib/constants";
 import { typeLabel } from "lib/product-types";
 import { Product } from "lib/shopify/types";
+import Image from "next/image";
 import Link from "next/link";
 import { VariantSelector } from "./variant-selector";
 
+/**
+ * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
+ * suben con el color en el `altText`. Sin esto, "Queda bien con..." siempre
+ * caía al gradiente aunque el producto ya tuviera fotografía real subida.
+ */
+function firstProductImage(product: Product) {
+  const firstColor = product.variants[0]?.selectedOptions.find(
+    (o) => o.name.toLowerCase() === "color",
+  )?.value;
+
+  const candidates = firstColor
+    ? product.images.filter((img) =>
+        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
+      )
+    : product.images;
+
+  return (
+    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
+    candidates[0]
+  );
+}
+
 function CompleteTheLook({ product }: { product: Product }) {
   const price = product.priceRange.minVariantPrice;
+  const image = firstProductImage(product);
 
   return (
     <div className="mb-6 border-t border-neutral-200 pt-6">
@@ -21,10 +45,19 @@ function CompleteTheLook({ product }: { product: Product }) {
         className="group flex items-center gap-4"
       >
         <div className="relative h-20 w-16 flex-none overflow-hidden rounded-md">
-          <div
-            className="absolute inset-0"
-            style={{ backgroundImage: productGradient(firstColorHex(product)) }}
-          />
+          {image ? (
+            <Image
+              src={image.url}
+              alt={image.altText || product.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: productGradient(firstColorHex(product)) }}
+            />
+          )}
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-black">
