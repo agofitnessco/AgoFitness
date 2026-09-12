@@ -27,6 +27,29 @@ gsap.registerPlugin(Flip);
  * swatches, quick-add) tapaba el copy del hero. Texto blanco fijo porque
  * este componente nunca se renderiza sobre fondo sólido.
  */
+/**
+ * Misma idea que `groupByColor` en `product-card.tsx`: las fotos reales
+ * suben con el color en el `altText`. Sin esto, las tarjetas del panel de
+ * búsqueda siempre caían al gradiente aunque el producto ya tuviera
+ * fotografía real subida.
+ */
+function firstProductImage(product: Product) {
+  const firstColor = product.variants[0]?.selectedOptions.find(
+    (o) => o.name.toLowerCase() === "color",
+  )?.value;
+
+  const candidates = firstColor
+    ? product.images.filter((img) =>
+        img.altText?.toLowerCase().includes(firstColor.toLowerCase()),
+      )
+    : product.images;
+
+  return (
+    candidates.find((img) => !img.altText?.toLowerCase().includes("modelo")) ??
+    candidates[0]
+  );
+}
+
 function MiniProductCard({
   product,
   onNavigate,
@@ -35,6 +58,7 @@ function MiniProductCard({
   onNavigate: () => void;
 }) {
   const price = product.priceRange.minVariantPrice;
+  const image = firstProductImage(product);
   return (
     <li data-panel-item className="w-24 flex-none sm:w-28">
       <Link
@@ -43,10 +67,21 @@ function MiniProductCard({
         onClick={onNavigate}
         className="group block"
       >
-        <div
-          className="aspect-[3/4] w-full overflow-hidden rounded-md"
-          style={{ backgroundImage: productGradient(firstColorHex(product)) }}
-        />
+        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md">
+          {image ? (
+            <Image
+              src={image.url}
+              alt={image.altText || product.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: productGradient(firstColorHex(product)) }}
+            />
+          )}
+        </div>
         <p className="mt-2 truncate text-xs font-medium text-white">
           {product.title}
         </p>
@@ -83,10 +118,16 @@ function RecentMiniCard({
         onClick={onNavigate}
         className="group block"
       >
-        <div
-          className="aspect-[3/4] w-full overflow-hidden rounded-md"
-          style={{ backgroundImage: productGradient(item.colorHex) }}
-        />
+        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md">
+          {item.image ? (
+            <Image src={item.image} alt={item.title} fill className="object-cover" />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: productGradient(item.colorHex) }}
+            />
+          )}
+        </div>
         <p
           className={clsx(
             "mt-2 truncate text-xs font-medium",

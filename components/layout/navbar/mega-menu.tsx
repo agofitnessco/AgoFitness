@@ -34,7 +34,11 @@ function HeroCard({
           alt={hero.title}
           fill
           sizes="(min-width: 1024px) 30vw, 90vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          // scale-105 de base (no solo al hover): un pelín de "sobre-zoom"
+          // constante para que nunca se vea un filo/borde en la esquina
+          // redondeada por antialiasing del recorte — aunque se pierda un
+          // poco de foto en el borde, mejor eso a que se vea el borde.
+          className="scale-105 object-cover transition-transform duration-500 ease-out group-hover:scale-110"
         />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-[#b48b8c]/25 via-neutral-100 to-neutral-200" />
