@@ -738,3 +738,49 @@ no este archivo.
   - **Pendiente**: Element Shift Playera solo tiene fotos de 2 de sus 4
     colores (Negro, Herb) — Ohana y Cocoa se quedan con gradiente hasta
     que el cliente mande esas fotos.
+
+- **Fotos en carrusel/búsqueda + revalidación automática + newsletter real
+  (12 septiembre 2026, mismo día):**
+  - **Bug de fondo identificado**: `firstProductImage()` (busca la foto
+    real por altText de color) estaba copiada a mano en 4 archivos
+    (`nav-main.tsx`, `outfit-grid.tsx`, `product-description.tsx`,
+    `record-recently-viewed.tsx`) — cada componente nuevo que mostrara un
+    producto se le olvidaba traerla y caía al gradiente. Se centralizó en
+    `lib/color-placeholder.ts` junto a `firstColorHex`/`colorHex` — un
+    componente nuevo la hereda con solo importarla.
+  - `product-showcase.tsx` (carrusel "Lo más nuevo") tuvo un round extra:
+    se le agregaron `image`/`modelImage` a `lib/product-showcase-data.ts`
+    pero se me olvidó actualizar el componente para usarlos — quedó
+    mostrando gradiente un rato más hasta el siguiente fix.
+  - **"Vistos recientemente" con foto real**: `RecentlyViewedItem` (en
+    `lib/recently-viewed.ts`, snapshot en localStorage) ganó un campo
+    `image?` — se calcula al grabar en `record-recently-viewed.tsx`. El
+    historial ya guardado en el navegador del cliente antes de este fix
+    se queda sin foto hasta que vuelva a visitar esos productos (no hay
+    forma de retro-completar localStorage ajeno).
+  - **Revalidación automática activada**: existía la ruta
+    `/api/revalidate` (Next.js Commerce default, escucha
+    `products/update|create|delete` y `collections/*`) pero nunca se
+    había conectado — cero webhooks registrados en Shopify. El MCP de
+    Shopify bloquea `webhookSubscriptionCreate` por política de
+    seguridad (riesgo de exfiltración), así que el cliente los dio de
+    alta a mano desde **Configuración → Notificaciones → Webhooks**
+    (3: actualización/creación/eliminación de producto) apuntando a
+    `https://agofitnessco.com/api/revalidate?secret=<SHOPIFY_REVALIDATION_SECRET>`.
+    De ahora en adelante, cualquier cambio en Shopify (fotos, precios)
+    revalida solo, sin depender de que alguien haga hard-refresh.
+  - **Newsletter del footer conectado de verdad**: `footer-newsletter.tsx`
+    solo mostraba un toast de éxito sin guardar el correo en ningún
+    lado — pura maqueta visual. Se creó `app/actions/newsletter.ts`, que
+    llama al **Admin API** de Shopify (`customerCreate` con
+    `emailMarketingConsent.marketingState: SUBSCRIBED`) — no Storefront
+    API, porque `customerCreate` de Storefront exige contraseña (crearía
+    cuenta de login completa, no lo que se quiere para un simple
+    "avísame"). Requiere una app personalizada nueva en Shopify Admin con
+    scope `write_customers` → variable `SHOPIFY_ADMIN_API_ACCESS_TOKEN`
+    (documentada en `.env.example`, **pendiente que el cliente la cree y
+    la cargue** tanto en `.env.local` como en Vercel). Sin esa variable
+    el formulario falla con un mensaje claro en vez de fallar en
+    silencio. Sin Resend — esto usa el sistema nativo de clientes +
+    Shopify Email, no un servicio externo de correo (a diferencia del
+    formulario de `/contacto`, que sí es custom y sí necesita Resend).
