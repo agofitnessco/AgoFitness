@@ -13,7 +13,8 @@ import {
 } from "lib/color-placeholder";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ImageLightbox } from "./image-lightbox";
 
 type ColorSwatch = { name: string; hex: string };
 
@@ -45,6 +46,7 @@ export function Gallery({
   const searchParams = useSearchParams();
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const imageIndex = searchParams.has("image")
     ? parseInt(searchParams.get("image")!)
@@ -153,6 +155,7 @@ export function Gallery({
     "flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-neutral-100";
 
   return (
+    <>
     <form>
       {/* Mobile: carrusel deslizable de imágenes */}
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-neutral-100 lg:hidden">
@@ -165,7 +168,8 @@ export function Gallery({
           {images.map((image, index) => (
             <div
               key={image.src}
-              className="relative h-full w-full flex-none snap-center snap-always"
+              onClick={() => setLightboxIndex(index)}
+              className="relative h-full w-full flex-none cursor-zoom-in snap-center snap-always"
             >
               <Image
                 className="h-full w-full object-cover"
@@ -215,7 +219,10 @@ export function Gallery({
           `images.length > 1` sin la condición cuando el catálogo tenga
           2+ fotos reales por color en todos los productos. */}
       <div className="hidden gap-3 md:gap-4 lg:grid lg:grid-cols-2">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-neutral-100">
+        <div
+          onClick={() => setLightboxIndex(imageIndex)}
+          className="relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg bg-neutral-100"
+        >
           {images[imageIndex] && (
             <Image
               className="h-full w-full object-cover"
@@ -228,7 +235,10 @@ export function Gallery({
           )}
         </div>
         {images.length > 1 && (
-          <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-neutral-100">
+          <div
+            onClick={() => setLightboxIndex(secondImageIndex)}
+            className="relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg bg-neutral-100"
+          >
             <Image
               className="h-full w-full object-cover"
               fill
@@ -306,5 +316,11 @@ export function Gallery({
         </ul>
       ) : null}
     </form>
+    <ImageLightbox
+      images={images}
+      startIndex={lightboxIndex}
+      onClose={() => setLightboxIndex(null)}
+    />
+    </>
   );
 }
