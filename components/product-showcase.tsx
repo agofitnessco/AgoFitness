@@ -10,6 +10,7 @@ import {
   ELEMENT_PRODUCTS,
   type ShowcaseProduct,
 } from "lib/product-showcase-data";
+import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 
@@ -66,22 +67,52 @@ function ProductCard({ product }: { product: ShowcaseProduct }) {
 
   return (
     <li className="group w-[75%] flex-none snap-start sm:w-[45%] lg:w-[23%]">
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-neutral-100">
         <Link
           href={`/product/${product.handle}`}
           prefetch={true}
           className="absolute inset-0"
         >
-          {/* producto solo */}
-          <div
-            className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0"
-            style={{ backgroundImage: productGradient(activeColor.hex) }}
-          />
-          {/* con modelo */}
-          <div
-            className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
-            style={{ backgroundImage: modelGradient(activeColor.hex) }}
-          />
+          {activeColor.image ? (
+            <>
+              {/* producto solo */}
+              <Image
+                key={`${activeColor.name}-flat`}
+                src={activeColor.image}
+                alt={`${product.title} ${activeColor.name}`}
+                fill
+                sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 75vw"
+                className={clsx(
+                  "object-cover transition-opacity duration-500 ease-out",
+                  activeColor.modelImage && "group-hover:opacity-0",
+                )}
+              />
+              {/* con modelo (solo si este color tiene foto de modelo) */}
+              {activeColor.modelImage ? (
+                <Image
+                  key={`${activeColor.name}-model`}
+                  src={activeColor.modelImage}
+                  alt={`${product.title} ${activeColor.name} modelo`}
+                  fill
+                  sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 75vw"
+                  className="object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                />
+              ) : null}
+            </>
+          ) : (
+            <>
+              {/* producto solo */}
+              <div
+                className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0"
+                style={{ backgroundImage: productGradient(activeColor.hex) }}
+              />
+              {/* con modelo */}
+              <div
+                className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                style={{ backgroundImage: modelGradient(activeColor.hex) }}
+              />
+            </>
+          )}
         </Link>
 
         <HeartButton

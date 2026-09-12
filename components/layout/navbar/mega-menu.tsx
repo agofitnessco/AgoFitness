@@ -18,7 +18,13 @@ function HeroCard({
       prefetch={true}
       data-mega-col
       className={clsx(
-        "group relative flex w-full flex-col justify-end overflow-hidden rounded-lg bg-neutral-100",
+        // isolate: el panel del mega menu tiene backdrop-blur — sin esto,
+        // el blur del ancestro se mete a recortar mal la esquina redondeada
+        // de esta tarjeta cuando la foto hace scale al hover (se ve una
+        // sombra/degradado gris colándose por el borde). Con su propio
+        // stacking context, el overflow-hidden + rounded-lg de acá recorta
+        // limpio sin que el backdrop-filter de arriba interfiera.
+        "group relative isolate flex w-full flex-col justify-end overflow-hidden rounded-lg bg-neutral-100",
         compact ? "aspect-[4/5]" : "aspect-[16/9]",
       )}
     >
