@@ -15,6 +15,7 @@ import { Fragment, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { createCartAndSetCookie, redirectToCheckout } from "./actions";
 import { useCart } from "./cart-context";
+import { CartUpsell } from "./cart-upsell";
 import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-item-quantity-button";
 import OpenCart from "./open-cart";
@@ -225,6 +226,7 @@ export function CartPanel() {
                       );
                     })}
                 </ul>
+                <CartUpsell />
                 <div className="py-4 text-sm text-neutral-500">
                   <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-3">
                     <p>Impuestos</p>
