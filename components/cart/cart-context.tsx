@@ -95,6 +95,7 @@ function createOrUpdateCartItem(
         handle: product.handle,
         title: product.title,
         featuredImage: product.featuredImage,
+        tags: product.tags ?? [],
       },
     },
   };

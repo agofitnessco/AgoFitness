@@ -13,7 +13,7 @@ import RecordRecentlyViewed from "components/product/record-recently-viewed";
 import { RecommendationsCarousel } from "components/product/recommendations-carousel";
 import { colorHex } from "lib/color-placeholder";
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
-import { climateFor, fitFor } from "lib/product-types";
+import { climateFor, fitFor, sameGender } from "lib/product-types";
 import { getProduct, getProductRecommendations, getProducts } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
 import { baseUrl } from "lib/utils";
@@ -93,39 +93,62 @@ export default async function ProductPage(props: {
     colorFilteredImages.length > 0 ? colorFilteredImages : product.images;
 
   const recommendations = await getProductRecommendations(product.id);
+
+  // Segmentación por género: una prenda de Mujer nunca debe recomendar
+  // algo de Hombre y viceversa, en NINGUNA superficie de la página (ni el
+  // carrusel de abajo, que por lo demás no se filtra por tipo — ver
+  // `sameGender` en lib/product-types.ts). Se aplica antes que cualquier
+  // otro filtro.
+  const genderMatchedRecommendations = recommendations.filter((candidate) =>
+    sameGender(candidate.tags, product.tags),
+  );
+
   // "Queda bien con..." e "Ideas para combinar" son piezas sueltas para
   // armar un outfit con la prenda actual — un conjunto o enterizo ya es
   // un outfit completo, no tiene sentido "combinarlo". El carrusel
-  // completo de abajo (RecommendationsCarousel) SÍ muestra todo, sin
-  // filtrar — usa `recommendations` sin tocar, no esta lista. Los
-  // Enterizo de Kisu están tipados como "Conjunto" en Shopify (no tienen
-  // su propio productType), así que el filtro también revisa el título.
+  // completo de abajo (RecommendationsCarousel) SÍ muestra todo tipo de
+  // prenda, sin este filtro — usa `genderMatchedRecommendations` sin
+  // tocar, no esta lista. Los Enterizo de Kisu están tipados como
+  // "Conjunto" en Shopify (no tienen su propio productType), así que el
+  // filtro también revisa el título.
   const isOutfitPiece = (candidate: { productType: string; title: string }) => {
     const type = candidate.productType.toLowerCase();
     const title = candidate.title.toLowerCase();
     return type !== "conjunto" && !title.includes("enterizo");
   };
-  let outfitOnlyRecommendations = recommendations.filter(isOutfitPiece);
+  let outfitOnlyRecommendations = genderMatchedRecommendations.filter(
+    isOutfitPiece,
+  );
 
   // Las recomendaciones de Shopify son una lista corta y fija — filtrar
-  // conjuntos/enterizos ahí puede dejar muy pocas piezas (ej. 5→2) y un
-  // espacio vacío en la última fila del grid. Se apunta a 7 (1 para "Queda
-  // bien con..." + 6 para "Ideas para combinar", múltiplo de 3) y se
-  // rellena con otro producto real del catálogo (best-sellers, sin
+  // por género y luego por tipo ahí puede dejar muy pocas piezas y
+  // espacios vacíos en la última fila del grid, o un carrusel de abajo
+  // corto. Se apunta a un mínimo por sección y se rellena con más
+  // productos reales del catálogo (best-sellers, del mismo género, sin
   // repetir lo que ya está ni mostrar la prenda actual) si hace falta.
-  const TARGET_COUNT = 7;
-  if (outfitOnlyRecommendations.length < TARGET_COUNT) {
+  const OUTFIT_TARGET = 7; // 1 para "Queda bien con..." + 6 para "Ideas para combinar" (múltiplo de 3)
+  const BOTTOM_TARGET = 8;
+  const needsCatalog =
+    outfitOnlyRecommendations.length < OUTFIT_TARGET ||
+    genderMatchedRecommendations.length < BOTTOM_TARGET;
+  const catalog = needsCatalog
+    ? await getProducts({ sortKey: "BEST_SELLING" })
+    : [];
+  const sameGenderCatalog = catalog.filter((p) =>
+    sameGender(p.tags, product.tags),
+  );
+
+  if (outfitOnlyRecommendations.length < OUTFIT_TARGET) {
     const usedHandles = new Set([
       product.handle,
       ...outfitOnlyRecommendations.map((p) => p.handle),
     ]);
-    const catalog = await getProducts({ sortKey: "BEST_SELLING" });
-    const fillers = catalog
+    const fillers = sameGenderCatalog
       .filter(isOutfitPiece)
       .filter((p) => !usedHandles.has(p.handle));
     outfitOnlyRecommendations = [
       ...outfitOnlyRecommendations,
-      ...fillers.slice(0, TARGET_COUNT - outfitOnlyRecommendations.length),
+      ...fillers.slice(0, OUTFIT_TARGET - outfitOnlyRecommendations.length),
     ];
   }
 
@@ -133,6 +156,25 @@ export default async function ProductPage(props: {
   const otherRecommendations = outfitOnlyRecommendations.filter(
     (product) => product.handle !== completeWith?.handle,
   );
+
+  // Carrusel de abajo ("Creemos que también te gustará...") — mismo
+  // respaldo del catálogo si Shopify no trae suficientes del mismo
+  // género, pero sin filtrar por tipo de prenda (conjuntos/enterizos sí
+  // aparecen aquí, a propósito).
+  let bottomRecommendations = genderMatchedRecommendations;
+  if (bottomRecommendations.length < BOTTOM_TARGET) {
+    const usedHandles = new Set([
+      product.handle,
+      ...bottomRecommendations.map((p) => p.handle),
+    ]);
+    const fillers = sameGenderCatalog.filter(
+      (p) => !usedHandles.has(p.handle),
+    );
+    bottomRecommendations = [
+      ...bottomRecommendations,
+      ...fillers.slice(0, BOTTOM_TARGET - bottomRecommendations.length),
+    ];
+  }
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -220,7 +262,7 @@ export default async function ProductPage(props: {
         <OutfitGrid heroProduct={product} pieces={otherRecommendations} />
         <FeatureStory product={product} />
       </div>
-      <RecommendationsCarousel products={recommendations} />
+      <RecommendationsCarousel products={bottomRecommendations} />
       <Footer />
     </>
   );

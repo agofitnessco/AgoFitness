@@ -814,3 +814,47 @@ no este archivo.
     (Audiences → ahí se mandan campañas), no como clientes de Shopify —
     si más adelante hace falta cruzar "suscritos" con "compraron algo",
     esa unión ya no es automática.
+
+- **Foto real en Favoritos + algoritmo de recomendaciones segmentado por
+  género (12 septiembre 2026, mismo día):**
+  - **Favoritos sin foto real**: `FavoriteItem` (en `lib/favorites.ts`)
+    nunca guardó la url de la foto, solo `colorHex` — así que
+    `/favoritos` siempre caía al gradiente aunque el producto ya tuviera
+    fotografía real. Se agregó `image?: string` al tipo y se llena en
+    los 5 puntos donde se crea un favorito (tarjetas de colección,
+    showcase Element, showcase Second Skin, y los dos `HeartButton` de
+    la página de producto). `/favoritos` ahora renderiza `<Image>` real
+    cuando existe, si no cae al gradiente de siempre.
+  - **Segmentación por género en TODAS las recomendaciones**: el cliente
+    pidió que un producto de Mujer nunca recomiende algo de Hombre (y
+    viceversa) en ninguna superficie — a diferencia del filtro de
+    conjuntos/enterizos (que sí deja libre el carrusel de abajo), este
+    aplica parejo a las tres superficies de la página de producto
+    ("Queda bien con...", "Ideas para combinar" y el carrusel de abajo
+    "Creemos que también te gustará...") y al upsell del carrito.
+    `genderOf()`/`sameGender()` (nuevas, en `lib/product-types.ts`) leen
+    el género del mismo tag real de Shopify que ya usaba el breadcrumb
+    (`"Mujer"`/`"Hombre"`) — si un producto no trae ninguno de los dos
+    tags, o trae ambos (unisex), no se filtra: mejor mostrar de más que
+    esconder una recomendación válida por falta de dato.
+  - **Respaldo del catálogo también segmentado**: el relleno que ya
+    existía para "Ideas para combinar" (cuando las recomendaciones de
+    Shopify traen pocas piezas del tipo correcto) ahora filtra el
+    catálogo de respaldo por género antes de rellenar; se extendió el
+    mismo respaldo al carrusel de abajo (antes sin backfill) para que
+    filtrar por género no lo deje corto.
+  - **Upsell del carrito necesitó un dato que no tenía**: `getCartUpsell`
+    solo recibía el `productId` del último agregado, no su género. El
+    fragmento GraphQL del carrito (`fragments/cart.ts`) ya trae el
+    producto completo por línea (`...product`, tags incluidos) pero el
+    tipo `CartProduct` (en `lib/shopify/types.ts`) lo recortaba a
+    `id/handle/title/featuredImage` — se le agregó `tags: string[]` (el
+    dato ya viaja en la respuesta real, solo faltaba declararlo) y
+    `cart-context.tsx` lo propaga también en el update optimista al
+    agregar un producto. `cart-upsell.tsx` manda esos tags al server
+    action para que el upsell no mezcle género con lo último agregado al
+    carrito.
+  - Verificado con `curl`: la página de `/product/biker-cova` (Mujer) no
+    tiene ni un solo link a los handles de `/search/hombre` (y viceversa
+    con `/product/element-easy-short`) — intersección vacía en ambas
+    direcciones antes de hacer commit.

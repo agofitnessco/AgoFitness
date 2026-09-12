@@ -58,3 +58,35 @@ export function fitFor(productType: string, title?: string) {
 export function climateFor(productType: string) {
   return CLIMATE_BY_TYPE[productType] ?? "Cálido";
 }
+
+/**
+ * Género real del producto a partir de sus tags de Shopify ("Mujer" /
+ * "Hombre" — misma fuente que usa el breadcrumb, ver `breadcrumbFor` en
+ * components/product/product-description.tsx). Si el producto no trae
+ * ninguno de los dos tags, o trae los dos (unisex), devuelve undefined —
+ * eso hace que `sameGender` no lo filtre: mejor mostrar de más que
+ * esconder una recomendación válida por falta de dato.
+ */
+const GENDER_TAGS = ["Mujer", "Hombre"];
+
+export function genderOf(tags: string[]): string | undefined {
+  const matches = GENDER_TAGS.filter((gender) =>
+    tags.some((tag) => tag.toLowerCase() === gender.toLowerCase()),
+  );
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+/**
+ * true si ambos productos son del mismo género, o si no se puede
+ * determinar el género de alguno (sin tag, o unisex) — en ese caso no se
+ * filtra. Se usa en TODAS las superficies de recomendación (Queda bien
+ * con..., Ideas para combinar, el carrusel de abajo de la página de
+ * producto, y el upsell del carrito) para que un producto de Mujer nunca
+ * recomiende algo de Hombre y viceversa.
+ */
+export function sameGender(tagsA: string[], tagsB: string[]): boolean {
+  const genderA = genderOf(tagsA);
+  const genderB = genderOf(tagsB);
+  if (!genderA || !genderB) return true;
+  return genderA === genderB;
+}

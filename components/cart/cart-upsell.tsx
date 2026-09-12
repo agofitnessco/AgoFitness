@@ -86,6 +86,10 @@ export function CartUpsell() {
 
   const lastLine = cart?.lines[cart.lines.length - 1];
   const lastProductId = lastLine?.merchandise.product.id;
+  // El fragmento de producto que trae cada línea del carrito ya incluye
+  // `tags` (mismo fragmento que usa el resto del sitio) — se manda al
+  // servidor para que el upsell no mezcle género con lo último agregado.
+  const lastProductTags = lastLine?.merchandise.product.tags ?? [];
   const cartHandles = cart?.lines
     .map((line) => line.merchandise.product.handle)
     .join(",");
@@ -95,7 +99,11 @@ export function CartUpsell() {
       setProducts([]);
       return;
     }
-    getCartUpsell(lastProductId, cartHandles?.split(",") ?? []).then(setProducts);
+    getCartUpsell(
+      lastProductId,
+      cartHandles?.split(",") ?? [],
+      lastProductTags,
+    ).then(setProducts);
     // cartHandles ya cubre cambios en el contenido del carrito.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastProductId, cartHandles]);

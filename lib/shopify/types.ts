@@ -17,6 +17,13 @@ export type CartProduct = {
   handle: string;
   title: string;
   featuredImage: Image;
+  /**
+   * El fragmento GraphQL de la línea del carrito ya trae el producto
+   * completo (`...product`, ver fragments/cart.ts), tags incluidos — se
+   * declara aquí para poder segmentar por género el upsell del carrito
+   * sin pedir otra vez el producto (ver components/cart/cart-upsell.tsx).
+   */
+  tags: string[];
 };
 
 export type CartItem = {

@@ -1,6 +1,7 @@
 "use server";
 
 import { TAGS } from "lib/constants";
+import { sameGender } from "lib/product-types";
 import {
   addToCart,
   createCart,
@@ -18,17 +19,24 @@ import { redirect } from "next/navigation";
  * Upsell del carrito ("También te puede gustar") — recomendaciones reales
  * de Shopify (misma fuente que "Ideas para combinar" en la página de
  * producto) a partir del último producto agregado, sin repetir lo que ya
- * está en el carrito ni conjuntos/enterizos (ya son un outfit completo,
- * no tiene sentido sugerir "combinarlo" dentro del carrito tampoco).
+ * está en el carrito, sin conjuntos/enterizos (ya son un outfit completo,
+ * no tiene sentido sugerir "combinarlo" dentro del carrito tampoco), y sin
+ * mezclar género (si el último agregado es de Mujer, nunca sugerir algo de
+ * Hombre — ver `sameGender` en lib/product-types.ts). `referenceTags` son
+ * los tags del producto de referencia: el carrito ya trae el fragmento
+ * completo de producto por línea (incluye `tags`), así que se pasan desde
+ * el cliente en vez de pedirlos otra vez aquí.
  */
 export async function getCartUpsell(
   productId: string,
   excludeHandles: string[],
+  referenceTags: string[] = [],
 ): Promise<Product[]> {
   const recommendations = await getProductRecommendations(productId);
 
   return recommendations
     .filter((product) => !excludeHandles.includes(product.handle))
+    .filter((product) => sameGender(product.tags, referenceTags))
     .filter((product) => {
       const type = product.productType.toLowerCase();
       const title = product.title.toLowerCase();
